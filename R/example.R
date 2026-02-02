@@ -1,17 +1,17 @@
-#' Example Analysis for Expected Value of Eliminating Causal Ambiguity in Development Context
+#' Example Analysis for Expected Value of Eliminating Causal Ambiguity in Gender-Nutrition Context
 #'
-#' Generate example data for development/agriculture decision problems and run
+#' Generate example data for gender-nutrition decision problems and run
 #' a demonstration EVECA analysis. This function creates realistic examples
-#' relevant to nutrition-sensitive agriculture, climate adaptation, and other
-#' development interventions with multiple competing causal models.
+#' relevant to gender-sensitive nutrition programming, women's empowerment interventions,
+#' and other gender-nutrition decisions with multiple competing causal models.
 #'
 #' @param n_decisions Number of decision alternatives (default: 3).
 #' @param n_models Number of competing causal models (default: 4).
-#' @param n_outcomes Number of outcome dimensions (e.g., SDG indicators, default: 4).
-#' @param context Development context for naming (default: "agriculture").
-#'   Options: "agriculture", "nutrition", "climate", "health".
-#' @param sdg_weights Vector of weights for multi-attribute utility function
-#'   (default: equal weights).
+#' @param n_outcomes Number of outcome dimensions (default: 2 for nutrition and gender).
+#' @param context Gender-nutrition context for naming (default: "gender_nutrition").
+#'   Options: "gender_nutrition", "empowerment_pathways", "nutrition_sensitive".
+#' @param outcome_weights Vector of weights for multi-attribute utility function
+#'   (default: c(0.6, 0.4) for nutrition vs gender empowerment).
 #' @param seed Random seed for reproducibility (default: 123).
 #'
 #' @return A list with the following components:
@@ -19,54 +19,54 @@
 #'   \item{model_outcomes}{Array of outcomes [decisions × models × outcomes].}
 #'   \item{model_utilities}{Matrix of model utilities used in analysis.}
 #'   \item{model_probs}{Vector of model probabilities used in analysis.}
-#'   \item{sdg_weights}{SDG weights used in multi-attribute utility.}
-#'   \item{context}{Development context used.}
+#'   \item{outcome_weights}{Outcome weights used in multi-attribute utility.}
+#'   \item{context}{Gender-nutrition context used.}
 #'
 #' @export
 #' @importFrom stats rnorm runif
 #'
 #' @examples
-#' # Run example analysis with default parameters (agriculture context)
+#' # Run example analysis with default parameters (gender-nutrition context)
 #' example_result <- example_development()
 #'
 #' # Print key results
 #' cat("EVECA:", example_result$evca_result$evca, "\n")
 #' cat("Optimal intervention:", example_result$evca_result$optimal_decision_bma, "\n")
 #'
-#' # Run example with nutrition context and custom parameters
-#' nutrition_result <- example_development(
+#' # Run example with empowerment pathways context and custom parameters
+#' empowerment_result <- example_development(
 #'   n_decisions = 3,
 #'   n_models = 3,
-#'   n_outcomes = 3,
-#'   context = "nutrition",
-#'   sdg_weights = c(0.4, 0.4, 0.2)
+#'   n_outcomes = 2,
+#'   context = "empowerment_pathways",
+#'   outcome_weights = c(0.5, 0.5) # Equal weight on nutrition and empowerment
 #' )
 #'
-#' # Run climate adaptation example
-#' climate_result <- example_development(
-#'   context = "climate",
-#'   sdg_weights = c(0.3, 0.3, 0.2, 0.2)
+#' # Run nutrition-sensitive agriculture example
+#' nutrition_result <- example_development(
+#'   context = "nutrition_sensitive",
+#'   outcome_weights = c(0.7, 0.3) # Higher weight on nutrition
 #' )
 example_development <- function(n_decisions = 3,
                                 n_models = 4,
-                                n_outcomes = 4,
-                                context = "agriculture",
-                                sdg_weights = NULL,
+                                n_outcomes = 2,
+                                context = "gender_nutrition",
+                                outcome_weights = NULL,
                                 seed = 123) {
   set.seed(seed)
 
-  # Set default SDG weights if not provided
-  if (is.null(sdg_weights)) {
-    sdg_weights <- rep(1 / n_outcomes, n_outcomes)
+  # Set default outcome weights if not provided
+  if (is.null(outcome_weights)) {
+    outcome_weights <- c(0.6, 0.4) # Default: nutrition (0.6) vs gender empowerment (0.4)
   }
 
-  # Validate SDG weights
-  if (abs(sum(sdg_weights) - 1) > 1e-10) {
-    stop("SDG weights must sum to 1 (within 1e-10 tolerance)")
+  # Validate outcome weights
+  if (abs(sum(outcome_weights) - 1) > 1e-10) {
+    stop("Outcome weights must sum to 1 (within 1e-10 tolerance)")
   }
 
-  if (any(sdg_weights < 0)) {
-    stop("SDG weights must be non-negative")
+  if (any(outcome_weights < 0)) {
+    stop("Outcome weights must be non-negative")
   }
 
   # Generate realistic outcome arrays based on context
@@ -88,7 +88,7 @@ example_development <- function(n_decisions = 3,
   # Compute multi-attribute utilities
   model_utilities <- compute_multi_attribute_utilities(
     model_outcomes = model_outcomes,
-    sdg_weights = sdg_weights
+    outcome_weights = outcome_weights
   )
 
   # Compute EVECA
@@ -103,7 +103,7 @@ example_development <- function(n_decisions = 3,
     model_outcomes = model_outcomes,
     model_utilities = model_utilities,
     model_probs = model_probs,
-    sdg_weights = sdg_weights,
+    outcome_weights = outcome_weights,
     context = context,
     decision_names = rownames(model_utilities),
     model_names = colnames(model_utilities),
@@ -115,72 +115,55 @@ example_development <- function(n_decisions = 3,
 generate_context_outcomes <- function(n_decisions, n_models, n_outcomes, context, seed) {
   set.seed(seed)
 
-  # Define context-specific parameters
+  # Define context-specific parameters for gender-nutrition applications
   context_params <- list(
-    agriculture = list(
+    gender_nutrition = list(
       decision_names = c(
-        "Homestead Production", "Biofortified Crops", "Climate-Smart Ag",
-        "Agroforestry", "Irrigation", "Value Chain"
+        "Homestead Food Production", "Women's Empowerment Program", "Nutrition Education",
+        "Cash Transfers", "Agricultural Training", "Childcare Support"
       )[1:n_decisions],
       model_names = c(
         "Income Pathway", "Production Pathway", "Empowerment Pathway",
-        "Environmental Pathway", "Market Pathway"
+        "Time Pathway", "Integrated Pathway"
       )[1:n_models],
       outcome_names = c(
-        "Dietary Diversity", "Household Income", "Women's Empowerment",
-        "Carbon Sequestration", "Water Use Efficiency"
+        "Dietary Diversity", "Women's Empowerment Index", "Child Growth",
+        "Feeding Practices", "Decision-Making Power"
       )[1:n_outcomes],
       mean_range = c(0.5, 1.5),
       sd_range = c(0.1, 0.3)
     ),
-    nutrition = list(
+    empowerment_pathways = list(
       decision_names = c(
-        "Supplementary Feeding", "Nutrition Education", "Fortification",
-        "Behavior Change", "Social Protection"
+        "Asset Transfer", "Leadership Training", "Group Formation",
+        "Legal Literacy", "Financial Inclusion"
       )[1:n_decisions],
       model_names = c(
-        "Direct Consumption", "Income-Mediated", "Knowledge-Mediated",
-        "Behavior-Mediated", "Access-Mediated"
+        "Resource Control", "Decision-Making", "Leadership",
+        "Social Networks", "Agency"
       )[1:n_models],
       outcome_names = c(
-        "Child HAZ", "Dietary Diversity", "Maternal BMI",
-        "Micronutrient Status", "Feeding Practices"
-      )[1:n_outcomes],
-      mean_range = c(0.3, 1.2),
-      sd_range = c(0.05, 0.2)
-    ),
-    climate = list(
-      decision_names = c(
-        "Drought-Tolerant Varieties", "Conservation Agriculture",
-        "Weather Insurance", "Early Warning Systems",
-        "Water Harvesting"
-      )[1:n_decisions],
-      model_names = c(
-        "Yield Stability", "Risk Reduction", "Adaptive Capacity",
-        "Ecosystem Services", "Institutional"
-      )[1:n_models],
-      outcome_names = c(
-        "Yield Stability", "Income Stability", "Soil Health",
-        "Water Security", "Adaptive Capacity"
+        "Nutrition Outcomes", "Empowerment Score", "Agency Index",
+        "Resource Access", "Social Participation"
       )[1:n_outcomes],
       mean_range = c(0.4, 1.3),
-      sd_range = c(0.1, 0.25)
+      sd_range = c(0.08, 0.25)
     ),
-    health = list(
+    nutrition_sensitive = list(
       decision_names = c(
-        "Preventive Care", "Treatment Access", "Health Education",
-        "Sanitation", "Vector Control"
+        "Biofortified Crops", "Kitchen Gardens", "Animal Husbandry",
+        "Food Processing", "Market Linkages"
       )[1:n_decisions],
       model_names = c(
-        "Direct Treatment", "Prevention", "Behavior Change",
-        "Environmental", "System Strengthening"
+        "Direct Consumption", "Income Generation", "Women's Control",
+        "Knowledge Transfer", "Multi-pathway"
       )[1:n_models],
       outcome_names = c(
-        "Mortality Reduction", "Morbidity Reduction", "Quality of Life",
-        "Health Equity", "System Resilience"
+        "Nutrition Status", "Women's Empowerment", "Food Security",
+        "Diet Quality", "Care Practices"
       )[1:n_outcomes],
-      mean_range = c(0.2, 1.0),
-      sd_range = c(0.05, 0.15)
+      mean_range = c(0.6, 1.4),
+      sd_range = c(0.1, 0.3)
     )
   )
 
@@ -229,12 +212,11 @@ generate_context_outcomes <- function(n_decisions, n_models, n_outcomes, context
 generate_context_probabilities <- function(n_models, context, seed) {
   set.seed(seed)
 
-  # Context-specific probability patterns
+  # Context-specific probability patterns for gender-nutrition pathways
   patterns <- list(
-    agriculture = c(0.3, 0.25, 0.2, 0.15, 0.1)[1:n_models],
-    nutrition = c(0.35, 0.25, 0.2, 0.15, 0.05)[1:n_models],
-    climate = c(0.25, 0.25, 0.2, 0.2, 0.1)[1:n_models],
-    health = c(0.4, 0.25, 0.2, 0.1, 0.05)[1:n_models]
+    gender_nutrition = c(0.30, 0.25, 0.20, 0.15, 0.10)[1:n_models], # Income pathway most likely
+    empowerment_pathways = c(0.25, 0.25, 0.20, 0.20, 0.10)[1:n_models], # More balanced
+    nutrition_sensitive = c(0.35, 0.25, 0.20, 0.15, 0.05)[1:n_models] # Direct pathways more likely
   )
 
   pattern <- patterns[[context]]
@@ -252,7 +234,7 @@ generate_context_probabilities <- function(n_models, context, seed) {
 }
 
 # Helper function: Compute multi-attribute utilities
-compute_multi_attribute_utilities <- function(model_outcomes, sdg_weights) {
+compute_multi_attribute_utilities <- function(model_outcomes, outcome_weights) {
   n_decisions <- dim(model_outcomes)[1]
   n_models <- dim(model_outcomes)[2]
 
@@ -263,7 +245,7 @@ compute_multi_attribute_utilities <- function(model_outcomes, sdg_weights) {
   for (i in 1:n_decisions) {
     for (j in 1:n_models) {
       # Simple linear multi-attribute utility
-      utilities[i, j] <- sum(sdg_weights * model_outcomes[i, j, ])
+      utilities[i, j] <- sum(outcome_weights * model_outcomes[i, j, ])
     }
   }
 

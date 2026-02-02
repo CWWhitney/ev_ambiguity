@@ -1,5 +1,5 @@
 ---
-title: "Expected Value of Eliminating Causal Ambiguity: A Decision-Theoretic Framework for Valuing Structural Uncertainty in Agricultural Development and Nutrition Interventions"
+title: "Expected Value of Eliminating Causal Ambiguity: A Decision-Theoretic Framework for Valuing Structural Uncertainty in Gender-Nutrition Pathways"
 author:
   - name: "Cory Whitney"
     affiliation: "Center for Development Research, University of Bonn"
@@ -18,7 +18,7 @@ output:
 bibliography: bib/references.bib
 csl: bib/apa.csl
 abstract: |
-  Development and agricultural interventions operate under profound causal ambiguity—multiple competing theories of change exist for how interventions affect nutrition, livelihoods, and environmental outcomes. Traditional impact evaluation methods, while addressing parameter uncertainty within fixed causal models, fail to quantify the value of resolving structural uncertainty about causal mechanisms. This paper introduces the **Expected Value of Eliminating Causal Ambiguity (EVECA)**, a decision-theoretic framework that extends value of information analysis to handle structural uncertainty in complex development decisions. We present a Bayesian model averaging approach for computing EVECA, implement it in an R package designed for development practitioners, and demonstrate its application through a nutrition-sensitive agriculture case study relevant to CGIAR research priorities and Sustainable Development Goals (SDGs). EVECA provides development organizations, policymakers, and funders with principled tools to prioritize research investments that resolve causal ambiguity in agricultural development and nutrition interventions.
+  Nutrition-sensitive agriculture interventions operate under profound causal ambiguity—multiple competing theories of change exist for how interventions affect nutrition outcomes through different pathways. Traditional impact evaluation methods, while addressing parameter uncertainty within fixed causal models, fail to quantify the value of resolving structural uncertainty about causal mechanisms. This paper introduces the **Expected Value of Eliminating Causal Ambiguity (EVECA)**, a decision-theoretic framework that extends value of information analysis to handle structural uncertainty in gender-nutrition programming. We present a Bayesian model averaging approach for computing EVECA, implement it in an R package designed for development practitioners, and demonstrate its application through a case study focused on trade-offs between nutrition outcomes and women's empowerment. EVECA provides development organizations, policymakers, and funders with principled tools to prioritize research investments that resolve causal ambiguity in gender-sensitive nutrition programming.
 ---
 
 ```{r setup, include=FALSE}
@@ -40,60 +40,60 @@ library(kableExtra)
 
 # Introduction
 
-## The Challenge of Causal Ambiguity in Agricultural Development and Nutrition
+## The Challenge of Causal Ambiguity in Gender-Nutrition Programming
 
-Agricultural development and nutrition interventions operate in complex, context-dependent systems where causal mechanisms are often ambiguous and contested. A nutrition-sensitive agriculture program might improve child nutrition through multiple potential pathways: increased household income enabling food purchases, improved women's empowerment affecting intra-household allocation, enhanced dietary diversity from home production, or reduced disease burden through water-sanitation linkages (Ruel & Alderman, 2013; Kadiyala et al., 2014). Each pathway represents a different causal model with distinct implications for program design, targeting, and scaling.
+Gender-sensitive nutrition interventions operate in complex, context-dependent systems where causal mechanisms linking women's empowerment to nutrition outcomes are often ambiguous and contested. A nutrition-sensitive agriculture program might improve child nutrition through multiple potential pathways: increased household income enabling food purchases (income pathway), improved women's empowerment affecting intra-household allocation and feeding practices (empowerment pathway), enhanced dietary diversity from home production (production pathway), or integrated combinations of these mechanisms (Ruel & Alderman, 2013; Kadiyala et al., 2014). Each pathway represents a different causal model with distinct implications for program design, targeting, and scaling in sustainable development contexts.
 
-This **causal ambiguity**—uncertainty about which causal mechanism among several competing alternatives drives outcomes—presents fundamental challenges for development organizations like CGIAR, bilateral donors, and national governments. Billions of dollars are invested annually in agricultural development with limited understanding of which theories of change are correct in specific contexts (Barrett & Carter, 2010; Maredia et al., 2014).
+This **causal ambiguity**—uncertainty about which causal mechanism among several competing alternatives drives nutrition outcomes through gender pathways—presents fundamental challenges for development organizations working on nutrition and women's empowerment. Billions of dollars are invested annually in gender-sensitive nutrition programming with limited understanding of which empowerment-nutrition pathways are correct in specific contexts (Malapit et al., 2015; Quisumbing et al., 2021).
 
-## Limitations of Current Impact Evaluation Approaches
+## Limitations of Current Impact Evaluation Approaches for Gender-Nutrition Pathways
 
-Current impact evaluation methods in development economics, while sophisticated in addressing parameter uncertainty within fixed causal models, provide limited guidance on the value of resolving structural uncertainty:
+Current impact evaluation methods in gender-nutrition research, while sophisticated in addressing parameter uncertainty within fixed causal models, provide limited guidance on the value of resolving structural uncertainty about empowerment-nutrition mechanisms:
 
-1. **Randomized controlled trials (RCTs)** test specific interventions but often assume a single causal pathway (Banerjee & Duflo, 2009; Deaton, 2010)
+1. **Randomized controlled trials (RCTs)** test specific interventions but often assume a single causal pathway (e.g., income-only or empowerment-only) (Banerjee & Duflo, 2009; Deaton, 2010)
 2. **Structural equation modeling** tests predefined causal structures but doesn't value learning which structure is correct (Bollen, 1989)
-3. **Bayesian networks** model uncertainty but lack decision-theoretic foundations for valuing causal clarity (Heckerman et al., 1995)
-4. **Theory-based evaluation** acknowledges multiple pathways but provides no quantitative framework for valuing their resolution (White, 2009)
+3. **Pathway analysis** examines mediation but lacks decision-theoretic foundations for valuing causal clarity (Heckerman et al., 1995)
+4. **Mixed-methods evaluation** acknowledges multiple pathways but provides no quantitative framework for valuing their resolution (White, 2009)
 
-The **Expected Value of Perfect Information (EVPI)** framework, while established in health economics and environmental decision-making (Claxton, 1999; Yokota & Thompson, 2004), has seen limited application in development despite its potential. More critically, traditional EVPI addresses parameter uncertainty within fixed causal structures but not structural uncertainty about the causal model itself.
+The **Expected Value of Perfect Information (EVPI)** framework, while established in health economics and environmental decision-making (Claxton, 1999; Yokota & Thompson, 2004), has seen limited application in gender-nutrition programming despite its potential. More critically, traditional EVPI addresses parameter uncertainty within fixed causal structures but not structural uncertainty about which empowerment-nutrition pathway is correct.
 
-## EVECA: A Framework for Development Decision-Making
+## EVECA: A Framework for Gender-Nutrition Decision-Making
 
-This paper introduces the **Expected Value of Eliminating Causal Ambiguity (EVECA)**, a decision-theoretic framework that quantifies the value of resolving structural uncertainty in development interventions. EVECA extends traditional value of information analysis to handle the causal ambiguity pervasive in agricultural development, nutrition, and sustainable food systems.
+This paper introduces the **Expected Value of Eliminating Causal Ambiguity (EVECA)**, a decision-theoretic framework that quantifies the value of resolving structural uncertainty in gender-nutrition programming. EVECA extends traditional value of information analysis to handle the causal ambiguity pervasive in nutrition and women's empowerment programming, where multiple competing theories exist about how women's empowerment affects nutrition outcomes.
 
 We make three contributions:
 
-1. **Theoretical**: Formalize EVECA within Bayesian decision theory for development contexts
-2. **Methodological**: Develop computational methods suitable for development evaluation
-3. **Practical**: Demonstrate application to nutrition-sensitive agriculture with CGIAR relevance
+1. **Theoretical**: Formalize EVECA within Bayesian decision theory for gender-nutrition contexts
+2. **Methodological**: Develop computational methods for valuing causal clarity in empowerment-nutrition pathways
+3. **Practical**: Demonstrate application to gender-sensitive nutrition programming with explicit trade-offs between nutrition and empowerment outcomes
 
 # Literature Review
 
-## Value of Information in Development Economics
+## Value of Information in Gender-Nutrition Research
 
-The application of value of information (VOI) methods in development economics remains limited despite their potential. Early work by Antle (1983) applied EVPI to agricultural technology adoption, while more recent applications include climate adaptation (Zhao et al., 2019) and health policy (Marseille et al., 2015). However, these applications focus on parameter uncertainty within single causal models.
+The application of value of information (VOI) methods in gender-nutrition research remains virtually non-existent despite their potential. While VOI has been applied in agricultural economics (Antle, 1983) and health policy (Marseille et al., 2015), no studies have applied VOI methods to value causal clarity in empowerment-nutrition pathways. This gap is particularly significant given the substantial investments in gender-sensitive nutrition programming and the ongoing debates about which empowerment mechanisms drive nutrition outcomes (Malapit et al., 2015; Quisumbing et al., 2021).
 
-## Causal Inference and Structural Uncertainty in Development
+## Causal Inference and Structural Uncertainty in Gender-Nutrition Research
 
-The "credibility revolution" in development economics (Angrist & Pischke, 2010) has emphasized identification of causal effects but largely assumes correct model specification. Recent work acknowledges model uncertainty through sensitivity analysis (Cinelli & Hazlett, 2020) and Bayesian model averaging (Young & Holsteen, 2017), but lacks decision-theoretic foundations for valuing causal clarity.
+The "credibility revolution" in development economics (Angrist & Pischke, 2010) has emphasized identification of causal effects but largely assumes correct model specification of empowerment-nutrition pathways. Recent work acknowledges model uncertainty through sensitivity analysis (Cinelli & Hazlett, 2020) and Bayesian model averaging (Young & Holsteen, 2017), but lacks decision-theoretic foundations for valuing causal clarity about which empowerment mechanisms affect nutrition outcomes.
 
-## Agricultural Development and Nutrition Pathways
+## Gender-Nutrition Pathways and Development Outcomes
 
-Research on nutrition-sensitive agriculture identifies multiple competing pathways linking agriculture to nutrition (Ruel et al., 2018):
-1. **Food production**: Direct consumption of produced foods
-2. **Income**: Purchase of diverse foods with increased income
-3. **Women's empowerment**: Control over resources and feeding practices
-4. **Health environment**: Reduced disease burden affecting nutrient utilization
+Research on gender-nutrition pathways identifies multiple competing mechanisms linking women's empowerment to nutrition outcomes (Ruel et al., 2018; Malapit et al., 2015):
+1. **Income pathway**: Increased household income → food purchases → nutrition
+2. **Production pathway**: Home production → direct consumption → nutrition
+3. **Empowerment pathway**: Women's control → feeding practices → nutrition
+4. **Time pathway**: Women's time allocation → caregiving → nutrition
 
-Each pathway represents a different causal model with distinct implications for program design.
+Each pathway represents a different causal model with distinct implications for gender-sensitive program design. The relative importance of these pathways varies by context, creating causal ambiguity that affects program effectiveness in achieving nutrition and empowerment outcomes.
 
-## Bayesian Methods in Development Evaluation
+## Bayesian Methods in Gender-Nutrition Evaluation
 
-Bayesian methods are increasingly used in development evaluation for handling uncertainty (Gelman et al., 2014), with applications in poverty mapping (Elbers et al., 2003) and program evaluation (Chib & Jacobi, 2016). Bayesian model averaging (BMA) addresses model uncertainty (Hoeting et al., 1999) but hasn't been integrated with decision-theoretic value of information.
+Bayesian methods are increasingly used in development evaluation for handling uncertainty (Gelman et al., 2014), with applications in poverty mapping (Elbers et al., 2003) and program evaluation (Chib & Jacobi, 2016). Bayesian model averaging (BMA) addresses model uncertainty (Hoeting et al., 1999) but hasn't been integrated with decision-theoretic value of information for gender-nutrition pathways. This integration is particularly valuable for nutrition and women's empowerment programming, where multiple competing theories exist about empowerment mechanisms.
 
-## CGIAR Research and Decision-Making Under Uncertainty
+## Gender-Nutrition Research and Decision-Making Under Uncertainty
 
-CGIAR research portfolios face multiple uncertainties: biophysical (climate, pests), economic (markets, policies), and social (adoption, behavior). The CGIAR Excellence in Agronomy Initiative and Nutrition-sensitive Agriculture programs explicitly acknowledge multiple theories of change but lack quantitative frameworks for valuing causal clarity (CGIAR, 2020).
+Gender-nutrition research faces multiple uncertainties: which empowerment mechanisms drive nutrition outcomes, how context affects pathway importance, and what trade-offs exist between nutrition and empowerment objectives. Research initiatives like the Gender, Agriculture, and Assets Project (GAAP) and Women's Empowerment in Agriculture Index (WEAI) explicitly measure empowerment but lack quantitative frameworks for valuing causal clarity about empowerment-nutrition pathways (Malapit et al., 2015; Quisumbing et al., 2021).
 
 # Theoretical Framework
 
@@ -107,7 +107,7 @@ $$
 EU(d|M_k) = \int U(\mathbf{y}) p(\mathbf{y}|d, M_k) d\mathbf{y}
 $$
 
-where $\mathbf{y}$ is a vector of outcomes (nutrition indicators, income, environmental impacts) and $U(\cdot)$ is a multi-attribute utility function capturing trade-offs among Sustainable Development Goals (SDGs).
+where $\mathbf{y}$ is a vector of outcomes (nutrition and gender empowerment indicators) and $U(\cdot)$ is a multi-attribute utility function capturing trade-offs between nutrition and gender equality objectives.
 
 The overall expected utility, accounting for causal ambiguity, is the Bayesian model average:
 
@@ -125,15 +125,15 @@ $$
 
 where $M^*$ is the true (unknown) causal model. The first term represents the expected utility if we knew which causal pathway was correct (perfect structural information), while the second term is the optimal expected utility under current ambiguity.
 
-## Multi-Dimensional Outcomes and SDG Trade-offs
+## Multi-Dimensional Outcomes and Gender-Nutrition Trade-offs
 
-Development interventions typically affect multiple SDGs with potential trade-offs. Let $\mathbf{y} = (y_1, y_2, ..., y_m)$ represent $m$ outcome dimensions (e.g., SDG 2: Zero Hunger, SDG 3: Good Health, SDG 5: Gender Equality, SDG 13: Climate Action). The multi-attribute utility function can be expressed as:
+Nutrition-sensitive agriculture interventions typically affect both nutrition and gender empowerment outcomes with potential trade-offs. Let $\mathbf{y} = (y_1, y_2)$ represent two outcome dimensions: nutrition outcomes (e.g., dietary diversity, child growth) and gender empowerment outcomes (e.g., women's control over resources, decision-making power). The multi-attribute utility function can be expressed as:
 
 $$
 U(\mathbf{y}) = \sum_{j=1}^m w_j u_j(y_j)
 $$
 
-where $w_j$ are weights reflecting SDG priorities and $u_j(\cdot)$ are single-attribute utility functions. This formulation allows explicit consideration of trade-offs among competing development objectives.
+where $w_j$ are weights reflecting the relative importance of nutrition versus gender empowerment objectives, and $u_j(\cdot)$ are single-attribute utility functions. This formulation allows explicit consideration of trade-offs between nutrition and women's empowerment outcomes, which are central to sustainable development and human well-being.
 
 ## Relationship to Traditional Value of Information
 
@@ -154,28 +154,27 @@ The EVECA framework is implemented in an R package designed for development prac
 1. **`compute_evca()`**: Main function for EVECA computation with multi-dimensional outcomes
 2. **`bma_expected_utility()`**: Bayesian model averaging for development contexts
 3. **`example_development()`**: Example with nutrition-sensitive agriculture data
-4. **`plot_evca_sdg()`**: Visualization showing SDG trade-offs
+4. **`plot_development()`**: Visualization showing gender-nutrition trade-offs
 5. **`sensitivity_evca()`**: Sensitivity analysis for model probabilities
 
 The package integrates with existing development evaluation tools:
 - **`ImpactEvaluation`**: For extracting model utilities from evaluation data
 - **`bayesm`**: For Bayesian model averaging
-- **`SDG`**: For SDG indicator calculations
 
 ## Core Algorithm for Development Contexts
 
 ```{r algorithm-pseudocode, eval=FALSE}
 # Pseudocode for EVECA computation with multi-dimensional outcomes
 compute_evca_development <- function(model_outcomes, model_probs,
-                                     utility_function, sdg_weights) {
+                                     utility_function, outcome_weights) {
   # model_outcomes: array [decisions × models × outcomes]
   # model_probs: vector of model probabilities
   # utility_function: function mapping outcomes to utilities
-  # sdg_weights: weights for multi-attribute utility
+  # outcome_weights: weights for multi-attribute utility (nutrition vs gender)
 
   # 1. Compute multi-attribute utilities
   model_utilities <- apply(model_outcomes, c(1, 2),
-                           function(y) sum(sdg_weights * utility_function(y)))
+                           function(y) sum(outcome_weights * utility_function(y)))
 
   # 2. Compute BMA expected utility
   bma_eu <- model_utilities %*% model_probs
@@ -220,23 +219,22 @@ We synthesize evidence from 24 studies in East Africa (systematic review + exper
 - **M3 (Empowerment)**: 0.20 (gender-unequal contexts)
 - **M4 (Integrated)**: 0.25 (complex, context-dependent)
 
-## Multi-Dimensional Outcomes Across SDGs
+## Multi-Dimensional Outcomes: Nutrition and Gender Empowerment
 
-Each intervention affects multiple SDG indicators:
+Each intervention affects both nutrition and gender empowerment outcomes:
 
 ```{r case-study-data}
 # Set seed for reproducibility
 set.seed(123)
 
 # Multi-dimensional outcomes array: [interventions × models × outcomes]
-# Outcomes: SDG 2 (Dietary Diversity), SDG 3 (Child HAZ),
-#           SDG 5 (Women's Empowerment), SDG 13 (Carbon Sequestration)
+# Outcomes: Nutrition (Dietary Diversity), Gender Empowerment (Women's Empowerment Index)
 model_outcomes <- array(
-  dim = c(3, 4, 4),
+  dim = c(3, 4, 2),
   dimnames = list(
-    c("Homestead Production", "Biofortified Crops", "Women's Empowerment"),
+    c("Homestead Production", "Biofortified Crops", "Women's Empowerment Program"),
     c("Income Pathway", "Production Pathway", "Empowerment Pathway", "Integrated Pathway"),
-    c("Dietary Diversity", "Child HAZ", "Women's Empowerment", "Carbon Seq")
+    c("Dietary Diversity", "Women's Empowerment")
   )
 )
 
@@ -244,10 +242,10 @@ model_outcomes <- array(
 # Intervention A: Homestead Production
 model_outcomes[1, , ] <- matrix(
   c(
-    0.8, 0.15, 0.3, 0.1,    # Model 1 outcomes
-    1.2, 0.25, 0.2, 0.2,    # Model 2 outcomes
-    0.5, 0.10, 0.6, 0.1,    # Model 3 outcomes
-    1.0, 0.20, 0.4, 0.15    # Model 4 outcomes
+    0.8, 0.3,    # Model 1 outcomes: moderate nutrition, low empowerment
+    1.2, 0.2,    # Model 2 outcomes: high nutrition, low empowerment
+    0.5, 0.6,    # Model 3 outcomes: low nutrition, high empowerment
+    1.0, 0.4     # Model 4 outcomes: balanced nutrition and empowerment
   ),
   nrow = 4, byrow = TRUE
 )
@@ -255,21 +253,21 @@ model_outcomes[1, , ] <- matrix(
 # Intervention B: Biofortified Crops
 model_outcomes[2, , ] <- matrix(
   c(
-    0.6, 0.30, 0.1, 0.05,   # Model 1 outcomes
-    0.9, 0.40, 0.1, 0.1,    # Model 2 outcomes
-    0.4, 0.20, 0.3, 0.05,   # Model 3 outcomes
-    0.7, 0.35, 0.2, 0.08    # Model 4 outcomes
+    0.6, 0.1,    # Model 1 outcomes: moderate nutrition, very low empowerment
+    0.9, 0.1,    # Model 2 outcomes: high nutrition, very low empowerment
+    0.4, 0.3,    # Model 3 outcomes: low nutrition, moderate empowerment
+    0.7, 0.2     # Model 4 outcomes: moderate nutrition, low empowerment
   ),
   nrow = 4, byrow = TRUE
 )
 
-# Intervention C: Women's Empowerment
+# Intervention C: Women's Empowerment Program
 model_outcomes[3, , ] <- matrix(
   c(
-    0.4, 0.10, 0.8, 0.02,   # Model 1 outcomes
-    0.6, 0.15, 0.7, 0.05,   # Model 2 outcomes
-    0.8, 0.25, 1.2, 0.03,   # Model 3 outcomes
-    0.7, 0.20, 1.0, 0.04    # Model 4 outcomes
+    0.4, 0.8,    # Model 1 outcomes: low nutrition, high empowerment
+    0.6, 0.7,    # Model 2 outcomes: moderate nutrition, high empowerment
+    0.8, 1.2,    # Model 3 outcomes: moderate nutrition, very high empowerment
+    0.7, 1.0     # Model 4 outcomes: moderate nutrition, high empowerment
   ),
   nrow = 4, byrow = TRUE
 )
@@ -277,21 +275,21 @@ model_outcomes[3, , ] <- matrix(
 # Model probabilities
 model_probs <- c(0.30, 0.25, 0.20, 0.25)
 
-# SDG weights (from stakeholder consultation)
-sdg_weights <- c(0.35, 0.35, 0.20, 0.10)  # SDG2, SDG3, SDG5, SDG13
+# Outcome weights (from stakeholder consultation on nutrition-empowerment trade-offs)
+outcome_weights <- c(0.6, 0.4)  # Nutrition (0.6) vs Gender Empowerment (0.4)
 
 # Display outcomes for first intervention
 kable(model_outcomes[1, , ],
-      caption = "Outcomes for Homestead Production Under Different Causal Models",
+      caption = "Nutrition and Gender Empowerment Outcomes for Homestead Production Under Different Causal Models",
       digits = 2) %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
-## EVECA Computation with SDG Trade-offs
+## EVECA Computation with Gender-Nutrition Trade-offs
 
 ```{r evca-computation-sdg}
 # Define multi-attribute utility function
-multi_attribute_utility <- function(outcomes, weights = sdg_weights) {
+multi_attribute_utility <- function(outcomes, weights = outcome_weights) {
   # Simple linear utility for demonstration
   # In practice, could use more sophisticated functions
   sum(weights * outcomes)
@@ -309,7 +307,7 @@ rownames(model_utilities) <- c("Homestead", "Biofortified", "Empowerment")
 colnames(model_utilities) <- c("Income", "Production", "Empowerment", "Integrated")
 
 # Compute EVECA
-compute_evca_sdg <- function(model_utilities, model_probs) {
+compute_evca_gender_nutrition <- function(model_utilities, model_probs) {
   # BMA expected utility
   bma_eu <- as.vector(model_utilities %*% model_probs)
 
@@ -335,7 +333,7 @@ compute_evca_sdg <- function(model_utilities, model_probs) {
 }
 
 # Run analysis
-evca_result <- compute_evca_sdg(model_utilities, model_probs)
+evca_result <- compute_evca_gender_nutrition(model_utilities, model_probs)
 
 # Display results
 results_df <- data.frame(
@@ -357,14 +355,14 @@ kable(results_df, caption = "EVECA Analysis Results for Nutrition-Sensitive Agri
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
-## Visualization of SDG Trade-offs
+## Visualization of Gender-Nutrition Trade-offs
 
 ```{r visualization-sdg}
-# Create visualization showing SDG contributions
-sdg_contributions <- matrix(0, nrow = 3, ncol = 4)
+# Create visualization showing outcome contributions
+outcome_contributions <- matrix(0, nrow = 3, ncol = 4)
 for (i in 1:3) {
   for (j in 1:4) {
-    sdg_contributions[i, j] <- sum(sdg_weights * model_outcomes[i, j, ])
+    outcome_contributions[i, j] <- sum(outcome_weights * model_outcomes[i, j, ])
   }
 }
 
@@ -372,14 +370,14 @@ plot_data <- expand.grid(
   Intervention = c("Homestead", "Biofortified", "Empowerment"),
   Model = c("Income", "Production", "Empowerment", "Integrated")
 )
-plot_data$Utility <- as.vector(t(sdg_contributions))
+plot_data$Utility <- as.vector(t(outcome_contributions))
 
 evca_plot <- ggplot(plot_data, aes(x = Intervention, y = Utility, fill = Model)) +
   geom_bar(stat = "identity", position = "dodge", width = 0.7) +
   labs(
-    title = "EVECA Analysis: Nutrition-Sensitive Agriculture Interventions",
+    title = "EVECA Analysis: Gender-Nutrition Programming",
     x = "Intervention",
-    y = "Multi-Attribute Utility (SDG-weighted)",
+    y = "Multi-Attribute Utility (Nutrition-Gender Weighted)",
     subtitle = sprintf("EVECA = %.3f | Optimal under ambiguity: %s",
                       evca_result$evca,
                       rownames(model_utilities)[evca_result$optimal_decision_bma])
@@ -396,11 +394,11 @@ evca_plot <- ggplot(plot_data, aes(x = Intervention, y = Utility, fill = Model))
 evca_plot
 ```
 
-## Interpretation for Development Decision-Making
+## Interpretation for Gender-Nutrition Decision-Making
 
-The EVECA of `r sprintf("%.3f", evca_result$evca)` represents the gain in multi-attribute utility (weighted across SDGs) from knowing which causal pathway drives nutrition outcomes in this context.
+The EVECA of `r sprintf("%.3f", evca_result$evca)` represents the gain in multi-attribute utility (weighted across nutrition and gender empowerment objectives) from knowing which causal pathway drives nutrition outcomes through gender mechanisms in this context.
 
-**Practical implications for CGIAR and development organizations:**
+**Practical implications for gender-nutrition programming:**
 
 1. **Research prioritization**: If a study to resolve causal ambiguity costs less than `r sprintf("%.3f", evca_result$evca)` (appropriately monetized), it represents a valuable investment.
 
@@ -408,7 +406,7 @@ The EVECA of `r sprintf("%.3f", evca_result$evca)` represents the gain in multi-
 
 3. **Adaptive management**: As evidence accumulates and model probabilities shift, the optimal intervention may change, requiring flexible program design.
 
-4. **Stakeholder engagement**: The SDG weights (`r paste(sprintf("%.2f", sdg_weights), collapse = ", ")`) reflect value trade-offs that should be explicitly discussed with stakeholders.
+4. **Stakeholder engagement**: The outcome weights (`r paste(sprintf("%.2f", outcome_weights), collapse = ", ")`) reflect value trade-offs between nutrition and gender empowerment that should be explicitly discussed with stakeholders in sustainable development programming.
 
 # Discussion
 
@@ -430,13 +428,14 @@ A key challenge in scaling development interventions is context specificity—wh
 - Guide targeting of interventions to contexts where specific causal pathways dominate
 - Inform adaptive scaling strategies that account for causal heterogeneity
 
-### 3. Multi-Dimensional Development Objectives
+### 3. Gender-Nutrition Trade-offs in Sustainable Development
 
-Development interventions typically affect multiple SDGs with potential trade-offs. EVECA's multi-attribute utility framework:
+Gender-sensitive nutrition interventions typically involve trade-offs between nutrition and empowerment objectives. EVECA's multi-attribute utility framework:
 
-- Makes SDG trade-offs explicit and quantifiable
-- Allows stakeholder-weighted objective functions
-- Supports transparent decision-making about which outcomes to prioritize
+- Makes gender-nutrition trade-offs explicit and quantifiable
+- Allows stakeholder-weighted objective functions reflecting development priorities
+- Supports transparent decision-making about balancing nutrition and empowerment outcomes
+- Provides a quantitative basis for discussing value trade-offs in gender-sensitive programming
 
 ### 4. Integration with Existing Development Evaluation Methods
 
@@ -467,18 +466,18 @@ Development interventions often have poorly articulated theories of change. Prac
 - **Qualitative research**: Identifying perceived pathways from participants
 - **Causal discovery algorithms**: Data-driven model identification (with caution)
 
-### 3. Computational and Data Requirements
+### 3. Computational and Data Requirements for Gender-Nutrition Applications
 
-While the basic EVECA computation is simple, real applications may face challenges:
+While the basic EVECA computation is simple, real applications to gender-nutrition pathways may face challenges:
 
-- **High-dimensional outcome spaces**: Many SDG indicators with complex interactions
-- **Large model spaces**: Many competing causal mechanisms
-- **Sparse data**: Limited evidence for estimating model probabilities
-- **Computational intensity**: For complex utility functions or many decisions
+- **Multi-dimensional outcomes**: Nutrition and empowerment indicators with complex interactions
+- **Large model spaces**: Many competing empowerment-nutrition mechanisms
+- **Sparse data**: Limited evidence for estimating model probabilities in specific contexts
+- **Context specificity**: Pathway importance varies across cultural and socioeconomic settings
 
-### 4. Institutional and Cultural Barriers
+### 4. Institutional and Cultural Barriers in Gender-Nutrition Programming
 
-Implementing EVECA in development organizations requires:
+Implementing EVECA in gender-nutrition research and programming requires:
 
 - **Capacity building**: Training in decision analysis and Bayesian methods
 - **Organizational buy-in**: Convincing managers of the value of formal decision analysis
@@ -501,28 +500,28 @@ Implementing EVECA in development organizations requires:
 - **National policy formulation**: Informing agricultural and nutrition policy design
 - **Program evaluation design**: Optimizing evaluation investments for learning
 
-### 3. Software Development
+### 3. Software Development for Gender-Nutrition Applications
 
-- **Integration with development tools**: Linking with DHIS2, ODK, and other M&E platforms
-- **User-friendly interfaces**: Shiny apps for non-technical users
-- **Standardized workflows**: For common development decision problems
-- **Training materials**: Case studies and tutorials for practitioners
+- **Integration with gender-nutrition tools**: Linking with WEAI (Women's Empowerment in Agriculture Index) and nutrition assessment platforms
+- **User-friendly interfaces**: Shiny apps for gender and nutrition specialists
+- **Standardized workflows**: For common gender-nutrition decision problems
+- **Training materials**: Case studies and tutorials for gender-sensitive programming
 
 # Conclusion
 
-The **Expected Value of Eliminating Causal Ambiguity (EVECA)** provides a decision-theoretic framework for valuing causal clarity in agricultural development and nutrition interventions. By extending traditional value of information analysis to handle structural uncertainty—the ambiguity about which causal mechanism drives outcomes—EVECA addresses a fundamental challenge in development practice.
+The **Expected Value of Eliminating Causal Ambiguity (EVECA)** provides a decision-theoretic framework for valuing causal clarity in gender-nutrition programming. By extending traditional value of information analysis to handle structural uncertainty—the ambiguity about which empowerment mechanism drives nutrition outcomes—EVECA addresses a fundamental challenge in gender-sensitive development practice.
 
-Our application to nutrition-sensitive agriculture demonstrates how EVECA can inform CGIAR research prioritization, accounting for multiple Sustainable Development Goals and competing theories of change. The framework makes explicit the trade-offs inherent in development decisions and provides a quantitative basis for valuing research that resolves causal ambiguity.
+Our application to gender-nutrition pathways demonstrates how EVECA can inform research prioritization and program design, explicitly accounting for trade-offs between nutrition and gender empowerment objectives. The framework makes explicit the value trade-offs inherent in sustainable development and provides a quantitative basis for valuing research that resolves causal ambiguity about empowerment-nutrition mechanisms.
 
 Key contributions of this work include:
 
-1. **Theoretical foundation**: Formalizing EVECA within Bayesian decision theory for development contexts
-2. **Practical implementation**: R package designed for development practitioners and researchers
-3. **Case study demonstration**: Application to nutrition-sensitive agriculture with CGIAR relevance
-4. **Methodological integration**: Showing how EVECA complements existing evaluation approaches
+1. **Theoretical foundation**: Formalizing EVECA within Bayesian decision theory for gender-nutrition contexts
+2. **Practical implementation**: R package designed for gender and nutrition practitioners
+3. **Case study demonstration**: Application to gender-sensitive nutrition programming with explicit nutrition-empowerment trade-offs
+4. **Methodological integration**: Showing how EVECA complements existing gender-nutrition evaluation approaches
 
-For development organizations operating under causal ambiguity—which is to say, all development organizations—EVECA offers a principled approach to answering critical questions: How much should we invest in understanding why our interventions work? Which causal uncertainties matter most for decision-making? How should we adapt our programs as we learn about causal mechanisms?
+For organizations working on nutrition and women's empowerment and operating under causal ambiguity about empowerment-nutrition pathways, EVECA offers a principled approach to answering critical questions: How much should we invest in understanding which empowerment mechanisms drive nutrition outcomes? Which causal uncertainties about gender pathways matter most for program effectiveness? How should we adapt gender-sensitive programs as we learn about causal mechanisms?
 
-As the development community increasingly recognizes the importance of context specificity, adaptive management, and evidence-informed decision-making, frameworks like EVECA will become essential tools for maximizing the impact of limited development resources. By quantifying the value of causal clarity, we can make better decisions today while investing wisely in the learning that will enable better decisions tomorrow.
+As the development community increasingly recognizes the importance of evidence-informed gender programming and context-specific empowerment strategies, frameworks like EVECA will become essential tools for maximizing the impact of gender-nutrition investments. By quantifying the value of causal clarity about empowerment mechanisms, we can make better decisions today while investing wisely in the learning that will enable more effective gender-sensitive programming tomorrow.
 
 # References

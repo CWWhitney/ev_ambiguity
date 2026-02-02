@@ -2,14 +2,14 @@
 % Please edit documentation in R/example.R
 \name{example_development}
 \alias{example_development}
-\title{Example Analysis for Expected Value of Eliminating Causal Ambiguity in Development Context}
+\title{Example Analysis for Expected Value of Eliminating Causal Ambiguity in Gender-Nutrition Context}
 \usage{
 example_development(
   n_decisions = 3,
   n_models = 4,
-  n_outcomes = 4,
-  context = "agriculture",
-  sdg_weights = NULL,
+  n_outcomes = 2,
+  context = "gender_nutrition",
+  outcome_weights = NULL,
   seed = 123
 )
 }
@@ -18,13 +18,13 @@ example_development(
 
 \item{n_models}{Number of competing causal models (default: 4).}
 
-\item{n_outcomes}{Number of outcome dimensions (e.g., SDG indicators, default: 4).}
+\item{n_outcomes}{Number of outcome dimensions (default: 2 for nutrition and gender).}
 
-\item{context}{Development context for naming (default: "agriculture").
-Options: "agriculture", "nutrition", "climate", "health".}
+\item{context}{Gender-nutrition context for naming (default: "gender_nutrition").
+Options: "gender_nutrition", "empowerment_pathways", "nutrition_sensitive".}
 
-\item{sdg_weights}{Vector of weights for multi-attribute utility function
-(default: equal weights).}
+\item{outcome_weights}{Vector of weights for multi-attribute utility function
+(default: c(0.6, 0.4) for nutrition vs gender empowerment).}
 
 \item{seed}{Random seed for reproducibility (default: 123).}
 }
@@ -34,35 +34,35 @@ A list with the following components:
 \item{model_outcomes}{Array of outcomes \link{decisions × models × outcomes}.}
 \item{model_utilities}{Matrix of model utilities used in analysis.}
 \item{model_probs}{Vector of model probabilities used in analysis.}
-\item{sdg_weights}{SDG weights used in multi-attribute utility.}
-\item{context}{Development context used.}
+\item{outcome_weights}{Outcome weights used in multi-attribute utility.}
+\item{context}{Gender-nutrition context used.}
 }
 \description{
-Generate example data for development/agriculture decision problems and run
+Generate example data for gender-nutrition decision problems and run
 a demonstration EVECA analysis. This function creates realistic examples
-relevant to nutrition-sensitive agriculture, climate adaptation, and other
-development interventions with multiple competing causal models.
+relevant to gender-sensitive nutrition programming, women's empowerment interventions,
+and other gender-nutrition decisions with multiple competing causal models.
 }
 \examples{
-# Run example analysis with default parameters (agriculture context)
+# Run example analysis with default parameters (gender-nutrition context)
 example_result <- example_development()
 
 # Print key results
 cat("EVECA:", example_result$evca_result$evca, "\n")
 cat("Optimal intervention:", example_result$evca_result$optimal_decision_bma, "\n")
 
-# Run example with nutrition context and custom parameters
-nutrition_result <- example_development(
+# Run example with empowerment pathways context and custom parameters
+empowerment_result <- example_development(
   n_decisions = 3,
   n_models = 3,
-  n_outcomes = 3,
-  context = "nutrition",
-  sdg_weights = c(0.4, 0.4, 0.2)
+  n_outcomes = 2,
+  context = "empowerment_pathways",
+  outcome_weights = c(0.5, 0.5) # Equal weight on nutrition and empowerment
 )
 
-# Run climate adaptation example
-climate_result <- example_development(
-  context = "climate",
-  sdg_weights = c(0.3, 0.3, 0.2, 0.2)
+# Run nutrition-sensitive agriculture example
+nutrition_result <- example_development(
+  context = "nutrition_sensitive",
+  outcome_weights = c(0.7, 0.3) # Higher weight on nutrition
 )
 }

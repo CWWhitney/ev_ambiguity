@@ -2,12 +2,12 @@
 % Please edit documentation in R/plot_development.R
 \name{plot_development}
 \alias{plot_development}
-\title{Plot Expected Value of Eliminating Causal Ambiguity for Development Contexts}
+\title{Plot Expected Value of Eliminating Causal Ambiguity for Gender-Nutrition Contexts}
 \usage{
 plot_development(
   evca_result,
   model_outcomes = NULL,
-  sdg_weights = NULL,
+  outcome_weights = NULL,
   plot_type = "evca_bars",
   title = NULL,
   colors = NULL,
@@ -18,14 +18,15 @@ plot_development(
 \item{evca_result}{Output from \code{compute_evca()} function.}
 
 \item{model_outcomes}{Optional array of model outcomes \link{decisions × models × outcomes}
-for detailed SDG visualization.}
+for detailed gender-nutrition visualization.}
 
-\item{sdg_weights}{Optional vector of SDG weights for multi-attribute utility.}
+\item{outcome_weights}{Optional vector of outcome weights for multi-attribute utility
+(nutrition vs gender empowerment).}
 
 \item{plot_type}{Type of plot to create. Options:
 \itemize{
 \item "evca_bars": Basic EVECA bar plot (default)
-\item "sdg_contributions": SDG contributions by intervention and model
+\item "outcome_contributions": Nutrition and empowerment contributions by intervention and model
 \item "decision_heatmap": Heatmap of utilities across decisions and models
 \item "sensitivity": Sensitivity of EVECA to model probabilities
 }}
@@ -41,8 +42,8 @@ A ggplot object or list of ggplot objects that can be further customized or prin
 }
 \description{
 Create visualizations of EVECA analysis results from \code{compute_evca()} with
-development-specific features including SDG trade-offs, causal pathway
-contributions, and decision-making insights.
+gender-nutrition-specific features including nutrition-empowerment trade-offs,
+causal pathway contributions, and decision-making insights for sustainable development.
 }
 \examples{
 \dontrun{
@@ -55,11 +56,11 @@ p1 <- plot_development(example_result$evca_result,
   title = "EVECA Analysis: Nutrition-Sensitive Agriculture"
 )
 
-# Create SDG contributions plot
+# Create outcome contributions plot
 p2 <- plot_development(example_result$evca_result,
   model_outcomes = example_result$model_outcomes,
-  sdg_weights = example_result$sdg_weights,
-  plot_type = "sdg_contributions"
+  outcome_weights = example_result$outcome_weights,
+  plot_type = "outcome_contributions"
 )
 
 # Create decision heatmap

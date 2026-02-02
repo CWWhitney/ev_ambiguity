@@ -1,16 +1,17 @@
-#' Plot Expected Value of Eliminating Causal Ambiguity for Development Contexts
+#' Plot Expected Value of Eliminating Causal Ambiguity for Gender-Nutrition Contexts
 #'
 #' Create visualizations of EVECA analysis results from `compute_evca()` with
-#' development-specific features including SDG trade-offs, causal pathway
-#' contributions, and decision-making insights.
+#' gender-nutrition-specific features including nutrition-empowerment trade-offs,
+#' causal pathway contributions, and decision-making insights for sustainable development.
 #'
 #' @param evca_result Output from `compute_evca()` function.
 #' @param model_outcomes Optional array of model outcomes [decisions × models × outcomes]
-#'   for detailed SDG visualization.
-#' @param sdg_weights Optional vector of SDG weights for multi-attribute utility.
+#'   for detailed gender-nutrition visualization.
+#' @param outcome_weights Optional vector of outcome weights for multi-attribute utility
+#'   (nutrition vs gender empowerment).
 #' @param plot_type Type of plot to create. Options:
 #'   - "evca_bars": Basic EVECA bar plot (default)
-#'   - "sdg_contributions": SDG contributions by intervention and model
+#'   - "outcome_contributions": Nutrition and empowerment contributions by intervention and model
 #'   - "decision_heatmap": Heatmap of utilities across decisions and models
 #'   - "sensitivity": Sensitivity of EVECA to model probabilities
 #' @param title Plot title (default: context-specific).
@@ -35,11 +36,11 @@
 #'   title = "EVECA Analysis: Nutrition-Sensitive Agriculture"
 #' )
 #'
-#' # Create SDG contributions plot
+#' # Create outcome contributions plot
 #' p2 <- plot_development(example_result$evca_result,
 #'   model_outcomes = example_result$model_outcomes,
-#'   sdg_weights = example_result$sdg_weights,
-#'   plot_type = "sdg_contributions"
+#'   outcome_weights = example_result$outcome_weights,
+#'   plot_type = "outcome_contributions"
 #' )
 #'
 #' # Create decision heatmap
@@ -54,7 +55,7 @@
 #' }
 plot_development <- function(evca_result,
                              model_outcomes = NULL,
-                             sdg_weights = NULL,
+                             outcome_weights = NULL,
                              plot_type = "evca_bars",
                              title = NULL,
                              colors = NULL,
@@ -68,8 +69,8 @@ plot_development <- function(evca_result,
   # add it to evca_result for heatmap and sensitivity plots
   if (plot_type %in% c("decision_heatmap", "sensitivity") &&
     !"model_utilities" %in% names(evca_result) &&
-    !is.null(model_outcomes) && !is.null(sdg_weights)) {
-    # Compute model_utilities from model_outcomes and sdg_weights
+    !is.null(model_outcomes) && !is.null(outcome_weights)) {
+    # Compute model_utilities from model_outcomes and outcome_weights
     n_decisions <- dim(model_outcomes)[1]
     n_models <- dim(model_outcomes)[2]
 
@@ -79,7 +80,7 @@ plot_development <- function(evca_result,
 
     for (i in 1:n_decisions) {
       for (j in 1:n_models) {
-        utilities[i, j] <- sum(sdg_weights * model_outcomes[i, j, ])
+        utilities[i, j] <- sum(outcome_weights * model_outcomes[i, j, ])
       }
     }
 
@@ -93,7 +94,7 @@ plot_development <- function(evca_result,
 
   # Set default colors if not provided
   if (is.null(colors)) {
-    if (plot_type %in% c("evca_bars", "sdg_contributions")) {
+    if (plot_type %in% c("evca_bars", "outcome_contributions")) {
       colors <- RColorBrewer::brewer.pal(8, "Set2")[1:6]
     }
   }
@@ -101,17 +102,17 @@ plot_development <- function(evca_result,
   # Generate appropriate plot based on type
   if (plot_type == "evca_bars") {
     p <- plot_evca_bars(evca_result, title, colors, theme)
-  } else if (plot_type == "sdg_contributions") {
-    if (is.null(model_outcomes) || is.null(sdg_weights)) {
-      stop("model_outcomes and sdg_weights required for sdg_contributions plot")
+  } else if (plot_type == "outcome_contributions") {
+    if (is.null(model_outcomes) || is.null(outcome_weights)) {
+      stop("model_outcomes and outcome_weights required for outcome_contributions plot")
     }
-    p <- plot_sdg_contributions(evca_result, model_outcomes, sdg_weights, title, colors, theme)
+    p <- plot_outcome_contributions(evca_result, model_outcomes, outcome_weights, title, colors, theme)
   } else if (plot_type == "decision_heatmap") {
     p <- plot_decision_heatmap(evca_result, title, theme)
   } else if (plot_type == "sensitivity") {
     p <- plot_sensitivity(evca_result, title, theme)
   } else {
-    stop("Invalid plot_type. Choose from: 'evca_bars', 'sdg_contributions',
+    stop("Invalid plot_type. Choose from: 'evca_bars', 'outcome_contributions',
          'decision_heatmap', 'sensitivity'")
   }
 
@@ -121,7 +122,7 @@ plot_development <- function(evca_result,
 # Helper function: Basic EVECA bar plot
 plot_evca_bars <- function(evca_result, title, colors, theme) {
   if (is.null(title)) {
-    title <- "EVECA Analysis: Value of Eliminating Causal Ambiguity"
+    title <- "EVECA Analysis: Value of Eliminating Causal Ambiguity in Gender-Nutrition Pathways"
   }
 
   # Create plot data
@@ -151,7 +152,7 @@ plot_evca_bars <- function(evca_result, title, colors, theme) {
     ggplot2::labs(
       title = title,
       x = NULL,
-      y = "Expected Multi-Attribute Utility",
+      y = "Expected Multi-Attribute Utility (Nutrition-Gender Weighted)",
       subtitle = sprintf("EVECA = %.3f", evca_result$evca)
     ) +
     ggplot2::scale_fill_manual(values = colors[1:2]) +
@@ -166,10 +167,10 @@ plot_evca_bars <- function(evca_result, title, colors, theme) {
   return(p)
 }
 
-# Helper function: SDG contributions plot
-plot_sdg_contributions <- function(evca_result, model_outcomes, sdg_weights, title, colors, theme) {
+# Helper function: Outcome contributions plot
+plot_outcome_contributions <- function(evca_result, model_outcomes, outcome_weights, title, colors, theme) {
   if (is.null(title)) {
-    title <- "SDG Contributions by Intervention and Causal Pathway"
+    title <- "Nutrition and Empowerment Contributions by Intervention and Causal Pathway"
   }
 
   # Extract dimensions
@@ -195,12 +196,12 @@ plot_sdg_contributions <- function(evca_result, model_outcomes, sdg_weights, tit
 
     plot_data$OutcomeValue[i] <- model_outcomes[d_idx, m_idx, o_idx]
     plot_data$WeightedContribution[i] <- model_outcomes[d_idx, m_idx, o_idx] *
-      sdg_weights[o_idx]
+      outcome_weights[o_idx]
   }
 
-  # Add SDG weight labels
+  # Add outcome weight labels
   weight_labels <- sapply(1:n_outcomes, function(i) {
-    sprintf("%s (w=%.2f)", dimnames(model_outcomes)[[3]][i], sdg_weights[i])
+    sprintf("%s (w=%.2f)", dimnames(model_outcomes)[[3]][i], outcome_weights[i])
   })
   plot_data$OutcomeLabel <- factor(
     plot_data$Outcome,
@@ -221,9 +222,11 @@ plot_sdg_contributions <- function(evca_result, model_outcomes, sdg_weights, tit
       y = "Weighted Contribution to Multi-Attribute Utility",
       fill = "Causal Pathway",
       subtitle = sprintf(
-        "Optimal intervention: %s (EVECA = %.3f)",
+        "Optimal intervention: %s | EVECA = %.3f | Weights: Nutrition=%.1f, Empowerment=%.1f",
         evca_result$optimal_decision_bma,
-        evca_result$evca
+        evca_result$evca,
+        outcome_weights[1],
+        outcome_weights[2]
       )
     ) +
     ggplot2::scale_fill_manual(values = colors) +
@@ -243,7 +246,7 @@ plot_sdg_contributions <- function(evca_result, model_outcomes, sdg_weights, tit
 # Helper function: Decision heatmap
 plot_decision_heatmap <- function(evca_result, title, theme) {
   if (is.null(title)) {
-    title <- "Decision-Model Utility Matrix"
+    title <- "Gender-Nutrition Decision-Model Utility Matrix"
   }
 
   # Prepare data for heatmap
@@ -272,7 +275,7 @@ plot_decision_heatmap <- function(evca_result, title, theme) {
       rownames(utilities) <- paste("Decision", 1:n_decisions)
       colnames(utilities) <- paste("Model", 1:n_models)
     } else {
-      stop("evca_result must contain model_utilities for heatmap plot, or provide model_outcomes and sdg_weights")
+      stop("evca_result must contain model_utilities for heatmap plot, or provide model_outcomes and outcome_weights")
     }
   }
 
@@ -298,8 +301,8 @@ plot_decision_heatmap <- function(evca_result, title, theme) {
     ) +
     ggplot2::labs(
       title = title,
-      x = "Causal Model",
-      y = "Intervention",
+      x = "Causal Model (Empowerment-Nutrition Pathway)",
+      y = "Gender-Nutrition Intervention",
       fill = "Utility",
       subtitle = sprintf(
         "Optimal under ambiguity: %s | EVECA = %.3f",
@@ -321,7 +324,7 @@ plot_decision_heatmap <- function(evca_result, title, theme) {
 # Helper function: Sensitivity analysis plot
 plot_sensitivity <- function(evca_result, title, theme) {
   if (is.null(title)) {
-    title <- "Sensitivity of EVECA to Model Probabilities"
+    title <- "Sensitivity of EVECA to Empowerment-Nutrition Pathway Probabilities"
   }
 
   # Simple sensitivity analysis: vary each probability while keeping others proportional
@@ -335,7 +338,7 @@ plot_sensitivity <- function(evca_result, title, theme) {
     p <- ggplot2::ggplot() +
       ggplot2::annotate("text",
         x = 0.5, y = 0.5,
-        label = "Sensitivity analysis requires model_utilities\nin evca_result or provide model_outcomes\nand sdg_weights to plot_development()",
+        label = "Sensitivity analysis requires model_utilities\nin evca_result or provide model_outcomes\nand outcome_weights to plot_development()",
         size = 5
       ) +
       ggplot2::labs(title = title) +
@@ -398,10 +401,10 @@ plot_sensitivity <- function(evca_result, title, theme) {
     ) +
     ggplot2::labs(
       title = title,
-      x = "Model Probability",
+      x = "Empowerment-Nutrition Pathway Probability",
       y = "EVECA",
-      color = "Causal Model",
-      subtitle = "Triangle shows current probability estimate"
+      color = "Causal Model (Pathway)",
+      subtitle = "Triangle shows current probability estimate for each empowerment-nutrition pathway"
     ) +
     ggplot2::scale_color_brewer(palette = "Set2") +
     theme +
