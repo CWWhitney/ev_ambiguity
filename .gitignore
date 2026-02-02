@@ -34,3 +34,4 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 ev_ambiguity.Rproj
+.DS_Store
