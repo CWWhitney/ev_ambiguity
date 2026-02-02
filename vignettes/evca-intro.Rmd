@@ -159,16 +159,8 @@ p2 <- plot_development(result_sdg,
                        plot_type = "sdg_contributions",
                        title = "SDG Contributions by Intervention and Causal Pathway")
 
-# Create decision heatmap (using result_sdg$evca_result with added model_utilities)
-result_sdg_with_utilities <- result_sdg$evca_result
-result_sdg_with_utilities$model_utilities <- model_utilities_sdg
-p3 <- plot_development(result_sdg_with_utilities,
-                       plot_type = "decision_heatmap",
-                       title = "Decision-Model Utility Matrix")
-
 print(p1)
 print(p2)
-print(p3)
 ```
 
 # Example Analysis for Development Contexts
@@ -189,25 +181,6 @@ cat("EVECA:", round(ag_result$evca_result$evca, 3), "\n")
 cat("Optimal intervention:", ag_result$decision_names[ag_result$evca_result$optimal_decision_bma], "\n")
 cat("Context:", ag_result$context, "\n")
 
-# Plot agriculture example results with heatmap
-ag_result_with_utilities <- ag_result$evca_result
-ag_result_with_utilities$model_utilities <- ag_result$model_utilities
-p_ag_heatmap <- plot_development(ag_result_with_utilities,
-                                 plot_type = "decision_heatmap",
-                                 title = "Agriculture Example: Decision-Model Utility Matrix")
-
-# Run example for nutrition context
-nutrition_result <- example_development(
-  context = "nutrition",
-  n_outcomes = 3,
-  sdg_weights = c(0.4, 0.4, 0.2),
-  seed = 789
-)
-
-cat("\nNutrition Example:\n")
-cat("EVECA:", round(nutrition_result$evca_result$evca, 3), "\n")
-cat("Optimal intervention:", nutrition_result$decision_names[nutrition_result$evca_result$optimal_decision_bma], "\n")
-
 # Plot agriculture example results
 p_ag <- plot_development(ag_result$evca_result,
                          model_outcomes = ag_result$model_outcomes,
@@ -216,19 +189,16 @@ p_ag <- plot_development(ag_result$evca_result,
                          title = "Agriculture Example: SDG Contributions")
 
 print(p_ag)
-print(p_ag_heatmap)
 ```
 
 # Real-World Application: CGIAR Research Prioritization
 
 ## Nutrition-Sensitive Agriculture Portfolio Allocation
 
-Consider a CGIAR research program in East Africa deciding how to allocate resources among competing nutrition-sensitive agriculture interventions. The program faces causal ambiguity about which pathway drives nutrition outcomes in different contexts:
+Consider a CGIAR research program in East Africa deciding how to allocate resources among competing nutrition-sensitive agriculture interventions:
 
-```{r health-example}
+```{r cgiar-example}
 # CGIAR research prioritization example
-# Based on real data from East Africa nutrition-sensitive agriculture programs
-
 cgiar_utilities <- matrix(
   c(
     0.82, 0.71, 0.88, 0.76,   # Homestead food production
@@ -257,15 +227,7 @@ p_cgiar <- plot_development(cgiar_result,
                            plot_type = "evca_bars",
                            title = "CGIAR Research Portfolio: Value of Eliminating Causal Ambiguity")
 
-# Create sensitivity analysis
-cgiar_result_with_utilities <- cgiar_result
-cgiar_result_with_utilities$model_utilities <- cgiar_utilities
-p_sensitivity <- plot_development(cgiar_result_with_utilities,
-                                 plot_type = "sensitivity",
-                                 title = "Sensitivity of EVECA to Model Probabilities")
-
 print(p_cgiar)
-print(p_sensitivity)
 
 # Interpret results for CGIAR decision-making
 cat("CGIAR Research Prioritization Example:\n")
@@ -274,16 +236,14 @@ cat("Optimal intervention:", rownames(cgiar_utilities)[cgiar_result$optimal_deci
 cat("Value of eliminating causal ambiguity:", round(cgiar_result$evca, 3), "utility units\n")
 cat("\nInterpretation:\n")
 cat("The EVECA of", round(cgiar_result$evca, 3), "represents the gain in multi-attribute utility\n")
-cat("from knowing which causal pathway drives nutrition outcomes. If research to\n")
-cat("resolve this ambiguity costs less than", round(cgiar_result$evca, 3), "(appropriately monetized),\n")
-cat("it represents a valuable investment for CGIAR's research portfolio.\n")
+cat("from knowing which causal pathway drives nutrition outcomes.\n")
 ```
 
 # Advanced Usage for Development Practitioners
 
 ## Custom Utility Functions for Development Contexts
 
-Development decisions often involve complex value trade-offs. The `evca` package supports custom utility functions:
+Development decisions often involve complex value trade-offs:
 
 ```{r custom-utility}
 # Define development-specific utility functions
@@ -299,15 +259,6 @@ diminishing_utility <- function(x, alpha = 0.5) {
 # Threshold utility (meeting minimum standards)
 threshold_utility <- function(x, threshold = 0.5) {
   ifelse(x >= threshold, 1, x/threshold)
-}
-
-# Equity-weighted utility (prioritizing worst-off)
-equity_weighted_utility <- function(outcomes, baseline, aversion = 2) {
-  # Atkinson inequality aversion
-  if (aversion == 1) {
-    return(mean(log(outcomes/baseline)))
-  }
-  mean((outcomes/baseline)^(1 - aversion) - 1) / (1 - aversion)
 }
 
 # Use custom utility function with EVECA
@@ -328,7 +279,7 @@ The package integrates with common development data formats:
 # Example: Integrating with impact evaluation data
 # library(dplyr)
 # library(tidyr)
-
+#
 # # Load impact evaluation results
 # impact_data <- read.csv("impact_evaluation_results.csv")
 #
@@ -340,132 +291,8 @@ The package integrates with common development data formats:
 #   column_to_rownames("intervention") %>%
 #   as.matrix()
 #
-# # Extract model probabilities from Bayesian analysis
-# library(bayesm)
-# # ... Bayesian model averaging code ...
-#
 # # Compute EVECA
 # result <- compute_evca(model_utilities, model_probs)
-```
-
-## Sensitivity Analysis for Robust Decision-Making
-
-Development decisions should be robust to uncertainty:
-
-```{r sensitivity}
-# Perform sensitivity analysis on model probabilities
-sensitivity_analysis <- function(model_utilities, base_probs, variations = 0.2) {
-  n_models <- length(base_probs)
-  results <- list()
-
-  for (i in 1:n_models) {
-    # Vary probability of model i
-    varied_probs <- base_probs
-    varied_probs[i] <- varied_probs[i] * (1 + variations)
-    varied_probs <- varied_probs / sum(varied_probs)
-
-    result_varied <- compute_evca(model_utilities, varied_probs)
-    results[[i]] <- data.frame(
-      Model = colnames(model_utilities)[i],
-      OriginalProb = base_probs[i],
-      VariedProb = varied_probs[i],
-      EVECA = result_varied$evca,
-      Change = result_varied$evca - result$evca
-    )
-  }
-
-  do.call(rbind, results)
-}
-
-# Run sensitivity analysis
-sensitivity_results <- sensitivity_analysis(model_utilities, model_probs, variations = 0.3)
-print(sensitivity_results)
-```
-
-## Integration with Development Planning Tools
-
-EVECA can be integrated with existing development planning frameworks:
-
-```{r integration-frameworks, eval=FALSE}
-# Example: Integration with logical frameworks
-# logical_framework_to_evca <- function(logframe) {
-#   # Extract theories of change from logframe
-#   theories <- extract_theories_of_change(logframe)
-#
-#   # Map to causal models
-#   causal_models <- map_theories_to_models(theories)
-#
-#   # Estimate model probabilities from monitoring data
-#   model_probs <- estimate_model_probabilities(logframe$indicators)
-#
-#   # Compute expected utilities
-#   model_utilities <- compute_expected_utilities(logframe$targets, causal_models)
-#
-#   # Return EVECA analysis
-#   compute_evca(model_utilities, model_probs)
-# }
-#
-# # Example: Integration with cost-effectiveness analysis
-# combine_evca_cea <- function(cost_effectiveness, evca_result, research_cost) {
-#   # Compare EVECA to research cost
-#   net_value <- evca_result$evca - research_cost
-#
-#   # Decision rule: invest in research if net value > 0
-#   invest_in_research <- net_value > 0
-#
-#   list(
-#     net_value = net_value,
-#     invest_in_research = invest_in_research,
-#     evca = evca_result$evca,
-#     research_cost = research_cost
-#   )
-# }
-```
-
-## Custom Utility Functions
-
-The package is designed to work with any utility function:
-
-```{r custom-utility-advanced}
-# Define custom utility functions
-linear_utility <- function(x, min_val = 0, max_val = 1) {
-  (x - min_val) / (max_val - min_val)  # Normalize to [0, 1]
-}
-
-power_utility <- function(x, gamma = 0.5) {
-  if (gamma == 1) {
-    return(log(x))
-  }
-  (x^(1 - gamma) - 1) / (1 - gamma)
-}
-
-# Use custom utility function
-result_custom <- compute_evca(
-  model_utilities,
-  model_probs,
-  utility_function = function(x) power_utility(x, gamma = 0.5)
-)
-
-cat("EVECA with power utility:", result_custom$evca, "\n")
-```
-
-## Working with Data Frames
-
-The functions work with both matrices and data frames:
-
-```{r data-frame}
-# Create data frame
-utility_df <- data.frame(
-  Model1 = c(10, 7, 11),
-  Model2 = c(8, 9, 10),
-  Model3 = c(12, 6, 8),
-  Model4 = c(9, 8, 10)
-)
-rownames(utility_df) <- c("Decision 1", "Decision 2", "Decision 3")
-
-# Compute EVECA with data frame
-result_df <- compute_evca(utility_df, model_probs)
-cat("EVECA from data frame:", result_df$evca, "\n")
 ```
 
 # Best Practices for Development Applications
@@ -473,85 +300,23 @@ cat("EVECA from data frame:", result_df$evca, "\n")
 ## 1. Eliciting Causal Models and Probabilities
 
 ### Expert Elicitation Process:
-```{r elicitation, eval=FALSE}
-# Structured expert elicitation for development contexts
-elicit_causal_models <- function(domain_experts, context) {
-  # Step 1: Brainstorm competing causal mechanisms
-  mechanisms <- brainstorm_mechanisms(experts, context)
-
-  # Step 2: Structure as causal models
-  models <- structure_as_models(mechanisms)
-
-  # Step 3: Elicit model probabilities
-  probabilities <- elicit_probabilities(experts, models)
-
-  # Step 4: Check coherence and consistency
-  validated <- validate_elicitation(models, probabilities)
-
-  list(models = validated$models, probabilities = validated$probabilities)
-}
-```
-
-### Data-Driven Approaches:
-- **Bayesian model averaging** from multiple studies
-- **Meta-analysis** of mechanism tests across contexts
-- **Causal discovery algorithms** (with expert oversight)
-- **Mixed-methods synthesis** combining quantitative and qualitative evidence
+- **Structured workshops** with domain experts to identify competing causal mechanisms
+- **Literature synthesis** to identify theories of change from existing research
+- **Mixed-methods evidence** combining quantitative and qualitative studies
+- **Bayesian updating** as new evidence becomes available
 
 ## 2. Specifying Multi-Attribute Utility Functions
 
 ### Stakeholder Engagement for SDG Weights:
-```{r stakeholder-weights}
-# Example stakeholder weighting process
-stakeholder_weighting <- function(stakeholders, sdg_indicators) {
-  # Conduct weighting exercise (e.g., pairwise comparisons, swing weighting)
-  weights <- conduct_weighting_exercise(stakeholders, sdg_indicators)
-
-  # Check for consensus or document disagreements
-  consensus <- check_consensus(weights)
-
-  # Return weights with uncertainty bounds
-  list(
-    weights = consensus$median_weights,
-    lower_bounds = consensus$lower_bounds,
-    upper_bounds = consensus$upper_bounds,
-    disagreement_index = consensus$disagreement
-  )
-}
-```
-
-### Utility Function Types for Development:
-- **Linear**: Simple weighted sum (default)
-- **Threshold-based**: Minimum standards must be met
-- **Diminishing returns**: Additional gains matter less
-- **Equity-weighted**: Prioritize improvements for worst-off
-- **Risk-averse**: Avoid downside risks
+- **Participatory workshops** with beneficiaries, implementers, and policymakers
+- **Pairwise comparisons** or **swing weighting** exercises
+- **Transparent documentation** of value trade-offs
+- **Sensitivity analysis** to different weighting schemes
 
 ## 3. Context Adaptation and Scaling Considerations
 
 ### Accounting for Context Heterogeneity:
-```{r context-heterogeneity}
-# Context-specific EVECA analysis
-context_specific_evca <- function(base_analysis, context_factors) {
-  # Adjust model probabilities based on context
-  adjusted_probs <- adjust_probabilities(
-    base_analysis$model_probs,
-    context_factors
-  )
-
-  # Adjust utilities based on context
-  adjusted_utilities <- adjust_utilities(
-    base_analysis$model_utilities,
-    context_factors
-  )
-
-  # Recompute EVECA for specific context
-  compute_evca(adjusted_utilities, adjusted_probs)
-}
-```
-
-### Scaling Implications:
-- **Spatial heterogeneity**: Different causal mechanisms in different regions
+- **Spatial variation**: Different causal mechanisms in different regions
 - **Temporal dynamics**: Mechanisms may change over time
 - **Institutional factors**: Implementation capacity affects which mechanisms operate
 - **Beneficiary characteristics**: Different pathways for different sub-groups
@@ -559,252 +324,10 @@ context_specific_evca <- function(base_analysis, context_factors) {
 ## 4. Integration with Development Monitoring and Evaluation
 
 ### M&E System Integration:
-```{r me-integration-example, eval=FALSE}
-# Integrate EVECA with M&E systems
-integrate_with_me <- function(me_system, evca_analysis) {
-  # Track model probabilities over time as evidence accumulates
-  update_probabilities <- function(new_evidence) {
-    bayesian_update(evca_analysis$model_probs, new_evidence)
-  }
-
-  # Monitor which causal mechanisms appear to be operating
-  monitor_mechanisms <- function(process_data, outcome_data) {
-    test_mechanisms(process_data, outcome_data, evca_analysis$model_names)
-  }
-
-  # Adaptive management: adjust interventions based on learning
-  adaptive_management <- function(learning_updates) {
-    updated_analysis <- update_evca(evca_analysis, learning_updates)
-    recommend_adaptations(updated_analysis)
-  }
-
-  list(
-    update_probabilities = update_probabilities,
-    monitor_mechanisms = monitor_mechanisms,
-    adaptive_management = adaptive_management
-  )
-}
-```
-
-## 5. Communication and Decision Support
-
-### Communicating Results to Different Audiences:
-
-```{r communication}
-# Tailor communication for different stakeholders
-communicate_evca_results <- function(evca_result, audience) {
-  switch(audience,
-    "researchers" = {
-      # Technical details, methodological rigor
-      list(
-        evca = evca_result$evca,
-        model_probs = evca_result$model_probs,
-        sensitivity = sensitivity_analysis(evca_result$model_utilities, evca_result$model_probs)
-      )
-    },
-    "policymakers" = {
-      # Clear recommendations, value for money
-      list(
-        recommendation = paste("Invest in research if cost <", round(evca_result$evca, 3)),
-        current_best = evca_result$optimal_decision_bma,
-        value_of_clarity = evca_result$evca
-      )
-    },
-    "implementers" = {
-      # Practical implications, adaptive management
-      list(
-        implement = evca_result$optimal_decision_bma,
-        monitor = "Track evidence for competing causal mechanisms",
-        adapt = "Be prepared to adjust based on learning"
-      )
-    },
-    "donors" = {
-      # Return on investment, learning value
-      list(
-        research_value = evca_result$evca,
-        optimal_allocation = evca_result$optimal_decision_bma,
-        learning_priority = which.max(evca_result$model_probs)
-      )
-    }
-  )
-}
-```
-
-### Decision Support Tools:
-- **Interactive dashboards**: Shiny apps for exploration
-- **Scenario analysis**: What-if analysis for different assumptions
-- **Portfolio optimization**: Multiple interventions across contexts
-- **Real-time updating**: As new evidence becomes available
-
-## 6. Ethical Considerations in Development Applications
-
-### Equity and Distributional Concerns:
-```{r equity}
-# Equity-sensitive EVECA analysis
-equity_sensitive_evca <- function(base_analysis, subgroup_data) {
-  # Analyze effects for different population subgroups
-  subgroup_analyses <- lapply(subgroup_data, function(subgroup) {
-    compute_evca(subgroup$utilities, base_analysis$model_probs)
-  })
-
-  # Check for differential effects
-  differential_effects <- check_differential_effects(subgroup_analyses)
-
-  # Equity-weighted aggregation
-  equity_weights <- determine_equity_weights(subgroup_data$characteristics)
-  equity_weighted <- equity_weight_aggregation(subgroup_analyses, equity_weights)
-
-  list(
-    subgroup_analyses = subgroup_analyses,
-    differential_effects = differential_effects,
-    equity_weighted = equity_weighted
-  )
-}
-```
-
-### Ethical Principles:
-- **Transparency**: Clear about assumptions and value judgments
-- **Participation**: Involve affected communities in model specification
-- **Accountability**: Document decisions and their rationale
-- **Precaution**: Err on side of caution when evidence is weak
-- **Justice**: Consider distributional impacts across groups
-
-## 7. Implementation in Development Organizations
-
-### Organizational Integration Roadmap:
-
-```{r org-integration-roadmap, eval=FALSE}
-# Roadmap for integrating EVECA in development organizations
-integration_roadmap <- function(organization_type) {
-  switch(organization_type,
-    "CGIAR_research" = c(
-      "1. Pilot with one research program (e.g., nutrition-sensitive agriculture)",
-      "2. Train researchers in decision analysis methods",
-      "3. Integrate with research priority setting processes",
-      "4. Link to monitoring, evaluation and learning systems",
-      "5. Scale to portfolio-level decision making"
-    ),
-    "bilateral_donor" = c(
-      "1. Apply to funding allocation decisions",
-      "2. Use in evaluation design and commissioning",
-      "3. Inform policy dialogue with partner governments",
-      "4. Integrate with results frameworks",
-      "5. Build capacity in partner organizations"
-    ),
-    "NGO_implementer" = c(
-      "1. Use for program design and theory of change development",
-      "2. Inform adaptive management decisions",
-      "3. Guide learning agenda and evaluation investments",
-      "4. Communicate value of learning to donors",
-      "5. Share learning across similar programs"
-    )
-  )
-}
-```
-
-### Capacity Building Needs:
-- **Technical skills**: Bayesian analysis, decision theory
-- **Process skills**: Expert elicitation, stakeholder engagement
-- **Software skills**: R, Shiny, data visualization
-- **Institutional skills**: Integrating with planning cycles, M&E systems
-
-# Case Study: Applying EVECA to CGIAR's Nutrition-Sensitive Agriculture Portfolio
-
-## Background
-
-CGIAR's Nutrition-Sensitive Agriculture Initiative aims to improve nutrition outcomes through agricultural interventions. However, there is causal ambiguity about which pathways are most important in different contexts.
-
-## Step 1: Identify Competing Causal Models
-
-Based on literature review and expert consultation, we identify four competing causal models:
-
-1. **Income pathway**: Agriculture → Increased income → Food purchase → Nutrition
-2. **Production pathway**: Diversified production → Direct consumption → Nutrition
-3. **Empowerment pathway**: Women's control → Feeding practices → Nutrition
-4. **Integrated pathway**: Multiple simultaneous mechanisms
-
-## Step 2: Estimate Model Probabilities
-
-We synthesize evidence from:
-- 12 randomized controlled trials in East Africa
-- 8 qualitative studies on implementation processes
-- Expert elicitation with 15 nutrition-agriculture specialists
-
-Resulting probabilities: `Income: 0.30, Production: 0.25, Empowerment: 0.20, Integrated: 0.25`
-
-## Step 3: Specify Interventions and Outcomes
-
-Four candidate interventions:
-- Homestead food production (vegetables, small livestock)
-- Biofortified staple crops (orange sweet potato, iron beans)
-- Women's empowerment + agriculture training
-- Climate-smart agriculture integration
-
-Outcomes across four SDGs:
-- SDG 2: Dietary diversity score (0-10)
-- SDG 3: Child height-for-age Z-score
-- SDG 5: Women's empowerment index (0-1)
-- SDG 13: Carbon sequestration (tons/ha/year)
-
-## Step 4: Compute Expected Utilities
-
-Using data from pilot studies and expert judgment, we estimate outcomes for each intervention under each causal model.
-
-## Step 5: Compute EVECA and Make Decisions
-
-```{r cgiar-case-study}
-# CGIAR case study analysis
-cgiar_analysis <- example_development(
-  context = "agriculture",
-  n_decisions = 4,
-  n_models = 4,
-  n_outcomes = 4,
-  sdg_weights = c(0.35, 0.35, 0.20, 0.10),
-  seed = 2024
-)
-
-# Results
-cat("CGIAR Nutrition-Sensitive Agriculture Case Study\n")
-cat("================================================\n")
-cat("EVECA:", round(cgiar_analysis$evca_result$evca, 3), "\n")
-cat("Optimal intervention:", cgiar_analysis$decision_names[cgiar_analysis$evca_result$optimal_decision_bma], "\n")
-cat("Model probabilities:", round(cgiar_analysis$model_probs, 3), "\n\n")
-
-cat("Decision Recommendations:\n")
-cat("1. Implement", cgiar_analysis$decision_names[cgiar_analysis$evca_result$optimal_decision_bma], "while ambiguity persists
-
-## 2. Utility Functions
-
-- Choose utility functions appropriate for development contexts (e.g., equity-weighted, threshold-based)
-- Consider stakeholder values and SDG trade-offs
-- Test utility functions with simple inputs to ensure they work correctly
-
-## 3. Interpretation for Development Decisions
-
-- EVECA represents the maximum willingness to invest in research to resolve causal ambiguity
-- Compare EVECA to the cost of impact evaluations, process studies, or causal mechanism research
-- Consider sensitivity of results to model probabilities and stakeholder weights
-- Use EVECA to guide adaptive management and learning investments
-
-## 4. Integration with Development Evaluation Packages
-
-The `evca` package is designed to work with development evaluation tools:
-
-```{r integration-tools, eval=FALSE}
-# Example: Integration with impact evaluation packages
-# library(ImpactEvaluation)
-# impact_data <- load_impact_data("evaluation_results.rds")
-# model_utilities <- extract_utilities(impact_data, causal_models = c("M1", "M2", "M3"))
-
-# Example: Integration with Bayesian analysis packages
-# library(bayesm)
-# model_probs <- bayesian_model_averaging(data, models = c("income", "production", "empowerment"))
-
-# Example: Integration with SDG monitoring packages
-# library(SDG)
-# sdg_indicators <- compute_sdg_indicators(intervention_data)
-# model_outcomes <- map_to_sdg_outcomes(sdg_indicators, causal_models)
-```
+- **Track model probabilities** over time as evidence accumulates
+- **Monitor causal mechanisms** through process evaluation
+- **Adaptive management**: Adjust interventions based on learning
+- **Learning agendas**: Prioritize research to resolve key uncertainties
 
 # Conclusion
 
@@ -817,14 +340,6 @@ The `evca` package provides a decision-theoretic framework for valuing causal cl
 3. **Adaptive management**: Adjust programs as evidence accumulates about causal mechanisms
 4. **Stakeholder engagement**: Make explicit the value trade-offs and uncertainties in development decisions
 5. **Portfolio allocation**: Optimize resource allocation across interventions and contexts
-
-## Key Features for Development Contexts:
-
-- **Multi-dimensional outcomes**: Handle trade-offs across Sustainable Development Goals
-- **Context adaptation**: Account for spatial and temporal heterogeneity in causal mechanisms
-- **Stakeholder values**: Incorporate diverse perspectives through weighted utility functions
-- **Practical implementation**: R package designed for development researchers and practitioners
-- **Integration ready**: Works with existing evaluation methods and data systems
 
 ## Getting Started with EVECA in Your Organization:
 
@@ -841,35 +356,21 @@ For development organizations operating under causal ambiguity—which is to say
 ## Value of Information and Decision Analysis
 - Claxton, K. (1999). The irrelevance of inference: a decision-making approach to the stochastic evaluation of health care technologies. *Journal of Health Economics*, 18(3), 341-364.
 - Yokota, F., & Thompson, K. M. (2004). Value of information analysis in environmental health risk management decisions: past, present, and future. *Risk Analysis*, 24(3), 635-650.
-- Brennan, A., Kharroubi, S. A., O'Hagan, A., & Chilcott, J. (2007). Calculating partial expected value of perfect information via Monte Carlo sampling algorithms. *Medical Decision Making*, 27(4), 448-470.
 
 ## Causal Inference and Structural Uncertainty
 - Pearl, J. (2009). *Causality: Models, Reasoning, and Inference* (2nd ed.). Cambridge University Press.
 - Hernán, M. A., & Robins, J. M. (2020). *Causal Inference: What If*. Chapman & Hall/CRC.
-- Cinelli, C., & Hazlett, C. (2020). Making sense of sensitivity: Extending omitted variable bias. *Journal of the Royal Statistical Society: Series B*, 82(1), 39-67.
 
 ## Bayesian Model Averaging
 - Hoeting, J. A., Madigan, D., Raftery, A. E., & Volinsky, C. T. (1999). Bayesian model averaging: a tutorial. *Statistical Science*, 14(4), 382-401.
-- Madigan, D., & Raftery, A. E. (1994). Model selection and accounting for model uncertainty in graphical models using Occam's window. *Journal of the American Statistical Association*, 89(428), 1535-1546.
 
 ## Development Economics and Impact Evaluation
 - Banerjee, A. V., & Duflo, E. (2009). The experimental approach to development economics. *Annual Review of Economics*, 1(1), 151-178.
 - Barrett, C. B., & Carter, M. R. (2010). The power and pitfalls of experiments in development economics: Some non-random reflections. *Applied Economic Perspectives and Policy*, 32(4), 515-548.
-- Deaton, A. (2010). Instruments, randomization, and learning about development. *Journal of Economic Literature*, 48(2), 424-455.
 
 ## Nutrition-Sensitive Agriculture
 - Ruel, M. T., & Alderman, H. (2013). Nutrition-sensitive interventions and programmes: how can they help to accelerate progress in improving maternal and child nutrition? *The Lancet*, 382(9891), 536-551.
-- Kadiyala, S., Harris, J., Headey, D., Yosef, S., & Gillespie, S. (2014). Agriculture and nutrition in India: mapping evidence to pathways. *Annals of the New York Academy of Sciences*, 1331(1), 43-56.
 - Ruel, M. T., Quisumbing, A. R., & Balagamwala, M. (2018). Nutrition-sensitive agriculture: What have we learned so far? *Global Food Security*, 17, 128-153.
 
 ## CGIAR and Agricultural Development
-- Maredia, M. K., Shankar, B., Kelley, T. G., & Stevenson, J. R. (2014). Impact assessment of agricultural research, institutional innovation, and technology adoption: Introduction to the special section. *Food Policy*, 44, 214-217.
 - CGIAR. (2020). *CGIAR 2030 Research and Innovation Strategy: Transforming Food, Land, and Water Systems in a Climate Crisis*. CGIAR System Organization.
-
-## Multi-Criteria Decision Analysis in Development
-- Hajkowicz, S., & Collins, K. (2007). A review of multiple criteria analysis for water resource planning and management. *Water Resources Management*, 21(9), 1553-1566.
-- Mendoza, G. A., & Martins, H. (2006). Multi-criteria decision analysis in natural resource management: A critical review of methods and new modelling paradigms. *Forest Ecology and Management*, 230(1-3), 1-22.
-
-## Software and Implementation
-- Gelman, A., Carlin, J. B., Stern, H. S., Dunson, D. B., Vehtari, A., & Rubin, D. B. (2014). *Bayesian Data Analysis* (3rd ed.). Chapman & Hall/CRC.
-- Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L. D., François, R., ... & Yutani, H. (2019). Welcome to the tidyverse. *Journal of Open Source Software*, 4(43), 1686.
