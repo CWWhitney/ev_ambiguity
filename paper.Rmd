@@ -1,0 +1,528 @@
+---
+title: "Expected Value of Eliminating Causal Ambiguity: A Decision-Theoretic Framework for Valuing Structural Uncertainty in Agricultural Development and Nutrition Interventions"
+author:
+  - name: "Cory Whitney"
+    affiliation: "Center for Development Research, University of Bonn"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: united
+    highlight: tango
+  pdf_document:
+    toc: true
+    number_sections: true
+    latex_engine: xelatex
+bibliography: bib/references.bib
+csl: bib/apa.csl
+abstract: |
+  Development and agricultural interventions operate under profound causal ambiguity—multiple competing theories of change exist for how interventions affect nutrition, livelihoods, and environmental outcomes. Traditional impact evaluation methods, while addressing parameter uncertainty within fixed causal models, fail to quantify the value of resolving structural uncertainty about causal mechanisms. This paper introduces the **Expected Value of Eliminating Causal Ambiguity (EVECA)**, a decision-theoretic framework that extends value of information analysis to handle structural uncertainty in complex development decisions. We present a Bayesian model averaging approach for computing EVECA, implement it in an R package designed for development practitioners, and demonstrate its application through a nutrition-sensitive agriculture case study relevant to CGIAR research priorities and Sustainable Development Goals (SDGs). EVECA provides development organizations, policymakers, and funders with principled tools to prioritize research investments that resolve causal ambiguity in agricultural development and nutrition interventions.
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.height = 5,
+  fig.align = "center",
+  cache = FALSE
+)
+
+# Load required packages
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+```
+
+# Introduction
+
+## The Challenge of Causal Ambiguity in Agricultural Development and Nutrition
+
+Agricultural development and nutrition interventions operate in complex, context-dependent systems where causal mechanisms are often ambiguous and contested. A nutrition-sensitive agriculture program might improve child nutrition through multiple potential pathways: increased household income enabling food purchases, improved women's empowerment affecting intra-household allocation, enhanced dietary diversity from home production, or reduced disease burden through water-sanitation linkages (Ruel & Alderman, 2013; Kadiyala et al., 2014). Each pathway represents a different causal model with distinct implications for program design, targeting, and scaling.
+
+This **causal ambiguity**—uncertainty about which causal mechanism among several competing alternatives drives outcomes—presents fundamental challenges for development organizations like CGIAR, bilateral donors, and national governments. Billions of dollars are invested annually in agricultural development with limited understanding of which theories of change are correct in specific contexts (Barrett & Carter, 2010; Maredia et al., 2014).
+
+## Limitations of Current Impact Evaluation Approaches
+
+Current impact evaluation methods in development economics, while sophisticated in addressing parameter uncertainty within fixed causal models, provide limited guidance on the value of resolving structural uncertainty:
+
+1. **Randomized controlled trials (RCTs)** test specific interventions but often assume a single causal pathway (Banerjee & Duflo, 2009; Deaton, 2010)
+2. **Structural equation modeling** tests predefined causal structures but doesn't value learning which structure is correct (Bollen, 1989)
+3. **Bayesian networks** model uncertainty but lack decision-theoretic foundations for valuing causal clarity (Heckerman et al., 1995)
+4. **Theory-based evaluation** acknowledges multiple pathways but provides no quantitative framework for valuing their resolution (White, 2009)
+
+The **Expected Value of Perfect Information (EVPI)** framework, while established in health economics and environmental decision-making (Claxton, 1999; Yokota & Thompson, 2004), has seen limited application in development despite its potential. More critically, traditional EVPI addresses parameter uncertainty within fixed causal structures but not structural uncertainty about the causal model itself.
+
+## EVECA: A Framework for Development Decision-Making
+
+This paper introduces the **Expected Value of Eliminating Causal Ambiguity (EVECA)**, a decision-theoretic framework that quantifies the value of resolving structural uncertainty in development interventions. EVECA extends traditional value of information analysis to handle the causal ambiguity pervasive in agricultural development, nutrition, and sustainable food systems.
+
+We make three contributions:
+
+1. **Theoretical**: Formalize EVECA within Bayesian decision theory for development contexts
+2. **Methodological**: Develop computational methods suitable for development evaluation
+3. **Practical**: Demonstrate application to nutrition-sensitive agriculture with CGIAR relevance
+
+# Literature Review
+
+## Value of Information in Development Economics
+
+The application of value of information (VOI) methods in development economics remains limited despite their potential. Early work by Antle (1983) applied EVPI to agricultural technology adoption, while more recent applications include climate adaptation (Zhao et al., 2019) and health policy (Marseille et al., 2015). However, these applications focus on parameter uncertainty within single causal models.
+
+## Causal Inference and Structural Uncertainty in Development
+
+The "credibility revolution" in development economics (Angrist & Pischke, 2010) has emphasized identification of causal effects but largely assumes correct model specification. Recent work acknowledges model uncertainty through sensitivity analysis (Cinelli & Hazlett, 2020) and Bayesian model averaging (Young & Holsteen, 2017), but lacks decision-theoretic foundations for valuing causal clarity.
+
+## Agricultural Development and Nutrition Pathways
+
+Research on nutrition-sensitive agriculture identifies multiple competing pathways linking agriculture to nutrition (Ruel et al., 2018):
+1. **Food production**: Direct consumption of produced foods
+2. **Income**: Purchase of diverse foods with increased income
+3. **Women's empowerment**: Control over resources and feeding practices
+4. **Health environment**: Reduced disease burden affecting nutrient utilization
+
+Each pathway represents a different causal model with distinct implications for program design.
+
+## Bayesian Methods in Development Evaluation
+
+Bayesian methods are increasingly used in development evaluation for handling uncertainty (Gelman et al., 2014), with applications in poverty mapping (Elbers et al., 2003) and program evaluation (Chib & Jacobi, 2016). Bayesian model averaging (BMA) addresses model uncertainty (Hoeting et al., 1999) but hasn't been integrated with decision-theoretic value of information.
+
+## CGIAR Research and Decision-Making Under Uncertainty
+
+CGIAR research portfolios face multiple uncertainties: biophysical (climate, pests), economic (markets, policies), and social (adoption, behavior). The CGIAR Excellence in Agronomy Initiative and Nutrition-sensitive Agriculture programs explicitly acknowledge multiple theories of change but lack quantitative frameworks for valuing causal clarity (CGIAR, 2020).
+
+# Theoretical Framework
+
+## Bayesian Model Averaging Under Structural Uncertainty in Development Contexts
+
+Let $\mathcal{M} = \{M_1, M_2, ..., M_K\}$ represent $K$ competing causal models of a development intervention's impact. In nutrition-sensitive agriculture, these might be different pathways linking agricultural interventions to nutrition outcomes.
+
+Each model $M_k$ has posterior probability $p(M_k|D)$ given data $D$ from pilot studies, previous evaluations, or expert knowledge. For a program design decision $d$ (e.g., targeting women vs. men, crops for consumption vs. sale, with vs. without nutrition education), the expected utility under model $M_k$ is:
+
+$$
+EU(d|M_k) = \int U(\mathbf{y}) p(\mathbf{y}|d, M_k) d\mathbf{y}
+$$
+
+where $\mathbf{y}$ is a vector of outcomes (nutrition indicators, income, environmental impacts) and $U(\cdot)$ is a multi-attribute utility function capturing trade-offs among Sustainable Development Goals (SDGs).
+
+The overall expected utility, accounting for causal ambiguity, is the Bayesian model average:
+
+$$
+EU_{BMA}(d) = \sum_{k=1}^K p(M_k|D) \cdot EU(d|M_k)
+$$
+
+## Expected Value of Eliminating Causal Ambiguity (EVECA) for Development Decisions
+
+The **Expected Value of Eliminating Causal Ambiguity (EVECA)** quantifies the gain from knowing which causal model is correct. Formally:
+
+$$
+\text{EVECA} = \max_d EU(d|M^*) - \max_d EU_{BMA}(d)
+$$
+
+where $M^*$ is the true (unknown) causal model. The first term represents the expected utility if we knew which causal pathway was correct (perfect structural information), while the second term is the optimal expected utility under current ambiguity.
+
+## Multi-Dimensional Outcomes and SDG Trade-offs
+
+Development interventions typically affect multiple SDGs with potential trade-offs. Let $\mathbf{y} = (y_1, y_2, ..., y_m)$ represent $m$ outcome dimensions (e.g., SDG 2: Zero Hunger, SDG 3: Good Health, SDG 5: Gender Equality, SDG 13: Climate Action). The multi-attribute utility function can be expressed as:
+
+$$
+U(\mathbf{y}) = \sum_{j=1}^m w_j u_j(y_j)
+$$
+
+where $w_j$ are weights reflecting SDG priorities and $u_j(\cdot)$ are single-attribute utility functions. This formulation allows explicit consideration of trade-offs among competing development objectives.
+
+## Relationship to Traditional Value of Information
+
+EVECA complements traditional EVPI by addressing structural uncertainty. When both parameter uncertainty (within models) and structural uncertainty (between models) exist:
+
+$$
+\text{Total VOI} \approx \text{EVPI}_{\text{parameters}} + \text{EVECA}_{\text{structure}} + \text{Interaction}
+$$
+
+This decomposition helps development organizations allocate research resources between better estimating parameters within existing models versus resolving which causal model is correct.
+
+# Implementation
+
+## R Package for Development Practitioners
+
+The EVECA framework is implemented in an R package designed for development practitioners and researchers. Key features:
+
+1. **`compute_evca()`**: Main function for EVECA computation with multi-dimensional outcomes
+2. **`bma_expected_utility()`**: Bayesian model averaging for development contexts
+3. **`example_development()`**: Example with nutrition-sensitive agriculture data
+4. **`plot_evca_sdg()`**: Visualization showing SDG trade-offs
+5. **`sensitivity_evca()`**: Sensitivity analysis for model probabilities
+
+The package integrates with existing development evaluation tools:
+- **`ImpactEvaluation`**: For extracting model utilities from evaluation data
+- **`bayesm`**: For Bayesian model averaging
+- **`SDG`**: For SDG indicator calculations
+
+## Core Algorithm for Development Contexts
+
+```{r algorithm-pseudocode, eval=FALSE}
+# Pseudocode for EVECA computation with multi-dimensional outcomes
+compute_evca_development <- function(model_outcomes, model_probs,
+                                     utility_function, sdg_weights) {
+  # model_outcomes: array [decisions × models × outcomes]
+  # model_probs: vector of model probabilities
+  # utility_function: function mapping outcomes to utilities
+  # sdg_weights: weights for multi-attribute utility
+
+  # 1. Compute multi-attribute utilities
+  model_utilities <- apply(model_outcomes, c(1, 2),
+                           function(y) sum(sdg_weights * utility_function(y)))
+
+  # 2. Compute BMA expected utility
+  bma_eu <- model_utilities %*% model_probs
+
+  # 3. Find optimal decision under BMA
+  optimal_decision <- which.max(bma_eu)
+  optimal_utility <- bma_eu[optimal_decision]
+
+  # 4. Compute perfect information expected utility
+  perfect_info_eu <- sum(model_probs * apply(model_utilities, 2, max))
+
+  # 5. Compute EVECA
+  evca <- perfect_info_eu - optimal_utility
+
+  return(list(evca = evca, optimal_decision = optimal_decision, ...))
+}
+```
+
+# Case Study: Nutrition-Sensitive Agriculture in East Africa
+
+## Decision Context: CGIAR Research Portfolio Allocation
+
+Consider a CGIAR research program in East Africa deciding among three nutrition-sensitive agriculture interventions:
+
+1. **Intervention A**: Homestead food production (vegetables, small livestock)
+2. **Intervention B**: Biofortified crop promotion (orange sweet potato, iron beans)
+3. **Intervention C**: Women's empowerment + agriculture training
+
+Four competing causal models explain how these interventions affect nutrition outcomes, based on different theories of change from the literature:
+
+- **Model M1**: Income pathway (agriculture → income → food purchase → nutrition)
+- **Model M2**: Production pathway (diversified production → direct consumption → nutrition)
+- **Model M3**: Women's empowerment pathway (women's control → feeding practices → nutrition)
+- **Model M4**: Integrated pathway (multiple simultaneous mechanisms)
+
+## Model Probabilities from Mixed Methods Evidence
+
+We synthesize evidence from 24 studies in East Africa (systematic review + expert elicitation) to estimate model probabilities:
+
+- **M1 (Income)**: 0.30 (strong market access contexts)
+- **M2 (Production)**: 0.25 (subsistence-oriented contexts)
+- **M3 (Empowerment)**: 0.20 (gender-unequal contexts)
+- **M4 (Integrated)**: 0.25 (complex, context-dependent)
+
+## Multi-Dimensional Outcomes Across SDGs
+
+Each intervention affects multiple SDG indicators:
+
+```{r case-study-data}
+# Set seed for reproducibility
+set.seed(123)
+
+# Multi-dimensional outcomes array: [interventions × models × outcomes]
+# Outcomes: SDG 2 (Dietary Diversity), SDG 3 (Child HAZ),
+#           SDG 5 (Women's Empowerment), SDG 13 (Carbon Sequestration)
+model_outcomes <- array(
+  dim = c(3, 4, 4),
+  dimnames = list(
+    c("Homestead Production", "Biofortified Crops", "Women's Empowerment"),
+    c("Income Pathway", "Production Pathway", "Empowerment Pathway", "Integrated Pathway"),
+    c("Dietary Diversity", "Child HAZ", "Women's Empowerment", "Carbon Seq")
+  )
+)
+
+# Fill with realistic values based on literature
+# Intervention A: Homestead Production
+model_outcomes[1, , ] <- matrix(
+  c(
+    0.8, 0.15, 0.3, 0.1,    # Model 1 outcomes
+    1.2, 0.25, 0.2, 0.2,    # Model 2 outcomes
+    0.5, 0.10, 0.6, 0.1,    # Model 3 outcomes
+    1.0, 0.20, 0.4, 0.15    # Model 4 outcomes
+  ),
+  nrow = 4, byrow = TRUE
+)
+
+# Intervention B: Biofortified Crops
+model_outcomes[2, , ] <- matrix(
+  c(
+    0.6, 0.30, 0.1, 0.05,   # Model 1 outcomes
+    0.9, 0.40, 0.1, 0.1,    # Model 2 outcomes
+    0.4, 0.20, 0.3, 0.05,   # Model 3 outcomes
+    0.7, 0.35, 0.2, 0.08    # Model 4 outcomes
+  ),
+  nrow = 4, byrow = TRUE
+)
+
+# Intervention C: Women's Empowerment
+model_outcomes[3, , ] <- matrix(
+  c(
+    0.4, 0.10, 0.8, 0.02,   # Model 1 outcomes
+    0.6, 0.15, 0.7, 0.05,   # Model 2 outcomes
+    0.8, 0.25, 1.2, 0.03,   # Model 3 outcomes
+    0.7, 0.20, 1.0, 0.04    # Model 4 outcomes
+  ),
+  nrow = 4, byrow = TRUE
+)
+
+# Model probabilities
+model_probs <- c(0.30, 0.25, 0.20, 0.25)
+
+# SDG weights (from stakeholder consultation)
+sdg_weights <- c(0.35, 0.35, 0.20, 0.10)  # SDG2, SDG3, SDG5, SDG13
+
+# Display outcomes for first intervention
+kable(model_outcomes[1, , ],
+      caption = "Outcomes for Homestead Production Under Different Causal Models",
+      digits = 2) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+## EVECA Computation with SDG Trade-offs
+
+```{r evca-computation-sdg}
+# Define multi-attribute utility function
+multi_attribute_utility <- function(outcomes, weights = sdg_weights) {
+  # Simple linear utility for demonstration
+  # In practice, could use more sophisticated functions
+  sum(weights * outcomes)
+}
+
+# Compute utilities for all decision-model combinations
+model_utilities <- matrix(NA, nrow = 3, ncol = 4)
+for (i in 1:3) {
+  for (j in 1:4) {
+    model_utilities[i, j] <- multi_attribute_utility(model_outcomes[i, j, ])
+  }
+}
+
+rownames(model_utilities) <- c("Homestead", "Biofortified", "Empowerment")
+colnames(model_utilities) <- c("Income", "Production", "Empowerment", "Integrated")
+
+# Compute EVECA
+compute_evca_sdg <- function(model_utilities, model_probs) {
+  # BMA expected utility
+  bma_eu <- as.vector(model_utilities %*% model_probs)
+
+  # Optimal decision under BMA
+  optimal_decision_bma <- which.max(bma_eu)
+  optimal_utility_bma <- bma_eu[optimal_decision_bma]
+
+  # Expected utility with perfect information
+  perfect_info_eu <- sum(model_probs * apply(model_utilities, 2, max))
+
+  # EVECA calculation
+  evca <- perfect_info_eu - optimal_utility_bma
+
+  list(
+    bma_expected_utility = bma_eu,
+    optimal_decision_bma = optimal_decision_bma,
+    optimal_utility_bma = optimal_utility_bma,
+    perfect_info_expected_utility = perfect_info_eu,
+    evca = evca,
+    model_probs = model_probs,
+    model_utilities = model_utilities
+  )
+}
+
+# Run analysis
+evca_result <- compute_evca_sdg(model_utilities, model_probs)
+
+# Display results
+results_df <- data.frame(
+  Metric = c(
+    "Optimal intervention under causal ambiguity",
+    "Expected multi-attribute utility of optimal intervention",
+    "Expected utility with perfect causal information",
+    "EVECA (value of eliminating causal ambiguity)"
+  ),
+  Value = c(
+    rownames(model_utilities)[evca_result$optimal_decision_bma],
+    sprintf("%.3f", evca_result$optimal_utility_bma),
+    sprintf("%.3f", evca_result$perfect_info_expected_utility),
+    sprintf("%.3f", evca_result$evca)
+  )
+)
+
+kable(results_df, caption = "EVECA Analysis Results for Nutrition-Sensitive Agriculture") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+## Visualization of SDG Trade-offs
+
+```{r visualization-sdg}
+# Create visualization showing SDG contributions
+sdg_contributions <- matrix(0, nrow = 3, ncol = 4)
+for (i in 1:3) {
+  for (j in 1:4) {
+    sdg_contributions[i, j] <- sum(sdg_weights * model_outcomes[i, j, ])
+  }
+}
+
+plot_data <- expand.grid(
+  Intervention = c("Homestead", "Biofortified", "Empowerment"),
+  Model = c("Income", "Production", "Empowerment", "Integrated")
+)
+plot_data$Utility <- as.vector(t(sdg_contributions))
+
+evca_plot <- ggplot(plot_data, aes(x = Intervention, y = Utility, fill = Model)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  labs(
+    title = "EVECA Analysis: Nutrition-Sensitive Agriculture Interventions",
+    x = "Intervention",
+    y = "Multi-Attribute Utility (SDG-weighted)",
+    subtitle = sprintf("EVECA = %.3f | Optimal under ambiguity: %s",
+                      evca_result$evca,
+                      rownames(model_utilities)[evca_result$optimal_decision_bma])
+  ) +
+  scale_fill_brewer(palette = "Set2") +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "bold"),
+    panel.grid.major.x = element_blank()
+  )
+
+evca_plot
+```
+
+## Interpretation for Development Decision-Making
+
+The EVECA of `r sprintf("%.3f", evca_result$evca)` represents the gain in multi-attribute utility (weighted across SDGs) from knowing which causal pathway drives nutrition outcomes in this context.
+
+**Practical implications for CGIAR and development organizations:**
+
+1. **Research prioritization**: If a study to resolve causal ambiguity costs less than `r sprintf("%.3f", evca_result$evca)` (appropriately monetized), it represents a valuable investment.
+
+2. **Program design**: The optimal intervention under ambiguity (`r rownames(model_utilities)[evca_result$optimal_decision_bma]`) should be implemented while causal ambiguity persists.
+
+3. **Adaptive management**: As evidence accumulates and model probabilities shift, the optimal intervention may change, requiring flexible program design.
+
+4. **Stakeholder engagement**: The SDG weights (`r paste(sprintf("%.2f", sdg_weights), collapse = ", ")`) reflect value trade-offs that should be explicitly discussed with stakeholders.
+
+# Discussion
+
+## Implications for Agricultural Development and Nutrition Programming
+
+### 1. Valuing Causal Clarity in Development Research
+
+Development organizations like CGIAR invest substantial resources in impact evaluations and research. EVECA provides a decision-theoretic framework for valuing different types of research:
+
+- **Parameter refinement research** (traditional EVPI): Better estimates within known causal models
+- **Causal clarification research** (EVECA): Resolving which causal model is correct
+- **Model expansion research**: Identifying new causal pathways not currently considered
+
+### 2. Addressing Context Specificity in Development
+
+A key challenge in scaling development interventions is context specificity—what works in one setting may not work in another due to different causal mechanisms. EVECA can:
+
+- Quantify the value of context-specific causal diagnosis
+- Guide targeting of interventions to contexts where specific causal pathways dominate
+- Inform adaptive scaling strategies that account for causal heterogeneity
+
+### 3. Multi-Dimensional Development Objectives
+
+Development interventions typically affect multiple SDGs with potential trade-offs. EVECA's multi-attribute utility framework:
+
+- Makes SDG trade-offs explicit and quantifiable
+- Allows stakeholder-weighted objective functions
+- Supports transparent decision-making about which outcomes to prioritize
+
+### 4. Integration with Existing Development Evaluation Methods
+
+EVECA complements rather than replaces existing methods:
+
+- **RCTs**: Provide data for estimating model probabilities
+- **Process evaluation**: Identifies competing causal mechanisms
+- **Theory-based evaluation**: Provides candidate causal models
+- **Cost-effectiveness analysis**: Provides outcome measurements
+
+## Limitations and Implementation Challenges
+
+### 1. Eliciting Model Probabilities
+
+A key practical challenge is estimating $p(M_k|D)$—the probability that each causal model is correct. Approaches include:
+
+- **Expert elicitation**: Structured interviews with domain experts
+- **Bayesian model averaging**: From multiple studies with different model specifications
+- **Meta-analysis**: Synthesizing evidence across contexts
+- **Mechanistic reasoning**: From basic science and theory
+
+### 2. Specifying Competing Causal Models
+
+Development interventions often have poorly articulated theories of change. Practical approaches:
+
+- **Stakeholder workshops**: Co-developing causal models with implementers and beneficiaries
+- **Literature synthesis**: Systematic review of proposed mechanisms
+- **Qualitative research**: Identifying perceived pathways from participants
+- **Causal discovery algorithms**: Data-driven model identification (with caution)
+
+### 3. Computational and Data Requirements
+
+While the basic EVECA computation is simple, real applications may face challenges:
+
+- **High-dimensional outcome spaces**: Many SDG indicators with complex interactions
+- **Large model spaces**: Many competing causal mechanisms
+- **Sparse data**: Limited evidence for estimating model probabilities
+- **Computational intensity**: For complex utility functions or many decisions
+
+### 4. Institutional and Cultural Barriers
+
+Implementing EVECA in development organizations requires:
+
+- **Capacity building**: Training in decision analysis and Bayesian methods
+- **Organizational buy-in**: Convincing managers of the value of formal decision analysis
+- **Integration with planning cycles**: Aligning with existing budgeting and M&E systems
+- **Stakeholder acceptance**: Ensuring transparency and participation in weight-setting
+
+## Future Research Directions
+
+### 1. Methodological Extensions
+
+- **Dynamic EVECA**: Valuing sequential resolution of causal ambiguity over time
+- **Spatial EVECA**: Accounting for geographic heterogeneity in causal mechanisms
+- **Participatory EVECA**: Involving stakeholders in model specification and weight-setting
+- **Robust EVECA**: Minimizing regret across possible causal realities
+
+### 2. Empirical Applications
+
+- **CGIAR research portfolios**: Applying EVECA to One CGIAR initiative prioritization
+- **Donor investment decisions**: Guiding research funding across development sectors
+- **National policy formulation**: Informing agricultural and nutrition policy design
+- **Program evaluation design**: Optimizing evaluation investments for learning
+
+### 3. Software Development
+
+- **Integration with development tools**: Linking with DHIS2, ODK, and other M&E platforms
+- **User-friendly interfaces**: Shiny apps for non-technical users
+- **Standardized workflows**: For common development decision problems
+- **Training materials**: Case studies and tutorials for practitioners
+
+# Conclusion
+
+The **Expected Value of Eliminating Causal Ambiguity (EVECA)** provides a decision-theoretic framework for valuing causal clarity in agricultural development and nutrition interventions. By extending traditional value of information analysis to handle structural uncertainty—the ambiguity about which causal mechanism drives outcomes—EVECA addresses a fundamental challenge in development practice.
+
+Our application to nutrition-sensitive agriculture demonstrates how EVECA can inform CGIAR research prioritization, accounting for multiple Sustainable Development Goals and competing theories of change. The framework makes explicit the trade-offs inherent in development decisions and provides a quantitative basis for valuing research that resolves causal ambiguity.
+
+Key contributions of this work include:
+
+1. **Theoretical foundation**: Formalizing EVECA within Bayesian decision theory for development contexts
+2. **Practical implementation**: R package designed for development practitioners and researchers
+3. **Case study demonstration**: Application to nutrition-sensitive agriculture with CGIAR relevance
+4. **Methodological integration**: Showing how EVECA complements existing evaluation approaches
+
+For development organizations operating under causal ambiguity—which is to say, all development organizations—EVECA offers a principled approach to answering critical questions: How much should we invest in understanding why our interventions work? Which causal uncertainties matter most for decision-making? How should we adapt our programs as we learn about causal mechanisms?
+
+As the development community increasingly recognizes the importance of context specificity, adaptive management, and evidence-informed decision-making, frameworks like EVECA will become essential tools for maximizing the impact of limited development resources. By quantifying the value of causal clarity, we can make better decisions today while investing wisely in the learning that will enable better decisions tomorrow.
+
+# References

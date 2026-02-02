@@ -1,0 +1,32 @@
+Package: evca
+Title: Expected Value of Eliminating Causal Ambiguity for Development Decisions
+Version: 0.2.0
+Description: Computes the Expected Value of Eliminating Causal Ambiguity (EVECA),
+    a decision-theoretic framework that quantifies the value of resolving
+    structural uncertainty in development, agriculture, and nutrition interventions.
+    EVECA extends traditional value of information analysis to handle causal
+    ambiguity—uncertainty about which causal mechanism among competing alternatives
+    drives outcomes. Designed for CGIAR researchers, development practitioners,
+    and policy analysts working under multiple competing theories of change.
+Authors@R:
+    person("Cory", "Whitney", email = "cory.whitney@example.com", role = c("aut", "cre"))
+License: MIT + file LICENSE
+URL: https://github.com/example/evca
+BugReports: https://github.com/example/evca/issues
+Depends:
+    R (>= 4.0.0)
+Imports:
+    ggplot2,
+    viridis,
+    RColorBrewer
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    bayesm,
+    dplyr,
+    tidyr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Encoding: UTF-8
+VignetteBuilder: knitr
