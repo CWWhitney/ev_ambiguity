@@ -4,37 +4,71 @@
 \alias{example_evca}
 \title{Example Analysis for Expected Value of Eliminating Causal Ambiguity}
 \usage{
-example_evca(
-  n_decisions = 3,
-  n_models = 4,
-  seed = 123,
-  utility_range = c(0, 10)
-)
+example_evca(n_decisions = 3, n_models = 4, seed = 123,
+  utility_range = c(0, 10))
 }
 \arguments{
-\item{n_decisions}{Number of decision alternatives (default: 3).}
+\item{n_decisions}{Integer specifying number of decision alternatives (default: 3).
+Must be positive. Represents the number of choices available to the decision maker.}
 
-\item{n_models}{Number of competing causal models (default: 4).}
+\item{n_models}{Integer specifying number of competing causal models (default: 4).
+Must be positive. Represents the number of alternative theories about how
+decisions affect outcomes.}
 
-\item{seed}{Random seed for reproducibility (default: 123).}
+\item{seed}{Integer random seed for reproducibility (default: 123).
+Use the same seed to generate identical datasets across function calls.}
 
-\item{utility_range}{Range for generating utility values (default: c(0, 10)).}
+\item{utility_range}{Numeric vector of length 2 specifying the range for
+generating utility values (default: c(0, 10)). First element is minimum,
+second is maximum. Additional utility is added to create model-specific
+preferences.}
 }
 \value{
 A list with the following components:
-\item{evca_result}{Output from \code{compute_evca()} function.}
-\item{model_utilities}{Matrix of model utilities used in analysis.}
-\item{model_probs}{Vector of model probabilities used in analysis.}
-\item{decision_names}{Names of decision alternatives.}
-\item{model_names}{Names of competing models.}
+\item{evca_result}{Output from compute_evca() function containing EVECA value and details.}
+\item{model_utilities}{Matrix of model utilities with dimensions decisions x models.}
+\item{model_probs}{Numeric vector of model probabilities that sum to 1.}
+\item{decision_names}{Character vector of decision alternative names.}
+\item{model_names}{Character vector of competing model names.}
 }
 \description{
-Generate example data for decision problems with competing causal models
-and run a demonstration EVECA analysis. This function creates realistic
+Generates example data for decision problems with competing causal models
+and runs a demonstration EVECA analysis. This function creates realistic
 examples for testing and understanding EVECA in various modeling contexts.
+Utilities are randomly generated with structure to ensure different models
+favor different decisions, creating meaningful model ambiguity.
 }
+\details{
+This function generates synthetic data with the following structure:
+\enumerate{
+\item Base utilities are drawn from uniform distribution over utility_range
+\item Each model is assigned a "favored decision" that receives additional utility
+\item Model probabilities are drawn from uniform distribution and normalized to sum to 1
+}
+
+The generated data creates realistic model ambiguity where:
+\itemize{
+\item Different models favor different decisions
+\item EVECA will typically be positive (value to resolving ambiguity)
+\item Results are reproducible when using the same seed
+}
+
+This function is useful for:
+\itemize{
+\item Learning how EVECA works
+\item Testing visualization functions
+\item Demonstrating the framework to others
+\item Generating test data for development
+}
+}
+\section{Warning}{
+
+This function generates random data for demonstration purposes only.
+Real applications should use actual utility estimates from data or expert judgment.
+}
+
 \examples{
-# Run example analysis with default parameters
+# Example 1: Basic usage with default parameters
 example_result <- example_evca()
 
 # Print key results
@@ -42,14 +76,38 @@ cat("EVECA:", example_result$evca_result$evca, "\n")
 optimal_idx <- example_result$evca_result$optimal_decision_bma
 cat("Optimal decision:", example_result$decision_names[optimal_idx], "\n")
 
-# Run example with custom parameters
-custom_result <- example_evca(
-  n_decisions = 4,
-  n_models = 3,
+# View generated utilities
+print(example_result$model_utilities)
+
+# Example 2: Larger problem with more decisions and models
+large_result <- example_evca(
+  n_decisions = 5,
+  n_models = 6,
   seed = 456
 )
+cat("EVECA for larger problem:", large_result$evca_result$evca, "\n")
 
-# Access components
-print(custom_result$model_utilities)
-print(custom_result$model_probs)
+# Example 3: Different utility range
+scaled_result <- example_evca(
+  utility_range = c(-10, 10),
+  seed = 789
+)
+print(range(scaled_result$model_utilities))
+
+# Example 4: Reproducibility check
+result1 <- example_evca(seed = 100)
+result2 <- example_evca(seed = 100)
+identical(result1$model_utilities, result2$model_utilities) # Should be TRUE
+
+# Example 5: Use generated data for visualization
+ex <- example_evca()
+plot_evca(ex$evca_result)
+
 }
+\references{
+Hoeting, J. A., Madigan, D., Raftery, A. E., & Volinsky, C. T. (1999).
+Bayesian model averaging: a tutorial. Statistical Science, 14(4), 382-401.
+}
+\keyword{datagen}
+\keyword{examples}
+\keyword{utilities}

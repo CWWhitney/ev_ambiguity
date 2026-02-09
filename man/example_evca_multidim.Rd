@@ -4,46 +4,80 @@
 \alias{example_evca_multidim}
 \title{Example with Multi-Dimensional Outcomes}
 \usage{
-example_evca_multidim(
-  n_decisions = 3,
-  n_models = 4,
-  n_outcomes = 2,
-  outcome_weights = NULL,
-  seed = 123,
-  outcome_range = c(0, 1)
-)
+example_evca_multidim(n_decisions = 3, n_models = 4, n_outcomes = 2,
+  outcome_weights = NULL, seed = 123, outcome_range = c(0, 1))
 }
 \arguments{
-\item{n_decisions}{Number of decision alternatives (default: 3).}
+\item{n_decisions}{Integer specifying number of decision alternatives (default: 3).
+Must be positive.}
 
-\item{n_models}{Number of competing causal models (default: 4).}
+\item{n_models}{Integer specifying number of competing causal models (default: 4).
+Must be positive.}
 
-\item{n_outcomes}{Number of outcome dimensions (default: 2).}
+\item{n_outcomes}{Integer specifying number of outcome dimensions (default: 2).
+Must be positive. Common examples: 2 outcomes for cost/effectiveness trade-off,
+3 outcomes for triple-bottom-line (economic/social/environmental).}
 
-\item{outcome_weights}{Vector of weights for multi-attribute utility function
-(default: equal weights). Must sum to 1.}
+\item{outcome_weights}{Numeric vector of weights for multi-attribute utility function
+(default: equal weights). Must be non-negative and sum to 1. Length must equal
+n_outcomes. Represents relative importance of each outcome dimension.}
 
-\item{seed}{Random seed for reproducibility (default: 123).}
+\item{seed}{Integer random seed for reproducibility (default: 123).}
 
-\item{outcome_range}{Range for generating outcome values (default: c(0, 1)).}
+\item{outcome_range}{Numeric vector of length 2 specifying range for generating
+outcome values (default: c(0, 1)). Applied to all outcome dimensions.}
 }
 \value{
 A list with the following components:
-\item{evca_result}{Output from \code{compute_evca()} function.}
-\item{model_outcomes}{Array of outcomes with dimensions: decisions x models x outcomes.}
-\item{model_utilities}{Matrix of utilities computed from outcomes.}
-\item{model_probs}{Vector of model probabilities.}
+\item{evca_result}{Output from compute_evca() function.}
+\item{model_outcomes}{3-dimensional array with dimensions: decisions x models x outcomes.}
+\item{model_utilities}{Matrix of utilities computed from weighted outcomes.}
+\item{model_probs}{Numeric vector of model probabilities.}
 \item{outcome_weights}{Outcome weights used in multi-attribute utility.}
-\item{decision_names}{Names of decision alternatives.}
-\item{model_names}{Names of competing models.}
-\item{outcome_names}{Names of outcome dimensions.}
+\item{decision_names}{Character vector of decision names.}
+\item{model_names}{Character vector of model names.}
+\item{outcome_names}{Character vector of outcome dimension names.}
 }
 \description{
-Generate example with explicit outcome dimensions (before utility transformation).
-Useful for demonstrating multi-attribute utility and trade-offs.
+Generates example data with explicit outcome dimensions before utility
+transformation. Useful for demonstrating multi-attribute utility functions
+and trade-offs between competing objectives (e.g., cost vs. effectiveness,
+yield vs. sustainability).
 }
+\details{
+This function generates multi-dimensional outcomes and computes utilities
+using a simple additive multi-attribute utility function:
+
+U(d,m) = sum over outcomes k of: w_k * outcome_k(d,m)
+
+where w_k are the outcome weights and outcome_k(d,m) is the value of
+outcome k for decision d under model m.
+
+The function creates trade-offs by:
+\enumerate{
+\item Generating base outcome values from uniform distribution
+\item Adding model-specific bonuses to different outcomes for different decisions
+\item Computing weighted utility using outcome_weights
+}
+
+This structure ensures that:
+\itemize{
+\item Decisions have different outcome profiles
+\item Models favor different decisions
+\item Outcome weights affect which decision is optimal
+}
+}
+\section{Warning}{
+
+This function generates random data for demonstration purposes only.
+Real applications should use actual outcome estimates.
+
+Outcome weights critically affect the optimal decision. Sensitivity analysis
+over different weight specifications is recommended.
+}
+
 \examples{
-# Run example with multi-dimensional outcomes
+# Example 1: Basic usage with default parameters
 example_result <- example_evca_multidim()
 
 # Print key results
@@ -51,12 +85,44 @@ cat("EVECA:", example_result$evca_result$evca, "\n")
 optimal_idx <- example_result$evca_result$optimal_decision_bma
 cat("Optimal decision:", example_result$decision_names[optimal_idx], "\n")
 
-# Example with custom weights (e.g., prioritizing first outcome)
-weighted_result <- example_evca_multidim(
-  n_outcomes = 3,
-  outcome_weights = c(0.6, 0.3, 0.1)
-)
+# View outcome array structure
+cat("Outcome dimensions:", dim(example_result$model_outcomes), "\n")
 
-# Access multi-dimensional outcomes
-print(weighted_result$model_outcomes)
+# Example 2: Custom weights prioritizing first outcome
+weighted_result <- example_evca_multidim(
+  n_outcomes = 2,
+  outcome_weights = c(0.8, 0.2) # 80\% weight on first outcome
+)
+cat("EVECA with 80/20 weights:", weighted_result$evca_result$evca, "\n")
+
+# Example 3: Three outcome dimensions
+triple_result <- example_evca_multidim(
+  n_outcomes = 3,
+  outcome_weights = c(0.5, 0.3, 0.2)
+)
+print(triple_result$outcome_names)
+
+# Example 4: Examine outcomes for one decision
+ex <- example_evca_multidim()
+cat("Outcomes for Decision 1 across all models:\n")
+print(ex$model_outcomes[1, , ])
+
+# Example 5: Compare different weight schemes
+weights_equal <- c(0.5, 0.5)
+weights_skewed <- c(0.9, 0.1)
+
+result_equal <- example_evca_multidim(outcome_weights = weights_equal, seed = 100)
+result_skewed <- example_evca_multidim(outcome_weights = weights_skewed, seed = 100)
+
+cat("EVECA with equal weights:", result_equal$evca_result$evca, "\n")
+cat("EVECA with skewed weights:", result_skewed$evca_result$evca, "\n")
+
 }
+\references{
+Keeney, R. L., & Raiffa, H. (1993). Decisions with multiple objectives:
+preferences and value trade-offs. Cambridge University Press.
+}
+\keyword{datagen}
+\keyword{examples}
+\keyword{multivariate}
+\keyword{utilities}

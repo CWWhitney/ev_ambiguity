@@ -164,7 +164,7 @@ test_that("example_evca_multidim validates outcome weights", {
       n_outcomes = 3,
       outcome_weights = c(0.5, 0.5)
     ),
-    "Length of outcome_weights must equal n_outcomes"
+    "Length of outcome_weights .* must equal n_outcomes"
   )
 })
 

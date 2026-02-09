@@ -9,14 +9,18 @@ compute_evca(model_utilities, model_probs, utility_function = identity)
 \arguments{
 \item{model_utilities}{Matrix where rows are decisions and columns are models,
 containing expected utilities for each decision under each model.
-Can also be a data frame that can be coerced to matrix.}
+Can also be a data frame that can be coerced to matrix. Each cell [i,j]
+represents the expected utility of decision i if model j is the true
+causal model.}
 
 \item{model_probs}{Numeric vector of posterior probabilities for each model.
-Must sum to 1 (within floating point tolerance).}
+Must have length equal to number of columns in model_utilities.
+Must be non-negative and sum to 1 (within 1e-10 tolerance).}
 
 \item{utility_function}{Function to apply to outcomes (default: identity).
-If provided, will be applied to \code{model_utilities} assuming they represent
-outcomes rather than utilities.}
+If provided, will be applied to model_utilities assuming they represent
+outcomes rather than utilities. Common examples include risk-averse
+utility functions like exponential utility: function(x) -exp(-r*x).}
 }
 \value{
 A list with the following components:
@@ -32,18 +36,56 @@ A list with the following components:
 \item{n_models}{Number of competing causal models.}
 }
 \description{
-Main function for computing the Expected Value of Eliminating Causal Ambiguity
-using Bayesian model averaging framework.
+Computes the Expected Value of Eliminating Causal Ambiguity using Bayesian
+model averaging framework. EVECA quantifies the maximum value of resolving
+structural uncertainty about which causal model is correct among competing
+alternatives.
 }
+\details{
+The Expected Value of Eliminating Causal Ambiguity (EVECA) extends traditional
+value of information analysis to handle structural uncertainty. It quantifies
+the value of definitively identifying the correct causal model.
+
+EVECA is calculated as:
+EVECA = E(max utility with perfect info) - max(E(utility under ambiguity))
+= sum_k P(M_k) * max_d EU(d|M_k) - max_d sum_k P(M_k) * EU(d|M_k)
+
+The first term represents expected utility if we knew which model is true
+(we would choose the optimal decision for that model). The second term is
+the expected utility of the optimal decision under current ambiguity using
+Bayesian Model Averaging.
+
+Interpretation:
+\itemize{
+\item EVECA = 0: No value to resolving ambiguity (same decision optimal under all models)
+\item EVECA > 0: Value to identifying correct model (different models favor different decisions)
+\item High EVECA: Research to identify correct model likely worthwhile
+\item Low EVECA: Decision is robust across models; proceed without additional research
+}
+
+Computational complexity is O(D × M) where D is the number of decisions
+and M is the number of models.
+}
+\section{Warning}{
+
+Model probabilities must sum to exactly 1 (within 1e-10 tolerance).
+All utility values should be on the same scale for meaningful comparison.
+If using a utility function, ensure it preserves the preference ordering
+and is appropriate for the decision context.
+
+When comparing EVECA to research costs, ensure both are in the same units
+(e.g., dollars, utility points).
+}
+
 \examples{
-# Example with 3 decisions and 4 competing causal models
+# Example 1: Basic usage with 3 decisions and 4 competing causal models
 model_utilities <- matrix(
   c(
     10, 8, 12, 9,
     7, 9, 6, 8,
     11, 10, 8, 10
   ),
-  nrow = 3, ncol = 4,
+  nrow = 3, ncol = 4, byrow = TRUE,
   dimnames = list(
     paste("Decision", 1:3),
     paste("Model", 1:4)
@@ -57,10 +99,21 @@ model_probs <- c(0.3, 0.25, 0.25, 0.2)
 result <- compute_evca(model_utilities, model_probs)
 
 # Print key results
-result$evca
-result$optimal_decision_bma
+print(result$evca)
+print(result$optimal_decision_bma)
 
-# Compute EVECA with risk-averse utility
+# Example 2: Making a decision based on EVECA
+research_cost <- 1.5
+
+if (result$evca > research_cost) {
+  cat("Decision: INVEST IN RESEARCH\n")
+  cat("Rationale: EVECA (", result$evca, ") > research cost (", research_cost, ")\n")
+} else {
+  cat("Decision: PROCEED with decision", result$optimal_decision_bma, "\n")
+  cat("Rationale: EVECA (", result$evca, ") < research cost (", research_cost, ")\n")
+}
+
+# Example 3: Compute EVECA with risk-averse utility
 result_risk <- compute_evca(
   model_utilities,
   model_probs,
@@ -68,5 +121,46 @@ result_risk <- compute_evca(
 )
 
 # Compare results
-c(risk_neutral = result$evca, risk_averse = result_risk$evca)
+cat("Risk-neutral EVECA:", result$evca, "\n")
+cat("Risk-averse EVECA:", result_risk$evca, "\n")
+
+# Example 4: Using with data frame input
+utility_df <- data.frame(
+  Model1 = c(10, 7, 11),
+  Model2 = c(8, 9, 10),
+  Model3 = c(12, 6, 8),
+  Model4 = c(9, 8, 10)
+)
+rownames(utility_df) <- paste("Decision", 1:3)
+
+result_df <- compute_evca(utility_df, model_probs)
+print(result_df$evca)
+
+# Example 5: Examining which decisions are optimal under each model
+for (i in 1:length(model_probs)) {
+  optimal_idx <- result$optimal_decisions_per_model[i]
+  cat(sprintf(
+    "If \%s is true (p=\%.2f): Choose \%s (utility=\%.2f)\n",
+    colnames(model_utilities)[i],
+    model_probs[i],
+    rownames(model_utilities)[optimal_idx],
+    result$optimal_utilities_per_model[i]
+  ))
 }
+
+}
+\references{
+Claxton, K. (1999). The irrelevance of inference: a decision-making approach
+to the stochastic evaluation of health care technologies. Journal of Health
+Economics, 18(3), 341-364.
+
+Yokota, F., & Thompson, K. M. (2004). Value of information analysis in
+environmental health risk management decisions: past, present, and future.
+Risk Analysis, 24(3), 635-650.
+
+Hoeting, J. A., Madigan, D., Raftery, A. E., & Volinsky, C. T. (1999).
+Bayesian model averaging: a tutorial. Statistical Science, 14(4), 382-401.
+}
+\keyword{decision-analysis}
+\keyword{models}
+\keyword{value-of-information}

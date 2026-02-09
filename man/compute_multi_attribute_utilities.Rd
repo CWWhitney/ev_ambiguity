@@ -7,16 +7,105 @@
 compute_multi_attribute_utilities(model_outcomes, outcome_weights)
 }
 \arguments{
-\item{model_outcomes}{Array of outcomes with dimensions: decisions x models x outcomes.}
+\item{model_outcomes}{3-dimensional array with dimensions: decisions x models x outcomes.
+Each element [i,j,k] represents the value of outcome k for decision i
+under model j. All values should be on comparable scales or pre-normalized.}
 
-\item{outcome_weights}{Vector of weights for multi-attribute utility function.
-Must sum to 1.}
+\item{outcome_weights}{Numeric vector of weights for multi-attribute utility function.
+Must be non-negative, sum to 1, and have length equal to the number of
+outcome dimensions (third dimension of model_outcomes).}
 }
 \value{
 Matrix of utilities with dimensions: decisions x models.
+Each element [i,j] represents the aggregated utility of decision i
+under model j, computed as the weighted sum of outcomes.
 }
 \description{
-Helper function to compute utilities from multi-dimensional outcomes
-using weighted linear combination.
+Computes single utility values from multi-dimensional outcomes using
+a weighted linear combination. This function aggregates multiple outcome
+dimensions into a single utility measure based on user-specified weights.
+}
+\details{
+This function implements a simple additive multi-attribute utility function:
+
+U(d,m) = sum over outcomes k of: w_k * outcome_k(d,m)
+
+where:
+\itemize{
+\item U(d,m) is the utility of decision d under model m
+\item w_k is the weight for outcome k
+\item outcome_k(d,m) is the value of outcome k for decision d under model m
+}
+
+This additive form assumes preferential independence among outcomes,
+meaning the preference for levels of one outcome does not depend on
+the levels of other outcomes.
+
+For more complex preference structures (e.g., non-linear utility,
+interactions between outcomes), users should compute utilities directly
+rather than using this helper function.
+}
+\section{Warning}{
+
+This is a helper function primarily used internally by example_evca_multidim().
+While exported for flexibility, most users should use higher-level functions.
+
+All outcomes should be scaled to comparable ranges or units. Mixing outcomes
+on vastly different scales (e.g., dollars and proportions) without proper
+scaling can lead to weights not having their intended effect.
+}
+
+\examples{
+# Example 1: Simple 2x2x2 case (2 decisions, 2 models, 2 outcomes)
+outcomes <- array(
+  c(
+    # Decision 1, Model 1
+    0.8, 0.3, # Outcome 1, Outcome 2
+    # Decision 1, Model 2
+    0.6, 0.7, # Outcome 1, Outcome 2
+    # Decision 2, Model 1
+    0.4, 0.9, # Outcome 1, Outcome 2
+    # Decision 2, Model 2
+    0.5, 0.6 # Outcome 1, Outcome 2
+  ),
+  dim = c(2, 2, 2),
+  dimnames = list(
+    c("Decision A", "Decision B"),
+    c("Model 1", "Model 2"),
+    c("Cost", "Effectiveness")
+  )
+)
+
+# Equal weights
+weights_equal <- c(0.5, 0.5)
+utilities_equal <- compute_multi_attribute_utilities(outcomes, weights_equal)
+print(utilities_equal)
+
+# Example 2: Prioritize first outcome
+weights_cost <- c(0.8, 0.2) # Prioritize cost over effectiveness
+utilities_cost <- compute_multi_attribute_utilities(outcomes, weights_cost)
+print(utilities_cost)
+
+# Example 3: Three outcome dimensions
+outcomes_3d <- array(
+  runif(3 * 2 * 3), # 3 decisions, 2 models, 3 outcomes
+  dim = c(3, 2, 3),
+  dimnames = list(
+    paste("Decision", 1:3),
+    paste("Model", 1:2),
+    c("Economic", "Social", "Environmental")
+  )
+)
+
+weights_3d <- c(0.5, 0.3, 0.2) # Triple bottom line
+utilities_3d <- compute_multi_attribute_utilities(outcomes_3d, weights_3d)
+print(utilities_3d)
+
+}
+\references{
+Keeney, R. L., & Raiffa, H. (1993). Decisions with multiple objectives:
+preferences and value trade-offs. Cambridge University Press.
 }
 \keyword{internal}
+\keyword{multivariate}
+\keyword{utilities}
