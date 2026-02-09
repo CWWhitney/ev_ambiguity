@@ -13,22 +13,6 @@
 #'   with length equal to `nrow(model_utilities)`.
 #'
 #' @keywords internal
-#'
-#' @examples
-#' # Example with 3 decisions and 4 models
-#' model_utilities <- matrix(
-#'   c(
-#'     10, 8, 12, 9,
-#'     7, 9, 6, 8,
-#'     11, 10, 8, 10
-#'   ),
-#'   nrow = 3, ncol = 4
-#' )
-#'
-#' model_probs <- c(0.3, 0.25, 0.25, 0.2)
-#'
-#' bma_eu <- bma_expected_utility(model_utilities, model_probs)
-#' bma_eu
 bma_expected_utility <- function(model_utilities, model_probs) {
   # Convert to matrix if needed
   if (!is.matrix(model_utilities)) {
@@ -43,12 +27,12 @@ bma_expected_utility <- function(model_utilities, model_probs) {
     )
   }
 
-  if (abs(sum(model_probs) - 1) > 1e-10) {
-    stop("Model probabilities must sum to 1 (within 1e-10 tolerance)")
-  }
-
   if (any(model_probs < 0)) {
     stop("Model probabilities must be non-negative")
+  }
+
+  if (abs(sum(model_probs) - 1) > 1e-10) {
+    stop("Model probabilities must sum to 1 (within 1e-10 tolerance)")
   }
 
   # Compute weighted average: matrix multiplication

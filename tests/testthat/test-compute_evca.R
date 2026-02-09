@@ -102,7 +102,7 @@ test_that("compute_evca returns correct EVECA calculation", {
       10, 5, # Decision 1: 10 under Model 1, 5 under Model 2
       6, 9
     ), # Decision 2: 6 under Model 1, 9 under Model 2
-    nrow = 2, ncol = 2
+    nrow = 2, ncol = 2, byrow = TRUE
   )
   model_probs <- c(0.5, 0.5)
 

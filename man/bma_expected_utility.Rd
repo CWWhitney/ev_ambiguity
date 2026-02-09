@@ -22,20 +22,4 @@ with length equal to \code{nrow(model_utilities)}.
 Helper function for computing Bayesian model average expected utilities.
 Used internally by \code{compute_evca()}.
 }
-\examples{
-# Example with 3 decisions and 4 models
-model_utilities <- matrix(
-  c(
-    10, 8, 12, 9,
-    7, 9, 6, 8,
-    11, 10, 8, 10
-  ),
-  nrow = 3, ncol = 4
-)
-
-model_probs <- c(0.3, 0.25, 0.25, 0.2)
-
-bma_eu <- bma_expected_utility(model_utilities, model_probs)
-bma_eu
-}
 \keyword{internal}

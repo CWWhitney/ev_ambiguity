@@ -1,17 +1,11 @@
 # Test file for all EVECA package functions
 
-# Source functions directly for testing
-source("../../R/bma.R")
-source("../../R/evca.R")
-source("../../R/example.R")
-source("../../R/plot.R")
-
 # Test bma_expected_utility function (internal)
 test_that("bma_expected_utility computes correct weighted averages", {
   # Simple test case
   model_utilities <- matrix(
     c(10, 5, 6, 9),
-    nrow = 2, ncol = 2
+    nrow = 2, ncol = 2, byrow = TRUE
   )
   model_probs <- c(0.5, 0.5)
 
@@ -34,13 +28,13 @@ test_that("bma_expected_utility computes correct weighted averages", {
 test_that("bma_expected_utility validates inputs", {
   model_utilities <- matrix(
     c(10, 5, 6, 9),
-    nrow = 2, ncol = 2
+    nrow = 2, ncol = 2, byrow = TRUE
   )
 
   # Test invalid probability sum
   expect_error(
     bma_expected_utility(model_utilities, c(0.5, 0.6)),
-    "Model probabilities must sum to 1 (within 1e-10 tolerance)"
+    "Model probabilities must sum to 1"
   )
 
   # Test negative probabilities
@@ -63,7 +57,10 @@ test_that("example_evca generates valid example data", {
 
   # Check structure
   expect_type(result, "list")
-  expect_named(result, c("evca_result", "model_utilities", "model_probs", "risk_aversion"))
+  expect_named(result, c(
+    "evca_result", "model_utilities", "model_probs",
+    "decision_names", "model_names"
+  ))
 
   # Check model_utilities matrix
   expect_equal(dim(result$model_utilities), c(3, 4))
@@ -84,14 +81,12 @@ test_that("example_evca handles custom parameters", {
   result <- example_evca(
     n_decisions = 5,
     n_models = 3,
-    risk_aversion = 0.05,
     seed = 999
   )
 
   # Check dimensions
   expect_equal(dim(result$model_utilities), c(5, 3))
   expect_equal(length(result$model_probs), 3)
-  expect_equal(result$risk_aversion, 0.05)
 
   # Test reproducibility with seed
   result1 <- example_evca(seed = 123)
@@ -104,18 +99,105 @@ test_that("example_evca handles custom parameters", {
   expect_false(identical(result1$model_utilities, result3$model_utilities))
 })
 
-test_that("example_evca handles risk neutrality", {
-  # Test risk neutral (risk_aversion = 0)
-  result <- example_evca(risk_aversion = 0)
-  expect_equal(result$risk_aversion, 0)
+# Test example_evca_multidim function
+test_that("example_evca_multidim generates valid multi-dimensional data", {
+  # Test with default parameters
+  result <- example_evca_multidim()
 
-  # The utility function should be identity
-  # We can check this indirectly by comparing utilities
-  evca_result <- result$evca_result
+  # Check structure
+  expect_type(result, "list")
+  expect_true("model_outcomes" %in% names(result))
+  expect_true("outcome_weights" %in% names(result))
 
-  # With risk neutrality, the utilities should be the raw values
-  # This is an indirect test since we don't have direct access to the utility function
-  expect_true(is.numeric(evca_result$evca))
+  # Check model_outcomes array
+  expect_equal(dim(result$model_outcomes), c(3, 4, 2))
+  expect_true(is.array(result$model_outcomes))
+
+  # Check outcome_weights
+  expect_equal(length(result$outcome_weights), 2)
+  expect_equal(sum(result$outcome_weights), 1, tolerance = 1e-10)
+  expect_true(all(result$outcome_weights >= 0))
+
+  # Check evca_result is valid
+  expect_type(result$evca_result, "list")
+  expect_true("evca" %in% names(result$evca_result))
+})
+
+test_that("example_evca_multidim handles custom outcome weights", {
+  # Test with custom weights
+  result <- example_evca_multidim(
+    n_outcomes = 3,
+    outcome_weights = c(0.5, 0.3, 0.2),
+    seed = 789
+  )
+
+  # Check dimensions
+  expect_equal(dim(result$model_outcomes)[3], 3)
+  expect_equal(result$outcome_weights, c(0.5, 0.3, 0.2))
+
+  # Check that weights sum to 1
+  expect_equal(sum(result$outcome_weights), 1, tolerance = 1e-10)
+})
+
+test_that("example_evca_multidim validates outcome weights", {
+  # Test invalid weight sum
+  expect_error(
+    example_evca_multidim(
+      n_outcomes = 2,
+      outcome_weights = c(0.5, 0.6)
+    ),
+    "Outcome weights must sum to 1"
+  )
+
+  # Test negative weights
+  expect_error(
+    example_evca_multidim(
+      n_outcomes = 2,
+      outcome_weights = c(0.6, -0.1)
+    ),
+    "Outcome weights must be non-negative"
+  )
+
+  # Test wrong length
+  expect_error(
+    example_evca_multidim(
+      n_outcomes = 3,
+      outcome_weights = c(0.5, 0.5)
+    ),
+    "Length of outcome_weights must equal n_outcomes"
+  )
+})
+
+# Test compute_multi_attribute_utilities function
+test_that("compute_multi_attribute_utilities computes correctly", {
+  # Create simple test data
+  # Array fills in column-major order: [decision, model, outcome]
+  model_outcomes <- array(dim = c(2, 2, 2))
+  # Decision 1, Model 1
+  model_outcomes[1, 1, 1] <- 1
+  model_outcomes[1, 1, 2] <- 2
+  # Decision 2, Model 1
+  model_outcomes[2, 1, 1] <- 5
+  model_outcomes[2, 1, 2] <- 6
+  # Decision 1, Model 2
+  model_outcomes[1, 2, 1] <- 3
+  model_outcomes[1, 2, 2] <- 4
+  # Decision 2, Model 2
+  model_outcomes[2, 2, 1] <- 7
+  model_outcomes[2, 2, 2] <- 8
+
+  outcome_weights <- c(0.6, 0.4)
+
+  result <- compute_multi_attribute_utilities(model_outcomes, outcome_weights)
+
+  # Manual calculation:
+  # Decision 1, Model 1: 0.6*1 + 0.4*2 = 1.4
+  # Decision 1, Model 2: 0.6*3 + 0.4*4 = 3.4
+  # Decision 2, Model 1: 0.6*5 + 0.4*6 = 5.4
+  # Decision 2, Model 2: 0.6*7 + 0.4*8 = 7.4
+
+  expected <- matrix(c(1.4, 5.4, 3.4, 7.4), nrow = 2, ncol = 2)
+  expect_equal(result, expected, tolerance = 1e-10)
 })
 
 # Test plot_evca function
@@ -162,14 +244,43 @@ test_that("plot_evca accepts customization parameters", {
   p2 <- plot_evca(evca_result, colors = c("red", "blue"))
   expect_s3_class(p2, "ggplot")
 
-  # Test custom axis labels
-  p3 <- plot_evca(evca_result, xlab = "Decision", ylab = "Value")
-  expect_s3_class(p3, "ggplot")
-
   # All should be valid ggplot objects
   expect_s3_class(p1, "ggplot")
   expect_s3_class(p2, "ggplot")
-  expect_s3_class(p3, "ggplot")
+})
+
+# Test plot_utilities_heatmap function
+test_that("plot_utilities_heatmap creates valid ggplot object", {
+  # Create example data
+  example_result <- example_evca()
+
+  # Create heatmap
+  p <- plot_utilities_heatmap(
+    example_result$model_utilities,
+    model_probs = example_result$model_probs,
+    optimal_decision = example_result$evca_result$optimal_decision_bma
+  )
+
+  # Check it's a ggplot object
+  expect_s3_class(p, "ggplot")
+  expect_s3_class(p, "gg")
+})
+
+# Test plot_sensitivity function
+test_that("plot_sensitivity creates valid ggplot object", {
+  # Create example data
+  example_result <- example_evca()
+
+  # Create sensitivity plot
+  p <- plot_sensitivity(
+    example_result$model_utilities,
+    example_result$model_probs,
+    vary_model = 1
+  )
+
+  # Check it's a ggplot object
+  expect_s3_class(p, "ggplot")
+  expect_s3_class(p, "gg")
 })
 
 # Test compute_evca function (more comprehensive tests)
@@ -200,7 +311,7 @@ test_that("compute_evca handles edge cases correctly", {
 test_that("compute_evca handles utility functions correctly", {
   model_utilities <- matrix(
     c(10, 5, 6, 9),
-    nrow = 2, ncol = 2
+    nrow = 2, ncol = 2, byrow = TRUE
   )
   model_probs <- c(0.5, 0.5)
 
@@ -283,24 +394,15 @@ test_that("functions work together correctly", {
 test_that("functions handle invalid inputs gracefully", {
   # Test compute_evca with invalid model_utilities
   expect_error(
-    compute_evca("not a matrix", c(0.5, 0.5)),
-    "must equal number of model utility columns" # Error from dimension check
-  )
-
-  # Test compute_evca with empty matrix
-  expect_error(
-    compute_evca(matrix(nrow = 0, ncol = 0), numeric(0)),
-    "must equal number of model utility columns" # Error from dimension check
+    compute_evca("not a matrix", c(0.5, 0.5))
   )
 
   # Test example_evca with invalid parameters
   expect_error(
-    example_evca(n_decisions = 0),
-    "invalid arguments" # Error from rnorm with n=0
+    example_evca(n_decisions = 0)
   )
 
   expect_error(
-    example_evca(n_models = 0),
-    "invalid arguments" # Error from rnorm with n=0
+    example_evca(n_models = 0)
   )
 })

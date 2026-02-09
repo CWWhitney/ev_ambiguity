@@ -6,9 +6,8 @@
 \usage{
 plot_evca(
   evca_result,
-  title = "EVECA Analysis",
-  xlab = "Component",
-  ylab = "Expected Utility",
+  title = "Expected Value of Eliminating Causal Ambiguity",
+  subtitle = NULL,
   colors = c("#4E79A7", "#F28E2B")
 )
 }
@@ -17,21 +16,17 @@ plot_evca(
 
 \item{title}{Plot title (default: "EVECA Analysis").}
 
-\item{xlab}{X-axis label (default: "Component").}
+\item{subtitle}{Optional subtitle (default: auto-generated with EVECA value).}
 
-\item{ylab}{Y-axis label (default: "Expected Utility").}
-
-\item{colors}{Vector of two colors for BMA Optimal and Perfect Information bars
-(default: c("#4E79A7", "#F28E2B")).}
+\item{colors}{Vector of colors for bars (default: c("#4E79A7", "#F28E2B")).}
 }
 \value{
 A ggplot object that can be further customized or printed.
 }
 \description{
-Create a simple visualization of EVECA analysis results from \code{compute_evca()}.
+Create visualizations of EVECA analysis results from \code{compute_evca()}.
 }
 \examples{
-\dontrun{
 # Run example analysis
 result <- example_evca()
 
@@ -41,9 +36,8 @@ print(p)
 
 # Customize plot
 p <- plot_evca(result$evca_result,
-  title = "EVECA Analysis for Treatment Selection",
+  title = "Value of Resolving Model Uncertainty",
   colors = c("#2E8B57", "#FF6347")
 )
 print(p)
-}
 }

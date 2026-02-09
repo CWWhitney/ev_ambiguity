@@ -84,12 +84,12 @@ compute_evca <- function(model_utilities, model_probs,
     )
   }
 
-  if (abs(sum(model_probs) - 1) > 1e-10) {
-    stop("Model probabilities must sum to 1 (within 1e-10 tolerance)")
-  }
-
   if (any(model_probs < 0)) {
     stop("Model probabilities must be non-negative")
+  }
+
+  if (abs(sum(model_probs) - 1) > 1e-10) {
+    stop("Model probabilities must sum to 1 (within 1e-10 tolerance)")
   }
 
   # Compute BMA expected utility
