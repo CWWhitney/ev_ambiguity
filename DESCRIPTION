@@ -1,30 +1,27 @@
 Package: evca
-Title: Expected Value of Eliminating Causal Ambiguity for Gender-Nutrition Decisions
-Version: 0.2.0
+Title: Expected Value of Eliminating Causal Ambiguity
+Version: 0.3.0
 Description: Computes the Expected Value of Eliminating Causal Ambiguity (EVECA),
     a decision-theoretic framework that quantifies the value of resolving
-    structural uncertainty in gender-nutrition programming. EVECA extends
-    traditional value of information analysis to handle causal ambiguity about
-    which empowerment mechanism drives nutrition outcomes. Designed for gender
-    and nutrition researchers, development practitioners, and policy analysts
-    working on women's empowerment and nutrition outcomes in sustainable
-    development contexts.
+    structural uncertainty in decision problems with competing causal models.
+    EVECA extends traditional value of information analysis to handle situations
+    where multiple competing theories exist about how interventions affect outcomes.
+    Uses Bayesian model averaging to integrate across model uncertainty and
+    provides tools for research prioritization and decision-making under ambiguity.
 Authors@R:
-    person("Cory", "Whitney", email = "cory.whitney@example.com", role = c("aut", "cre"))
+    person("Cory", "Whitney", email = "cory.whitney@uni-bonn.de", role = c("aut", "cre"))
 License: MIT + file LICENSE
-URL: https://github.com/example/evca
-BugReports: https://github.com/example/evca/issues
+URL: https://github.com/corywhitney/evca
+BugReports: https://github.com/corywhitney/evca/issues
 Depends:
     R (>= 4.0.0)
 Imports:
     ggplot2,
-    viridis,
-    RColorBrewer
+    viridis
 Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
-    bayesm,
     dplyr,
     tidyr
 Roxygen: list(markdown = TRUE)
