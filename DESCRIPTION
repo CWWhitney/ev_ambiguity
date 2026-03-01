@@ -1,10 +1,10 @@
 Package: evca
 Title: Expected Value of Eliminating Causal Ambiguity
 Version: 0.3.0
-Description: Computes the Expected Value of Eliminating Causal Ambiguity (EVECA),
+Description: Computes the Expected Value of Eliminating Causal Ambiguity (EVCA),
     a decision-theoretic framework that quantifies the value of resolving
     structural uncertainty in decision problems with competing causal models.
-    EVECA extends traditional value of information analysis to handle situations
+    EVCA extends traditional value of information analysis to handle situations
     where multiple competing theories exist about how interventions affect outcomes.
     Uses Bayesian model averaging to integrate across model uncertainty and
     provides tools for research prioritization and decision-making under ambiguity.
@@ -25,6 +25,6 @@ Suggests:
     dplyr,
     tidyr
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Encoding: UTF-8
 VignetteBuilder: knitr

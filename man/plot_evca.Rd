@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plot_evca}
 \alias{plot_evca}
-\title{Plot Expected Value of Eliminating Causal Ambiguity (EVECA) Results}
+\title{Plot Expected Value of Eliminating Causal Ambiguity (EVCA) Results}
 \usage{
 plot_evca(
   evca_result,
@@ -14,9 +14,9 @@ plot_evca(
 \arguments{
 \item{evca_result}{Output from \code{compute_evca()} function.}
 
-\item{title}{Plot title (default: "EVECA Analysis").}
+\item{title}{Plot title (default: "EVCA Analysis").}
 
-\item{subtitle}{Optional subtitle (default: auto-generated with EVECA value).}
+\item{subtitle}{Optional subtitle (default: auto-generated with EVCA value).}
 
 \item{colors}{Vector of colors for bars (default: c("#4E79A7", "#F28E2B")).}
 }
@@ -24,7 +24,7 @@ plot_evca(
 A ggplot object that can be further customized or printed.
 }
 \description{
-Create visualizations of EVECA analysis results from \code{compute_evca()}.
+Create visualizations of EVCA analysis results from \code{compute_evca()}.
 }
 \examples{
 # Run example analysis

@@ -25,7 +25,7 @@ preferences.}
 }
 \value{
 A list with the following components:
-\item{evca_result}{Output from compute_evca() function containing EVECA value and details.}
+\item{evca_result}{Output from compute_evca() function containing EVCA value and details.}
 \item{model_utilities}{Matrix of model utilities with dimensions decisions x models.}
 \item{model_probs}{Numeric vector of model probabilities that sum to 1.}
 \item{decision_names}{Character vector of decision alternative names.}
@@ -33,8 +33,8 @@ A list with the following components:
 }
 \description{
 Generates example data for decision problems with competing causal models
-and runs a demonstration EVECA analysis. This function creates realistic
-examples for testing and understanding EVECA in various modeling contexts.
+and runs a demonstration EVCA analysis. This function creates realistic
+examples for testing and understanding EVCA in various modeling contexts.
 Utilities are randomly generated with structure to ensure different models
 favor different decisions, creating meaningful model ambiguity.
 }
@@ -49,13 +49,13 @@ This function generates synthetic data with the following structure:
 The generated data creates realistic model ambiguity where:
 \itemize{
 \item Different models favor different decisions
-\item EVECA will typically be positive (value to resolving ambiguity)
+\item EVCA will typically be positive (value to resolving ambiguity)
 \item Results are reproducible when using the same seed
 }
 
 This function is useful for:
 \itemize{
-\item Learning how EVECA works
+\item Learning how EVCA works
 \item Testing visualization functions
 \item Demonstrating the framework to others
 \item Generating test data for development
@@ -72,7 +72,7 @@ Real applications should use actual utility estimates from data or expert judgme
 example_result <- example_evca()
 
 # Print key results
-cat("EVECA:", example_result$evca_result$evca, "\n")
+cat("EVCA:", example_result$evca_result$evca, "\n")
 optimal_idx <- example_result$evca_result$optimal_decision_bma
 cat("Optimal decision:", example_result$decision_names[optimal_idx], "\n")
 
@@ -85,7 +85,7 @@ large_result <- example_evca(
   n_models = 6,
   seed = 456
 )
-cat("EVECA for larger problem:", large_result$evca_result$evca, "\n")
+cat("EVCA for larger problem:", large_result$evca_result$evca, "\n")
 
 # Example 3: Different utility range
 scaled_result <- example_evca(

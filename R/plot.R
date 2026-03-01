@@ -1,10 +1,10 @@
-#' Plot Expected Value of Eliminating Causal Ambiguity (EVECA) Results
+#' Plot Expected Value of Eliminating Causal Ambiguity (EVCA) Results
 #'
-#' Create visualizations of EVECA analysis results from `compute_evca()`.
+#' Create visualizations of EVCA analysis results from `compute_evca()`.
 #'
 #' @param evca_result Output from `compute_evca()` function.
-#' @param title Plot title (default: "EVECA Analysis").
-#' @param subtitle Optional subtitle (default: auto-generated with EVECA value).
+#' @param title Plot title (default: "EVCA Analysis").
+#' @param subtitle Optional subtitle (default: auto-generated with EVCA value).
 #' @param colors Vector of colors for bars (default: c("#4E79A7", "#F28E2B")).
 #'
 #' @return A ggplot object that can be further customized or printed.
@@ -37,7 +37,7 @@ plot_evca <- function(evca_result,
 
   # Create subtitle if not provided
   if (is.null(subtitle)) {
-    subtitle <- sprintf("EVECA = %.4f", evca_result$evca)
+    subtitle <- sprintf("EVCA = %.4f", evca_result$evca)
   }
 
   # Create plot data
@@ -203,9 +203,9 @@ plot_utilities_heatmap <- function(model_utilities,
 }
 
 
-#' Plot EVECA Sensitivity to Model Probabilities
+#' Plot EVCA Sensitivity to Model Probabilities
 #'
-#' Create sensitivity analysis plots showing how EVECA changes as model
+#' Create sensitivity analysis plots showing how EVCA changes as model
 #' probabilities vary.
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models.
@@ -251,10 +251,10 @@ plot_sensitivity <- function(model_utilities,
 
   # Create title if not provided
   if (is.null(title)) {
-    title <- sprintf("EVECA Sensitivity: Varying P(%s)", model_name)
+    title <- sprintf("EVCA Sensitivity: Varying P(%s)", model_name)
   }
 
-  # Compute EVECA for each probability value
+  # Compute EVCA for each probability value
   evca_values <- numeric(length(prob_seq))
 
   for (i in seq_along(prob_seq)) {
@@ -272,7 +272,7 @@ plot_sensitivity <- function(model_utilities,
       new_probs[-model_idx] <- new_probs[-model_idx] / sum(new_probs[-model_idx]) * (1 - p)
     }
 
-    # Compute EVECA with new probabilities
+    # Compute EVCA with new probabilities
     new_bma_eu <- as.vector(model_utilities %*% new_probs)
     new_optimal_utility <- max(new_bma_eu)
     new_perfect_info_eu <- sum(new_probs * apply(model_utilities, 2, max))
@@ -282,7 +282,7 @@ plot_sensitivity <- function(model_utilities,
   # Create plot data
   plot_data <- data.frame(
     Probability = prob_seq,
-    EVECA = evca_values
+    EVCA = evca_values
   )
 
   # Baseline probability
@@ -292,12 +292,12 @@ plot_sensitivity <- function(model_utilities,
   # Create plot
   p <- ggplot2::ggplot(
     plot_data,
-    ggplot2::aes(x = .data$Probability, y = .data$EVECA)
+    ggplot2::aes(x = .data$Probability, y = .data$EVCA)
   ) +
     ggplot2::geom_line(color = "#4E79A7", linewidth = 1.2) +
     ggplot2::geom_point(
-      data = data.frame(Probability = baseline_prob, EVECA = baseline_evca),
-      ggplot2::aes(x = .data$Probability, y = .data$EVECA),
+      data = data.frame(Probability = baseline_prob, EVCA = baseline_evca),
+      ggplot2::aes(x = .data$Probability, y = .data$EVCA),
       color = "#E15759",
       size = 4,
       shape = 17
@@ -305,11 +305,11 @@ plot_sensitivity <- function(model_utilities,
     ggplot2::labs(
       title = title,
       subtitle = sprintf(
-        "Baseline: P(%s) = %.3f, EVECA = %.4f",
+        "Baseline: P(%s) = %.3f, EVCA = %.4f",
         model_name, baseline_prob, baseline_evca
       ),
       x = sprintf("Probability of %s", model_name),
-      y = "EVECA"
+      y = "EVCA"
     ) +
     ggplot2::theme_minimal() +
     ggplot2::theme(

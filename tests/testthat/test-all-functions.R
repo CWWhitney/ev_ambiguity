@@ -1,4 +1,4 @@
-# Test file for all EVECA package functions
+# Test file for all EVCA package functions
 
 # Test bma_expected_utility function (internal)
 test_that("bma_expected_utility computes correct weighted averages", {

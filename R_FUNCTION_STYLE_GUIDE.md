@@ -89,7 +89,7 @@ function_name <- function(param1, param2 = default_value) {
 
 **Title**: One line, capitalized, no period
 ```r
-#' Expected Value of Eliminating Causal Ambiguity (EVECA)
+#' Expected Value of Eliminating Causal Ambiguity (EVCA)
 ```
 
 **Description**: 1-3 sentences explaining purpose
@@ -152,7 +152,7 @@ Optional extended explanation:
 ```r
 #' @details
 #' This function implements Bayesian Model Averaging (BMA) to compute
-#' expected utilities under structural uncertainty. The EVECA metric
+#' expected utilities under structural uncertainty. The EVCA metric
 #' represents the maximum amount one should be willing to pay to
 #' definitively identify the correct causal model.
 #'
@@ -409,10 +409,10 @@ Include:
 ## Complete Example Following All Guidelines
 
 ```r
-#' Expected Value of Eliminating Causal Ambiguity (EVECA)
+#' Expected Value of Eliminating Causal Ambiguity (EVCA)
 #'
 #' Computes the Expected Value of Eliminating Causal Ambiguity using
-#' Bayesian model averaging. EVECA quantifies the maximum value of
+#' Bayesian model averaging. EVCA quantifies the maximum value of
 #' resolving structural uncertainty about which causal model is correct.
 #'
 #' @usage compute_evca(model_utilities, model_probs, utility_function = identity)
@@ -435,7 +435,7 @@ Include:
 #'
 #' @details
 #' The function implements Bayesian Model Averaging (BMA) to compute expected
-#' utilities under structural uncertainty. EVECA is calculated as the difference
+#' utilities under structural uncertainty. EVCA is calculated as the difference
 #' between expected utility with perfect structural information and expected
 #' utility under current ambiguity.
 #'

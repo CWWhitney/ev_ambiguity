@@ -2,7 +2,7 @@
 % Please edit documentation in R/evca.R
 \name{compute_evca}
 \alias{compute_evca}
-\title{Expected Value of Eliminating Causal Ambiguity (EVECA)}
+\title{Expected Value of Eliminating Causal Ambiguity (EVCA)}
 \usage{
 compute_evca(model_utilities, model_probs, utility_function = identity)
 }
@@ -37,17 +37,17 @@ A list with the following components:
 }
 \description{
 Computes the Expected Value of Eliminating Causal Ambiguity using Bayesian
-model averaging framework. EVECA quantifies the maximum value of resolving
+model averaging framework. EVCA quantifies the maximum value of resolving
 structural uncertainty about which causal model is correct among competing
 alternatives.
 }
 \details{
-The Expected Value of Eliminating Causal Ambiguity (EVECA) extends traditional
+The Expected Value of Eliminating Causal Ambiguity (EVCA) extends traditional
 value of information analysis to handle structural uncertainty. It quantifies
 the value of definitively identifying the correct causal model.
 
-EVECA is calculated as:
-EVECA = E(max utility with perfect info) - max(E(utility under ambiguity))
+EVCA is calculated as:
+EVCA = E(max utility with perfect info) - max(E(utility under ambiguity))
 = sum_k P(M_k) * max_d EU(d|M_k) - max_d sum_k P(M_k) * EU(d|M_k)
 
 The first term represents expected utility if we knew which model is true
@@ -57,10 +57,10 @@ Bayesian Model Averaging.
 
 Interpretation:
 \itemize{
-\item EVECA = 0: No value to resolving ambiguity (same decision optimal under all models)
-\item EVECA > 0: Value to identifying correct model (different models favor different decisions)
-\item High EVECA: Research to identify correct model likely worthwhile
-\item Low EVECA: Decision is robust across models; proceed without additional research
+\item EVCA = 0: No value to resolving ambiguity (same decision optimal under all models)
+\item EVCA > 0: Value to identifying correct model (different models favor different decisions)
+\item High EVCA: Research to identify correct model likely worthwhile
+\item Low EVCA: Decision is robust across models; proceed without additional research
 }
 
 Computational complexity is O(D × M) where D is the number of decisions
@@ -73,7 +73,7 @@ All utility values should be on the same scale for meaningful comparison.
 If using a utility function, ensure it preserves the preference ordering
 and is appropriate for the decision context.
 
-When comparing EVECA to research costs, ensure both are in the same units
+When comparing EVCA to research costs, ensure both are in the same units
 (e.g., dollars, utility points).
 }
 
@@ -95,25 +95,25 @@ model_utilities <- matrix(
 # Model probabilities from expert elicitation or data
 model_probs <- c(0.3, 0.25, 0.25, 0.2)
 
-# Compute EVECA with risk-neutral utility (identity function)
+# Compute EVCA with risk-neutral utility (identity function)
 result <- compute_evca(model_utilities, model_probs)
 
 # Print key results
 print(result$evca)
 print(result$optimal_decision_bma)
 
-# Example 2: Making a decision based on EVECA
+# Example 2: Making a decision based on EVCA
 research_cost <- 1.5
 
 if (result$evca > research_cost) {
   cat("Decision: INVEST IN RESEARCH\n")
-  cat("Rationale: EVECA (", result$evca, ") > research cost (", research_cost, ")\n")
+  cat("Rationale: EVCA (", result$evca, ") > research cost (", research_cost, ")\n")
 } else {
   cat("Decision: PROCEED with decision", result$optimal_decision_bma, "\n")
-  cat("Rationale: EVECA (", result$evca, ") < research cost (", research_cost, ")\n")
+  cat("Rationale: EVCA (", result$evca, ") < research cost (", research_cost, ")\n")
 }
 
-# Example 3: Compute EVECA with risk-averse utility
+# Example 3: Compute EVCA with risk-averse utility
 result_risk <- compute_evca(
   model_utilities,
   model_probs,
@@ -121,8 +121,8 @@ result_risk <- compute_evca(
 )
 
 # Compare results
-cat("Risk-neutral EVECA:", result$evca, "\n")
-cat("Risk-averse EVECA:", result_risk$evca, "\n")
+cat("Risk-neutral EVCA:", result$evca, "\n")
+cat("Risk-averse EVCA:", result_risk$evca, "\n")
 
 # Example 4: Using with data frame input
 utility_df <- data.frame(

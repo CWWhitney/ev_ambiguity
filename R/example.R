@@ -1,8 +1,8 @@
 #' Example Analysis for Expected Value of Eliminating Causal Ambiguity
 #'
 #' Generates example data for decision problems with competing causal models
-#' and runs a demonstration EVECA analysis. This function creates realistic
-#' examples for testing and understanding EVECA in various modeling contexts.
+#' and runs a demonstration EVCA analysis. This function creates realistic
+#' examples for testing and understanding EVCA in various modeling contexts.
 #' Utilities are randomly generated with structure to ensure different models
 #' favor different decisions, creating meaningful model ambiguity.
 #'
@@ -22,7 +22,7 @@
 #'   preferences.
 #'
 #' @return A list with the following components:
-#'   \item{evca_result}{Output from compute_evca() function containing EVECA value and details.}
+#'   \item{evca_result}{Output from compute_evca() function containing EVCA value and details.}
 #'   \item{model_utilities}{Matrix of model utilities with dimensions decisions x models.}
 #'   \item{model_probs}{Numeric vector of model probabilities that sum to 1.}
 #'   \item{decision_names}{Character vector of decision alternative names.}
@@ -36,11 +36,11 @@
 #'
 #' The generated data creates realistic model ambiguity where:
 #' - Different models favor different decisions
-#' - EVECA will typically be positive (value to resolving ambiguity)
+#' - EVCA will typically be positive (value to resolving ambiguity)
 #' - Results are reproducible when using the same seed
 #'
 #' This function is useful for:
-#' - Learning how EVECA works
+#' - Learning how EVCA works
 #' - Testing visualization functions
 #' - Demonstrating the framework to others
 #' - Generating test data for development
@@ -62,7 +62,7 @@
 #' example_result <- example_evca()
 #'
 #' # Print key results
-#' cat("EVECA:", example_result$evca_result$evca, "\n")
+#' cat("EVCA:", example_result$evca_result$evca, "\n")
 #' optimal_idx <- example_result$evca_result$optimal_decision_bma
 #' cat("Optimal decision:", example_result$decision_names[optimal_idx], "\n")
 #'
@@ -75,7 +75,7 @@
 #'   n_models = 6,
 #'   seed = 456
 #' )
-#' cat("EVECA for larger problem:", large_result$evca_result$evca, "\n")
+#' cat("EVCA for larger problem:", large_result$evca_result$evca, "\n")
 #'
 #' # Example 3: Different utility range
 #' scaled_result <- example_evca(
@@ -168,7 +168,7 @@ example_evca <- function(n_decisions = 3,
 
   # Add model-specific structure ----
   # Each model favors a different decision to create meaningful ambiguity
-  # This ensures EVECA will typically be positive
+  # This ensures EVCA will typically be positive
   for (j in 1:n_models) {
     # Assign each model a favored decision (cycling through decisions)
     favored_decision <- ((j - 1) %% n_decisions) + 1
@@ -185,7 +185,7 @@ example_evca <- function(n_decisions = 3,
   model_probs <- model_probs / sum(model_probs)
   names(model_probs) <- model_names
 
-  # Compute EVECA ----
+  # Compute EVCA ----
   evca_result <- compute_evca(
     model_utilities = model_utilities,
     model_probs = model_probs
@@ -275,7 +275,7 @@ example_evca <- function(n_decisions = 3,
 #' example_result <- example_evca_multidim()
 #'
 #' # Print key results
-#' cat("EVECA:", example_result$evca_result$evca, "\n")
+#' cat("EVCA:", example_result$evca_result$evca, "\n")
 #' optimal_idx <- example_result$evca_result$optimal_decision_bma
 #' cat("Optimal decision:", example_result$decision_names[optimal_idx], "\n")
 #'
@@ -287,7 +287,7 @@ example_evca <- function(n_decisions = 3,
 #'   n_outcomes = 2,
 #'   outcome_weights = c(0.8, 0.2) # 80% weight on first outcome
 #' )
-#' cat("EVECA with 80/20 weights:", weighted_result$evca_result$evca, "\n")
+#' cat("EVCA with 80/20 weights:", weighted_result$evca_result$evca, "\n")
 #'
 #' # Example 3: Three outcome dimensions
 #' triple_result <- example_evca_multidim(
@@ -308,8 +308,8 @@ example_evca <- function(n_decisions = 3,
 #' result_equal <- example_evca_multidim(outcome_weights = weights_equal, seed = 100)
 #' result_skewed <- example_evca_multidim(outcome_weights = weights_skewed, seed = 100)
 #'
-#' cat("EVECA with equal weights:", result_equal$evca_result$evca, "\n")
-#' cat("EVECA with skewed weights:", result_skewed$evca_result$evca, "\n")
+#' cat("EVCA with equal weights:", result_equal$evca_result$evca, "\n")
+#' cat("EVCA with skewed weights:", result_skewed$evca_result$evca, "\n")
 #'
 #' @export
 example_evca_multidim <- function(n_decisions = 3,
@@ -459,7 +459,7 @@ example_evca_multidim <- function(n_decisions = 3,
     outcome_weights = outcome_weights
   )
 
-  # Compute EVECA ----
+  # Compute EVCA ----
   evca_result <- compute_evca(
     model_utilities = model_utilities,
     model_probs = model_probs

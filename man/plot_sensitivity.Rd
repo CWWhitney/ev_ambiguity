@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plot_sensitivity}
 \alias{plot_sensitivity}
-\title{Plot EVECA Sensitivity to Model Probabilities}
+\title{Plot EVCA Sensitivity to Model Probabilities}
 \usage{
 plot_sensitivity(
   model_utilities,
@@ -27,7 +27,7 @@ plot_sensitivity(
 A ggplot object.
 }
 \description{
-Create sensitivity analysis plots showing how EVECA changes as model
+Create sensitivity analysis plots showing how EVCA changes as model
 probabilities vary.
 }
 \examples{

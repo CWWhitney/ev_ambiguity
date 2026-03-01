@@ -81,7 +81,7 @@ over different weight specifications is recommended.
 example_result <- example_evca_multidim()
 
 # Print key results
-cat("EVECA:", example_result$evca_result$evca, "\n")
+cat("EVCA:", example_result$evca_result$evca, "\n")
 optimal_idx <- example_result$evca_result$optimal_decision_bma
 cat("Optimal decision:", example_result$decision_names[optimal_idx], "\n")
 
@@ -93,7 +93,7 @@ weighted_result <- example_evca_multidim(
   n_outcomes = 2,
   outcome_weights = c(0.8, 0.2) # 80\% weight on first outcome
 )
-cat("EVECA with 80/20 weights:", weighted_result$evca_result$evca, "\n")
+cat("EVCA with 80/20 weights:", weighted_result$evca_result$evca, "\n")
 
 # Example 3: Three outcome dimensions
 triple_result <- example_evca_multidim(
@@ -114,8 +114,8 @@ weights_skewed <- c(0.9, 0.1)
 result_equal <- example_evca_multidim(outcome_weights = weights_equal, seed = 100)
 result_skewed <- example_evca_multidim(outcome_weights = weights_skewed, seed = 100)
 
-cat("EVECA with equal weights:", result_equal$evca_result$evca, "\n")
-cat("EVECA with skewed weights:", result_skewed$evca_result$evca, "\n")
+cat("EVCA with equal weights:", result_equal$evca_result$evca, "\n")
+cat("EVCA with skewed weights:", result_skewed$evca_result$evca, "\n")
 
 }
 \references{

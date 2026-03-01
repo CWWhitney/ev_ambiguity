@@ -95,7 +95,7 @@ test_that("compute_evca with utility function", {
     compute_evca(model_utilities, model_probs)$bma_expected_utility))
 })
 
-test_that("compute_evca returns correct EVECA calculation", {
+test_that("compute_evca returns correct EVCA calculation", {
   # Simple test case where we can manually verify
   model_utilities <- matrix(
     c(
@@ -117,7 +117,7 @@ test_that("compute_evca returns correct EVECA calculation", {
   # If Model 1 true: choose Decision 1 (10)
   # If Model 2 true: choose Decision 2 (9)
   # Perfect info EU: 0.5*10 + 0.5*9 = 9.5
-  # EVECA: 9.5 - 7.5 = 2.0
+  # EVCA: 9.5 - 7.5 = 2.0
 
   expect_equal(result$bma_expected_utility, c(7.5, 7.5))
   expect_equal(result$perfect_info_expected_utility, 9.5)

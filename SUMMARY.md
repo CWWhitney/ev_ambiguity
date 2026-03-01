@@ -48,7 +48,7 @@ The `evca` R package has been successfully streamlined to focus on the core mode
 **Removed**: `plot_development.R` (domain-specific)
 
 #### Vignette (Completely Rewritten)
-**Before**: "EVECA for Gender-Nutrition Decisions" with extensive development context
+**Before**: "EVCA for Gender-Nutrition Decisions" with extensive development context
 
 **After**: "Introduction to EVCA" - General framework
 - Explains causal ambiguity concept

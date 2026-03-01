@@ -1,10 +1,10 @@
 ---
-title: "Introduction to Expected Value of Eliminating Causal Ambiguity (EVECA)"
+title: "Introduction to Expected Value of Eliminating Causal Ambiguity (EVCA)"
 author: "Cory Whitney"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to EVECA}
+  %\VignetteIndexEntry{Introduction to EVCA}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -36,15 +36,15 @@ For example:
 
 Traditional value of information (VOI) analysis addresses parameter uncertainty but not structural uncertainty about which causal model is correct.
 
-## Expected Value of Eliminating Causal Ambiguity (EVECA)
+## Expected Value of Eliminating Causal Ambiguity (EVCA)
 
-**EVECA** extends VOI analysis to handle structural uncertainty. It quantifies the value of knowing which causal model is correct, helping you decide whether to:
+**EVCA** extends VOI analysis to handle structural uncertainty. It quantifies the value of knowing which causal model is correct, helping you decide whether to:
 - **Act now** under current uncertainty using Bayesian Model Averaging (BMA)
 - **Research first** to identify the correct causal model before deciding
 
 ### Key Insight
 
-If EVECA is high relative to research costs, invest in resolving model uncertainty. If EVECA is low, the optimal decision is robust across models—proceed without additional research.
+If EVCA is high relative to research costs, invest in resolving model uncertainty. If EVCA is low, the optimal decision is robust across models—proceed without additional research.
 
 # Mathematical Framework
 
@@ -67,11 +67,11 @@ The optimal decision under BMA is:
 
 $$d^* = \arg\max_d EU_{BMA}(d)$$
 
-## EVECA Calculation
+## EVCA Calculation
 
-EVECA compares decision-making with and without perfect structural information:
+EVCA compares decision-making with and without perfect structural information:
 
-$$EVECA = \underbrace{\sum_{k=1}^K p(M_k) \cdot \max_d EU(d|M_k)}_{\text{With perfect information}} - \underbrace{\max_d \sum_{k=1}^K p(M_k) \cdot EU(d|M_k)}_{\text{BMA (under ambiguity)}}$$
+$$EVCA = \underbrace{\sum_{k=1}^K p(M_k) \cdot \max_d EU(d|M_k)}_{\text{With perfect information}} - \underbrace{\max_d \sum_{k=1}^K p(M_k) \cdot EU(d|M_k)}_{\text{BMA (under ambiguity)}}$$
 
 The first term represents expected utility if we knew which model is true (we would choose the optimal decision for that model). The second term is the expected utility of the optimal decision under current ambiguity.
 
@@ -104,17 +104,17 @@ names(model_probs) <- colnames(model_utilities)
 print(model_probs)
 ```
 
-## Compute EVECA
+## Compute EVCA
 
 ```{r compute_evca}
-# Compute EVECA
+# Compute EVCA
 result <- compute_evca(model_utilities, model_probs)
 
 # Display key results
 cat("Optimal decision under BMA:", rownames(model_utilities)[result$optimal_decision_bma], "\n")
 cat("Expected utility under BMA:", round(result$optimal_utility_bma, 3), "\n")
 cat("Expected utility with perfect info:", round(result$perfect_info_expected_utility, 3), "\n")
-cat("EVECA:", round(result$evca, 3), "\n")
+cat("EVCA:", round(result$evca, 3), "\n")
 ```
 
 ## Interpretation
@@ -133,18 +133,18 @@ for (i in 1:length(model_probs)) {
 }
 ```
 
-The EVECA of `r round(result$evca, 3)` tells us the maximum we should pay (in utility units) to definitively identify the correct causal model. If research to resolve model ambiguity costs less than this, it's worthwhile.
+The EVCA of `r round(result$evca, 3)` tells us the maximum we should pay (in utility units) to definitively identify the correct causal model. If research to resolve model ambiguity costs less than this, it's worthwhile.
 
 # Visualization
 
-## Basic EVECA Plot
+## Basic EVCA Plot
 
 ```{r plot_basic, fig.width=7, fig.height=5}
-# Visualize EVECA components
-plot_evca(result, title = "EVECA Analysis: Model Ambiguity Value")
+# Visualize EVCA components
+plot_evca(result, title = "EVCA Analysis: Model Ambiguity Value")
 ```
 
-The gap between the bars represents EVECA — the expected value of eliminating causal ambiguity.
+The gap between the bars represents EVCA — the expected value of eliminating causal ambiguity.
 
 ## Utility Heatmap
 
@@ -158,25 +158,25 @@ evca::plot_utilities_heatmap(
 )
 ```
 
-The yellow border highlights the optimal decision under BMA. Notice how different decisions perform best under different models—this is why EVECA is positive.
+The yellow border highlights the optimal decision under BMA. Notice how different decisions perform best under different models—this is why EVCA is positive.
 
 ## Sensitivity Analysis
 
 ```{r plot_sensitivity, fig.width=7, fig.height=5}
-# How sensitive is EVECA to our belief about Model 1?
+# How sensitive is EVCA to our belief about Model 1?
 plot_sensitivity(
   model_utilities,
   model_probs,
   vary_model = 1,
-  title = "Sensitivity: How EVECA Changes with P(Model 1)"
+  title = "Sensitivity: How EVCA Changes with P(Model 1)"
 )
 ```
 
-This shows how EVECA varies as we become more or less certain about Model 1. The red triangle shows our current probability estimate.
+This shows how EVCA varies as we become more or less certain about Model 1. The red triangle shows our current probability estimate.
 
 # Multi-Dimensional Outcomes
 
-Often decisions affect multiple outcomes simultaneously (e.g., cost and effectiveness, yield and sustainability). EVECA handles this through multi-attribute utility functions.
+Often decisions affect multiple outcomes simultaneously (e.g., cost and effectiveness, yield and sustainability). EVCA handles this through multi-attribute utility functions.
 
 ## Example with Two Outcome Dimensions
 
@@ -206,15 +206,15 @@ print(result_multi$model_outcomes[1, , ])
 cat("Multi-attribute utilities:\n")
 print(round(result_multi$model_utilities, 3))
 
-# EVECA result
-cat("\nEVECA:", round(result_multi$evca_result$evca, 3), "\n")
+# EVCA result
+cat("\nEVCA:", round(result_multi$evca_result$evca, 3), "\n")
 cat("Optimal decision:",
     result_multi$decision_names[result_multi$evca_result$optimal_decision_bma], "\n")
 ```
 
-The outcome weights (0.6, 0.4) determine the trade-off between the two outcome dimensions. Sensitivity analysis could explore how EVECA changes with different weight specifications.
+The outcome weights (0.6, 0.4) determine the trade-off between the two outcome dimensions. Sensitivity analysis could explore how EVCA changes with different weight specifications.
 
-# Using EVECA in Practice
+# Using EVCA in Practice
 
 ## Workflow
 
@@ -224,11 +224,11 @@ The outcome weights (0.6, 0.4) determine the trade-off between the two outcome d
 
 3. **Compute expected utilities**: For each decision under each model, estimate the expected utility
 
-4. **Calculate EVECA**: Use `compute_evca()` to quantify the value of resolving ambiguity
+4. **Calculate EVCA**: Use `compute_evca()` to quantify the value of resolving ambiguity
 
 5. **Make decision**:
-   - If EVECA < research cost: Choose optimal decision under BMA
-   - If EVECA > research cost: Invest in research to identify correct model
+   - If EVCA < research cost: Choose optimal decision under BMA
+   - If EVCA > research cost: Invest in research to identify correct model
 
 ## Example Decision Process
 
@@ -239,7 +239,7 @@ ex <- example_evca(n_decisions = 4, n_models = 3, seed = 789)
 # Suppose research to identify the correct model costs 2.0 utility units
 research_cost <- 2.0
 
-cat("EVECA:", round(ex$evca_result$evca, 3), "\n")
+cat("EVCA:", round(ex$evca_result$evca, 3), "\n")
 cat("Research cost:", research_cost, "\n\n")
 
 if (ex$evca_result$evca > research_cost) {
@@ -258,7 +258,7 @@ if (ex$evca_result$evca > research_cost) {
 
 ## Risk Aversion
 
-By default, EVECA assumes risk-neutral utility. You can incorporate risk preferences:
+By default, EVCA assumes risk-neutral utility. You can incorporate risk preferences:
 
 ```{r risk_aversion}
 # Assume outcomes (not utilities) in model_utilities
@@ -279,32 +279,32 @@ result_averse <- compute_evca(
   utility_function = function(x) -exp(-0.02 * x)
 )
 
-cat("EVECA (risk-neutral):", round(result_neutral$evca, 3), "\n")
-cat("EVECA (risk-averse):", round(result_averse$evca, 3), "\n")
+cat("EVCA (risk-neutral):", round(result_neutral$evca, 3), "\n")
+cat("EVCA (risk-averse):", round(result_averse$evca, 3), "\n")
 ```
 
-Risk aversion typically increases EVECA because uncertainty is more costly when you're risk-averse.
+Risk aversion typically increases EVCA because uncertainty is more costly when you're risk-averse.
 
 ## Relationship to EVPI
 
-EVECA addresses structural uncertainty (which model?), while EVPI addresses parameter uncertainty (what are the exact parameter values?). In problems with both types of uncertainty:
+EVCA addresses structural uncertainty (which model?), while EVPI addresses parameter uncertainty (what are the exact parameter values?). In problems with both types of uncertainty:
 
-$$\text{Total VOI} \approx \text{EVPI}_{parameters} + \text{EVECA}_{structure}$$
+$$\text{Total VOI} \approx \text{EVPI}_{parameters} + \text{EVCA}_{structure}$$
 
-In practice, you might first compute EVECA to see if resolving structural uncertainty is valuable, then compute EVPI for parameters within the most probable model.
+In practice, you might first compute EVCA to see if resolving structural uncertainty is valuable, then compute EVPI for parameters within the most probable model.
 
 # Conclusion
 
-EVECA provides a rigorous framework for:
+EVCA provides a rigorous framework for:
 - **Quantifying** the value of resolving model uncertainty
 - **Prioritizing** research investments
 - **Making robust decisions** under causal ambiguity
 - **Combining** information from multiple competing theories
 
 Key takeaways:
-- High EVECA → Research to identify correct model is valuable
-- Low EVECA → Optimal decision is robust; proceed with BMA
-- EVECA integrates Bayesian model averaging with decision theory
+- High EVCA → Research to identify correct model is valuable
+- Low EVCA → Optimal decision is robust; proceed with BMA
+- EVCA integrates Bayesian model averaging with decision theory
 - Framework extends to multi-dimensional outcomes and risk preferences
 
 # Further Reading
