@@ -10,7 +10,7 @@
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models,
 #'   containing expected utilities for each decision under each model.
-#'   Can also be a data frame that can be coerced to matrix. Each cell [i,j]
+#'   Can also be a data frame that can be coerced to matrix. Each cell `[i,j]`
 #'   represents the expected utility of decision i under model j.
 #' @param model_probs Numeric vector of model probabilities. If provided,
 #'   the probabilities for remaining models are renormalized proportionally
@@ -20,7 +20,7 @@
 #'   to each model column before computing exclusion costs. Required for
 #'   meaningful cross-model comparison when welfare units are incommensurable
 #'   (e.g., NPV alongside wellbeing scores). The normalization rescales each
-#'   model's welfare range to [0, 1], where 0 is the worst outcome and 1 is
+#'   model's welfare range to \[0, 1\], where 0 is the worst outcome and 1 is
 #'   the best for that model. This is itself a political assumption (equal stakes
 #'   for each model) and should be reported explicitly.
 #'
