@@ -4,7 +4,7 @@
 #' models. This function calculates the weighted average of utilities where
 #' weights are the posterior probabilities of each model being correct.
 #'
-#' @usage bma_expected_utility(model_utilities, model_probs)
+#' @usage weighted_model_utility(model_utilities, model_probs)
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models,
 #'   containing expected utilities for each decision under each model.
@@ -20,7 +20,7 @@
 #'   weighted by model probabilities.
 #'
 #' @details
-#' Bayesian Model Averaging (BMA) provides a coherent framework for making
+#' prior-weighted model aggregation provides a coherent framework for making
 #' decisions under model uncertainty. For each decision d, the BMA expected
 #' utility is calculated as:
 #'
@@ -64,13 +64,13 @@
 #' )
 #' model_probs <- c(0.5, 0.5) # Equal probability for both models
 #'
-#' bma_eu <- bma_expected_utility(model_utilities, model_probs)
-#' print(bma_eu) # Should be c(7.5, 7.5)
+#' wtd_eu <- weighted_model_utility(model_utilities, model_probs)
+#' print(wtd_eu) # Should be c(7.5, 7.5)
 #'
 #' # Example 2: Unequal model probabilities
 #' model_probs_unequal <- c(0.7, 0.3)
-#' bma_eu_unequal <- bma_expected_utility(model_utilities, model_probs_unequal)
-#' print(bma_eu_unequal) # Decision 1: 0.7*10 + 0.3*5 = 8.5
+#' wtd_eu_unequal <- weighted_model_utility(model_utilities, model_probs_unequal)
+#' print(wtd_eu_unequal) # Decision 1: 0.7*10 + 0.3*5 = 8.5
 #' # Decision 2: 0.7*6 + 0.3*9 = 6.9
 #'
 #' # Example 3: Larger example with 3 decisions and 4 models
@@ -84,20 +84,20 @@
 #' )
 #' model_probs_large <- c(0.3, 0.3, 0.2, 0.2)
 #'
-#' bma_eu_large <- bma_expected_utility(model_utilities_large, model_probs_large)
-#' print(bma_eu_large)
+#' wtd_eu_large <- weighted_model_utility(model_utilities_large, model_probs_large)
+#' print(wtd_eu_large)
 #'
 #' # Example 4: Using with data frame input
 #' utility_df <- data.frame(
 #'   Model1 = c(10, 6),
 #'   Model2 = c(5, 9)
 #' )
-#' bma_eu_df <- bma_expected_utility(utility_df, c(0.5, 0.5))
-#' print(bma_eu_df)
+#' wtd_eu_df <- weighted_model_utility(utility_df, c(0.5, 0.5))
+#' print(wtd_eu_df)
 #'
 #' @export
 #'
-bma_expected_utility <- function(model_utilities, model_probs) {
+weighted_model_utility <- function(model_utilities, model_probs) {
   # Input validation ----
 
   # Convert to matrix if needed
@@ -142,7 +142,7 @@ bma_expected_utility <- function(model_utilities, model_probs) {
   if (any(is.na(model_utilities))) {
     stop(
       "model_utilities contains NA values. ",
-      "Please remove or impute missing values before computing BMA."
+      "Please remove or impute missing values before computing weighted model utility."
     )
   }
 
@@ -151,12 +151,12 @@ bma_expected_utility <- function(model_utilities, model_probs) {
     stop("model_probs contains NA values")
   }
 
-  # Compute BMA expected utility ----
+  # Compute weighted expected utility ----
 
   # Matrix multiplication: each decision's utility is weighted average across models
   # Result is a vector of length nrow(model_utilities)
-  bma_eu <- as.vector(model_utilities %*% model_probs)
+  wtd_eu <- as.vector(model_utilities %*% model_probs)
 
   # Return ----
-  return(bma_eu)
+  return(wtd_eu)
 }

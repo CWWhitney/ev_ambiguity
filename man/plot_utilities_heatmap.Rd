@@ -17,7 +17,7 @@ containing expected utilities for each decision under each model.}
 
 \item{model_probs}{Vector of model probabilities (optional, shown if provided).}
 
-\item{optimal_decision}{Index of optimal decision under BMA (optional, highlighted if provided).}
+\item{optimal_decision}{Index of optimal decision under model averaging (optional, highlighted if provided).}
 
 \item{title}{Plot title (default: "Decision-Model Utility Matrix").}
 }
@@ -35,7 +35,7 @@ result <- example_evca()
 p <- plot_utilities_heatmap(
   result$model_utilities,
   model_probs = result$model_probs,
-  optimal_decision = result$evca_result$optimal_decision_bma
+  optimal_decision = result$evca_result$optimal_decision
 )
 print(p)
 }

@@ -6,7 +6,7 @@
 \usage{
 plot_dirichlet_actions(
   dirichlet_result,
-  title = "BMA-Optimal Action across Dirichlet Weight Draws",
+  title = "Weighted-Optimal Action across Dirichlet Weight Draws",
   decision_order = NULL
 )
 }
@@ -25,7 +25,7 @@ A ggplot object that can be further customized or printed.
 }
 \description{
 Creates a stacked bar chart showing what fraction of Dirichlet weight draws
-result in each action being BMA-optimal. Supports a single result or a named
+result in each action being weighted-optimal. Supports a single result or a named
 list of results for multi-scenario comparison.
 }
 \examples{

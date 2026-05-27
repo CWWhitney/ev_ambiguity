@@ -1,7 +1,7 @@
 #' Compute Exclusion Costs for Each Causal Model
 #'
 #' For each model, computes the welfare cost of excluding that model from
-#' deliberation entirely. When a model is excluded, the BMA-optimal decision
+#' deliberation entirely. When a model is excluded, the weighted-optimal decision
 #' is found using only the remaining models, and the excluded model's welfare
 #' under that decision is compared to its best possible outcome.
 #'
@@ -26,7 +26,7 @@
 #'
 #' @return A data frame with one row per excluded model, containing:
 #'   \item{excluded_model}{Name of the excluded model (or "Model k" if unnamed).}
-#'   \item{decision_without}{The BMA-optimal decision made without this model.}
+#'   \item{decision_without}{The weighted-optimal decision made without this model.}
 #'   \item{welfare_excluded}{The excluded model's welfare under that decision.}
 #'   \item{welfare_own_best}{The best welfare the excluded model could receive.}
 #'   \item{exclusion_cost}{Welfare loss: welfare_own_best - welfare_excluded.}
@@ -198,10 +198,10 @@ compute_exclusion_costs <- function(model_utilities,
       weights_in  <- p_remaining / sum(p_remaining)
     }
 
-    # BMA-optimal decision without model k
-    bma_excl        <- as.vector(model_utilities[, models_in, drop = FALSE] %*% weights_in)
-    names(bma_excl) <- rownames(model_utilities)
-    decision_excl   <- rownames(model_utilities)[which.max(bma_excl)]
+    # weighted-optimal decision without model k
+    wtd_excl        <- as.vector(model_utilities[, models_in, drop = FALSE] %*% weights_in)
+    names(wtd_excl) <- rownames(model_utilities)
+    decision_excl   <- rownames(model_utilities)[which.max(wtd_excl)]
 
     # Welfare of excluded group under that decision
     welfare_if_excl  <- model_utilities[decision_excl, k]

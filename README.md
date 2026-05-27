@@ -1,6 +1,7 @@
 # evca: Expected Value of Eliminating Causal Ambiguity
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20418470.svg)](https://doi.org/10.5281/zenodo.20418470)
 
 ## Overview
 
@@ -82,18 +83,33 @@ EVCA = E[max utility with perfect info] - max[E[utility under ambiguity]]
 
 ## Features
 
-### Core Functions
+### Core functions
 
 - `compute_evca()`: Calculate EVCA given model utilities and probabilities
 - `bma_expected_utility()`: Compute Bayesian model averaging
-- `example_evca()`: Generate example datasets for testing
-- `example_evca_multidim()`: Generate examples with multiple outcome dimensions
+
+### Exclusion analysis
+
+- `compute_exclusion_costs()`: Compute welfare costs when each model is excluded from deliberation
+- `plot_exclusion_costs()`: Visualize exclusion costs by model
+
+### Sensitivity analysis
+
+- `compute_evca_dirichlet()`: EVCA across a Dirichlet distribution of model weights
+- `plot_dirichlet_evca()`: Plot EVCA distribution from Dirichlet analysis
+- `plot_dirichlet_actions()`: Plot BMA-optimal action frequencies from Dirichlet analysis
+- `plot_sensitivity()`: EVCA sensitivity to a single model's probability
 
 ### Visualization
 
-- `plot_evca()`: Basic EVCA visualization
+- `plot_evca()`: Basic EVCA bar chart
 - `plot_utilities_heatmap()`: Heatmap of decision-model utilities
-- `plot_sensitivity()`: Sensitivity analysis for model probabilities
+
+### Examples and utilities
+
+- `example_evca()`: Generate synthetic example datasets
+- `example_evca_multidim()`: Generate examples with multiple outcome dimensions
+- `compute_multi_attribute_utilities()`: Aggregate multi-dimensional outcomes into utilities
 
 ### Multi-Dimensional Outcomes
 
@@ -247,9 +263,19 @@ EVCA is applicable wherever causal ambiguity exists:
 
 If you use this package, please cite:
 
-```
-Whitney, C. (2024). evca: Expected Value of Eliminating Causal Ambiguity. 
-R package version 0.3.0. https://github.com/corywhitney/evca
+Whitney, C. W. (2026). *evca: Expected Value of Eliminating Causal Ambiguity*.
+R package version 0.1.1-alpha. https://doi.org/10.5281/zenodo.20418470
+
+```bibtex
+@software{whitney2025evca,
+  author  = {Whitney, Cory W.},
+  title   = {{evca}: {Expected Value of Eliminating Causal Ambiguity}},
+  year    = {2026},
+  version = {0.1.1-alpha},
+  doi     = {10.5281/zenodo.20418470},
+  url     = {https://doi.org/10.5281/zenodo.20418470},
+  note    = {R package}
+}
 ```
 
 ## License

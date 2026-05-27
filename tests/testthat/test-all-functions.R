@@ -1,7 +1,7 @@
 # Test file for all EVCA package functions
 
-# Test bma_expected_utility function (internal)
-test_that("bma_expected_utility computes correct weighted averages", {
+# Test weighted_model_utility function (internal)
+test_that("weighted_model_utility computes correct weighted averages", {
   # Simple test case
   model_utilities <- matrix(
     c(10, 5, 6, 9),
@@ -9,7 +9,7 @@ test_that("bma_expected_utility computes correct weighted averages", {
   )
   model_probs <- c(0.5, 0.5)
 
-  result <- bma_expected_utility(model_utilities, model_probs)
+  result <- weighted_model_utility(model_utilities, model_probs)
 
   # Manual calculation:
   # Decision 1: 0.5*10 + 0.5*5 = 7.5
@@ -18,14 +18,14 @@ test_that("bma_expected_utility computes correct weighted averages", {
 
   # Test with unequal probabilities
   model_probs2 <- c(0.7, 0.3)
-  result2 <- bma_expected_utility(model_utilities, model_probs2)
+  result2 <- weighted_model_utility(model_utilities, model_probs2)
 
   # Decision 1: 0.7*10 + 0.3*5 = 8.5
   # Decision 2: 0.7*6 + 0.3*9 = 6.9
   expect_equal(result2, c(8.5, 6.9), tolerance = 1e-10)
 })
 
-test_that("bma_expected_utility validates inputs", {
+test_that("weighted_model_utility validates inputs", {
   model_utilities <- matrix(
     c(10, 5, 6, 9),
     nrow = 2, ncol = 2, byrow = TRUE
@@ -33,19 +33,19 @@ test_that("bma_expected_utility validates inputs", {
 
   # Test invalid probability sum
   expect_error(
-    bma_expected_utility(model_utilities, c(0.5, 0.6)),
+    weighted_model_utility(model_utilities, c(0.5, 0.6)),
     "Model probabilities must sum to 1"
   )
 
   # Test negative probabilities
   expect_error(
-    bma_expected_utility(model_utilities, c(0.5, -0.1)),
+    weighted_model_utility(model_utilities, c(0.5, -0.1)),
     "Model probabilities must be non-negative"
   )
 
   # Test dimension mismatch
   expect_error(
-    bma_expected_utility(model_utilities, c(0.5, 0.5, 0.0)),
+    weighted_model_utility(model_utilities, c(0.5, 0.5, 0.0)),
     "must equal number of model utility columns"
   )
 })
@@ -215,7 +215,7 @@ test_that("plot_evca creates valid ggplot object", {
 
   # Check plot data
   plot_data <- ggplot2::ggplot_build(p)$data[[1]]
-  expect_equal(nrow(plot_data), 2) # Two bars: BMA Optimal and Perfect Information
+  expect_equal(nrow(plot_data), 2) # Two bars: Weighted-average optimal and Perfect Information
 })
 
 test_that("plot_evca validates input", {
@@ -227,7 +227,7 @@ test_that("plot_evca validates input", {
 
   # Test with missing evca field
   expect_error(
-    plot_evca(list(optimal_utility_bma = 5, perfect_info_expected_utility = 6)),
+    plot_evca(list(optimal_utility = 5, perfect_info_expected_utility = 6)),
     "evca_result must be output from compute_evca()"
   )
 })
@@ -258,7 +258,7 @@ test_that("plot_utilities_heatmap creates valid ggplot object", {
   p <- plot_utilities_heatmap(
     example_result$model_utilities,
     model_probs = example_result$model_probs,
-    optimal_decision = example_result$evca_result$optimal_decision_bma
+    optimal_decision = example_result$evca_result$optimal_decision
   )
 
   # Check it's a ggplot object
@@ -293,7 +293,7 @@ test_that("compute_evca handles edge cases correctly", {
 
   expect_equal(result$n_decisions, 1)
   expect_equal(result$n_models, 1)
-  expect_equal(result$optimal_decision_bma, 1)
+  expect_equal(result$optimal_decision, 1)
   expect_equal(result$evca, 0) # No ambiguity to eliminate
 
   # Multiple decisions, single model (no ambiguity)
@@ -304,7 +304,7 @@ test_that("compute_evca handles edge cases correctly", {
 
   expect_equal(result$n_decisions, 3)
   expect_equal(result$n_models, 1)
-  expect_equal(result$optimal_decision_bma, 3) # Decision 3 has highest utility (12)
+  expect_equal(result$optimal_decision, 3) # Decision 3 has highest utility (12)
   expect_equal(result$evca, 0) # No ambiguity to eliminate
 })
 
@@ -325,8 +325,8 @@ test_that("compute_evca handles utility functions correctly", {
   # Squared: [100, 25; 36, 81]
   # BMA: Decision 1: 0.5*100 + 0.5*25 = 62.5
   #      Decision 2: 0.5*36 + 0.5*81 = 58.5
-  expect_equal(result$bma_expected_utility, c(62.5, 58.5), tolerance = 1e-10)
-  expect_equal(result$optimal_decision_bma, 1)
+  expect_equal(result$weighted_model_utility, c(62.5, 58.5), tolerance = 1e-10)
+  expect_equal(result$optimal_decision, 1)
 })
 
 test_that("compute_evca returns correct structure and metadata", {
@@ -340,9 +340,9 @@ test_that("compute_evca returns correct structure and metadata", {
 
   # Check all expected components are present
   expected_components <- c(
-    "bma_expected_utility",
-    "optimal_decision_bma",
-    "optimal_utility_bma",
+    "weighted_model_utility",
+    "optimal_decision",
+    "optimal_utility",
     "optimal_decisions_per_model",
     "optimal_utilities_per_model",
     "perfect_info_expected_utility",
@@ -359,15 +359,15 @@ test_that("compute_evca returns correct structure and metadata", {
   expect_equal(result$n_models, 3)
   expect_equal(result$model_probs, model_probs)
 
-  # Check that optimal_decision_bma is within valid range
-  expect_true(result$optimal_decision_bma >= 1)
-  expect_true(result$optimal_decision_bma <= 3)
+  # Check that optimal_decision is within valid range
+  expect_true(result$optimal_decision >= 1)
+  expect_true(result$optimal_decision <= 3)
 
   # Check that evca is non-negative (by definition)
   expect_true(result$evca >= 0)
 
-  # Check that perfect_info_expected_utility >= optimal_utility_bma
-  expect_true(result$perfect_info_expected_utility >= result$optimal_utility_bma)
+  # Check that perfect_info_expected_utility >= optimal_utility
+  expect_true(result$perfect_info_expected_utility >= result$optimal_utility)
 })
 
 # Test integration between functions

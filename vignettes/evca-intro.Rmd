@@ -39,7 +39,7 @@ Traditional value of information (VOI) analysis addresses parameter uncertainty 
 ## Expected Value of Eliminating Causal Ambiguity (EVCA)
 
 **EVCA** extends VOI analysis to handle structural uncertainty. It quantifies the value of knowing which causal model is correct, helping you decide whether to:
-- **Act now** under current uncertainty using Bayesian Model Averaging (BMA)
+- **Act now** under current uncertainty using prior-weighted model aggregation
 - **Research first** to identify the correct causal model before deciding
 
 ### Key Insight
@@ -57,21 +57,21 @@ Consider:
 - **D decision alternatives**: d₁, d₂, ..., dᴰ
 - **Expected utility** EU(dᵢ|Mⱼ) for decision dᵢ under model Mⱼ
 
-## Bayesian Model Averaging (BMA)
+## prior-weighted model aggregation
 
-Under causal ambiguity, we use BMA to compute expected utility:
+Under causal ambiguity, we use prior-weighted model aggregation to compute expected utility:
 
-$$EU_{BMA}(d) = \sum_{k=1}^K p(M_k) \cdot EU(d|M_k)$$
+$$\overline{EU}(d) = \sum_{k=1}^K p(M_k) \cdot EU(d|M_k)$$
 
-The optimal decision under BMA is:
+The optimal decision under model averaging is:
 
-$$d^* = \arg\max_d EU_{BMA}(d)$$
+$$d^* = \arg\max_d \overline{EU}(d)$$
 
 ## EVCA Calculation
 
 EVCA compares decision-making with and without perfect structural information:
 
-$$EVCA = \underbrace{\sum_{k=1}^K p(M_k) \cdot \max_d EU(d|M_k)}_{\text{With perfect information}} - \underbrace{\max_d \sum_{k=1}^K p(M_k) \cdot EU(d|M_k)}_{\text{BMA (under ambiguity)}}$$
+$$EVCA = \underbrace{\sum_{k=1}^K p(M_k) \cdot \max_d EU(d|M_k)}_{\text{With perfect information}} - \underbrace{\max_d \sum_{k=1}^K p(M_k) \cdot EU(d|M_k)}_{\text{Weighted average (under ambiguity)}}$$
 
 The first term represents expected utility if we knew which model is true (we would choose the optimal decision for that model). The second term is the expected utility of the optimal decision under current ambiguity.
 
@@ -111,8 +111,8 @@ print(model_probs)
 result <- compute_evca(model_utilities, model_probs)
 
 # Display key results
-cat("Optimal decision under BMA:", rownames(model_utilities)[result$optimal_decision_bma], "\n")
-cat("Expected utility under BMA:", round(result$optimal_utility_bma, 3), "\n")
+cat("Optimal decision under model averaging:", rownames(model_utilities)[result$optimal_decision], "\n")
+cat("Expected utility under model averaging:", round(result$optimal_utility, 3), "\n")
 cat("Expected utility with perfect info:", round(result$perfect_info_expected_utility, 3), "\n")
 cat("EVCA:", round(result$evca, 3), "\n")
 ```
@@ -153,12 +153,12 @@ The gap between the bars represents EVCA — the expected value of eliminating c
 evca::plot_utilities_heatmap(
   model_utilities,
   model_probs = model_probs,
-  optimal_decision = result$optimal_decision_bma,
+  optimal_decision = result$optimal_decision,
   title = "Decision-Model Utility Landscape"
 )
 ```
 
-The yellow border highlights the optimal decision under BMA. Notice how different decisions perform best under different models—this is why EVCA is positive.
+The yellow border highlights the optimal decision under model averaging. Notice how different decisions perform best under different models—this is why EVCA is positive.
 
 ## Sensitivity Analysis
 
@@ -209,7 +209,7 @@ print(round(result_multi$model_utilities, 3))
 # EVCA result
 cat("\nEVCA:", round(result_multi$evca_result$evca, 3), "\n")
 cat("Optimal decision:",
-    result_multi$decision_names[result_multi$evca_result$optimal_decision_bma], "\n")
+    result_multi$decision_names[result_multi$evca_result$optimal_decision], "\n")
 ```
 
 The outcome weights (0.6, 0.4) determine the trade-off between the two outcome dimensions. Sensitivity analysis could explore how EVCA changes with different weight specifications.
@@ -227,7 +227,7 @@ The outcome weights (0.6, 0.4) determine the trade-off between the two outcome d
 4. **Calculate EVCA**: Use `compute_evca()` to quantify the value of resolving ambiguity
 
 5. **Make decision**:
-   - If EVCA < research cost: Choose optimal decision under BMA
+   - If EVCA < research cost: Choose optimal decision under model averaging
    - If EVCA > research cost: Invest in research to identify correct model
 
 ## Example Decision Process
@@ -247,10 +247,10 @@ if (ex$evca_result$evca > research_cost) {
   cat("Rationale: Value of resolving ambiguity (", round(ex$evca_result$evca, 3),
       ") exceeds research cost (", research_cost, ")\n")
 } else {
-  cat("Decision: PROCEED WITH DECISION", ex$decision_names[ex$evca_result$optimal_decision_bma], "\n")
+  cat("Decision: PROCEED WITH DECISION", ex$decision_names[ex$evca_result$optimal_decision], "\n")
   cat("Rationale: Value of resolving ambiguity (", round(ex$evca_result$evca, 3),
       ") is less than research cost (", research_cost, ")\n")
-  cat("Optimal decision under BMA:", ex$decision_names[ex$evca_result$optimal_decision_bma], "\n")
+  cat("Optimal decision under model averaging:", ex$decision_names[ex$evca_result$optimal_decision], "\n")
 }
 ```
 
@@ -303,8 +303,8 @@ EVCA provides a rigorous framework for:
 
 Key takeaways:
 - High EVCA → Research to identify correct model is valuable
-- Low EVCA → Optimal decision is robust; proceed with BMA
-- EVCA integrates Bayesian model averaging with decision theory
+- Low EVCA → Optimal decision is robust; proceed with model averaging
+- EVCA integrates prior-weighted model aggregation with decision theory
 - Framework extends to multi-dimensional outcomes and risk preferences
 
 # Further Reading

@@ -63,7 +63,7 @@
 #'
 #' # Print key results
 #' cat("EVCA:", example_result$evca_result$evca, "\n")
-#' optimal_idx <- example_result$evca_result$optimal_decision_bma
+#' optimal_idx <- example_result$evca_result$optimal_decision
 #' cat("Optimal decision:", example_result$decision_names[optimal_idx], "\n")
 #'
 #' # View generated utilities
@@ -276,7 +276,7 @@ example_evca <- function(n_decisions = 3,
 #'
 #' # Print key results
 #' cat("EVCA:", example_result$evca_result$evca, "\n")
-#' optimal_idx <- example_result$evca_result$optimal_decision_bma
+#' optimal_idx <- example_result$evca_result$optimal_decision
 #' cat("Optimal decision:", example_result$decision_names[optimal_idx], "\n")
 #'
 #' # View outcome array structure

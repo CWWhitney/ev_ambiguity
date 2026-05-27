@@ -13,9 +13,9 @@ test_that("compute_evca returns correct structure", {
   # Check structure
   expect_type(result, "list")
   expect_named(result, c(
-    "bma_expected_utility",
-    "optimal_decision_bma",
-    "optimal_utility_bma",
+    "weighted_model_utility",
+    "optimal_decision",
+    "optimal_utility",
     "optimal_decisions_per_model",
     "optimal_utilities_per_model",
     "perfect_info_expected_utility",
@@ -28,7 +28,7 @@ test_that("compute_evca returns correct structure", {
   # Check dimensions
   expect_equal(result$n_decisions, 3)
   expect_equal(result$n_models, 3)
-  expect_equal(length(result$bma_expected_utility), 3)
+  expect_equal(length(result$weighted_model_utility), 3)
   expect_equal(length(result$optimal_decisions_per_model), 3)
   expect_equal(length(result$optimal_utilities_per_model), 3)
 })
@@ -91,8 +91,8 @@ test_that("compute_evca with utility function", {
   expect_equal(result$n_models, 3)
 
   # Check that utilities were transformed (values should be smaller after sqrt)
-  expect_true(all(result$bma_expected_utility <
-    compute_evca(model_utilities, model_probs)$bma_expected_utility))
+  expect_true(all(result$weighted_model_utility <
+    compute_evca(model_utilities, model_probs)$weighted_model_utility))
 })
 
 test_that("compute_evca returns correct EVCA calculation", {
@@ -112,14 +112,14 @@ test_that("compute_evca returns correct EVCA calculation", {
   # BMA expected utilities:
   # Decision 1: 0.5*10 + 0.5*5 = 7.5
   # Decision 2: 0.5*6 + 0.5*9 = 7.5
-  # Optimal decision under BMA: either (both 7.5)
+  # Optimal decision under model averaging: either (both 7.5)
   # Perfect information:
   # If Model 1 true: choose Decision 1 (10)
   # If Model 2 true: choose Decision 2 (9)
   # Perfect info EU: 0.5*10 + 0.5*9 = 9.5
   # EVCA: 9.5 - 7.5 = 2.0
 
-  expect_equal(result$bma_expected_utility, c(7.5, 7.5))
+  expect_equal(result$weighted_model_utility, c(7.5, 7.5))
   expect_equal(result$perfect_info_expected_utility, 9.5)
   expect_equal(result$evca, 2.0)
 })
@@ -133,7 +133,7 @@ test_that("compute_evca handles edge cases", {
 
   expect_equal(result$n_decisions, 1)
   expect_equal(result$n_models, 1)
-  expect_equal(result$optimal_decision_bma, 1)
+  expect_equal(result$optimal_decision, 1)
   expect_equal(result$evca, 0) # No ambiguity to eliminate
 
   # Multiple decisions, single model
@@ -144,6 +144,6 @@ test_that("compute_evca handles edge cases", {
 
   expect_equal(result$n_decisions, 3)
   expect_equal(result$n_models, 1)
-  expect_equal(result$optimal_decision_bma, 3) # Decision 3 has highest utility (12)
+  expect_equal(result$optimal_decision, 3) # Decision 3 has highest utility (12)
   expect_equal(result$evca, 0) # No ambiguity to eliminate
 })

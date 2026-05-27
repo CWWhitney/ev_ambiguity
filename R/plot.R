@@ -42,13 +42,13 @@ plot_evca <- function(evca_result,
 
   # Create plot data
   plot_data <- data.frame(
-    Component = c("BMA Optimal", "Perfect Information"),
+    Component = c("Weighted-average optimal", "Perfect Information"),
     Value = c(
-      evca_result$optimal_utility_bma,
+      evca_result$optimal_utility,
       evca_result$perfect_info_expected_utility
     ),
     Label = c(
-      sprintf("%.3f", evca_result$optimal_utility_bma),
+      sprintf("%.3f", evca_result$optimal_utility),
       sprintf("%.3f", evca_result$perfect_info_expected_utility)
     )
   )
@@ -98,7 +98,7 @@ plot_evca <- function(evca_result,
 #' @param model_utilities Matrix where rows are decisions and columns are models,
 #'   containing expected utilities for each decision under each model.
 #' @param model_probs Vector of model probabilities (optional, shown if provided).
-#' @param optimal_decision Index of optimal decision under BMA (optional, highlighted if provided).
+#' @param optimal_decision Index of optimal decision under model averaging (optional, highlighted if provided).
 #' @param title Plot title (default: "Decision-Model Utility Matrix").
 #'
 #' @return A ggplot object.
@@ -115,7 +115,7 @@ plot_evca <- function(evca_result,
 #' p <- plot_utilities_heatmap(
 #'   result$model_utilities,
 #'   model_probs = result$model_probs,
-#'   optimal_decision = result$evca_result$optimal_decision_bma
+#'   optimal_decision = result$evca_result$optimal_decision
 #' )
 #' print(p)
 plot_utilities_heatmap <- function(model_utilities,
@@ -273,8 +273,8 @@ plot_sensitivity <- function(model_utilities,
     }
 
     # Compute EVCA with new probabilities
-    new_bma_eu <- as.vector(model_utilities %*% new_probs)
-    new_optimal_utility <- max(new_bma_eu)
+    new_wtd_eu <- as.vector(model_utilities %*% new_probs)
+    new_optimal_utility <- max(new_wtd_eu)
     new_perfect_info_eu <- sum(new_probs * apply(model_utilities, 2, max))
     evca_values[i] <- new_perfect_info_eu - new_optimal_utility
   }

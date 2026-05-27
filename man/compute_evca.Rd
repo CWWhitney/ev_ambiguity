@@ -24,9 +24,9 @@ utility functions like exponential utility: function(x) -exp(-r*x).}
 }
 \value{
 A list with the following components:
-\item{bma_expected_utility}{Numeric vector of BMA expected utility for each decision.}
-\item{optimal_decision_bma}{Integer index of optimal decision under BMA.}
-\item{optimal_utility_bma}{Expected utility of optimal BMA decision.}
+\item{weighted_model_utility}{Numeric vector of weighted expected utility for each decision.}
+\item{optimal_decision}{Integer index of optimal decision under model averaging.}
+\item{optimal_utility}{Expected utility of optimal weighted-optimal decision.}
 \item{optimal_decisions_per_model}{Integer vector of optimal decision under each model.}
 \item{optimal_utilities_per_model}{Numeric vector of expected utility of optimal decision under each model.}
 \item{perfect_info_expected_utility}{Expected utility with perfect information about which model is true.}
@@ -100,7 +100,7 @@ result <- compute_evca(model_utilities, model_probs)
 
 # Print key results
 print(result$evca)
-print(result$optimal_decision_bma)
+print(result$optimal_decision)
 
 # Example 2: Making a decision based on EVCA
 research_cost <- 1.5
@@ -109,7 +109,7 @@ if (result$evca > research_cost) {
   cat("Decision: INVEST IN RESEARCH\n")
   cat("Rationale: EVCA (", result$evca, ") > research cost (", research_cost, ")\n")
 } else {
-  cat("Decision: PROCEED with decision", result$optimal_decision_bma, "\n")
+  cat("Decision: PROCEED with decision", result$optimal_decision, "\n")
   cat("Rationale: EVCA (", result$evca, ") < research cost (", research_cost, ")\n")
 }
 

@@ -29,14 +29,14 @@ for each model) and should be reported explicitly.}
 \value{
 A data frame with one row per excluded model, containing:
 \item{excluded_model}{Name of the excluded model (or "Model k" if unnamed).}
-\item{decision_without}{The BMA-optimal decision made without this model.}
+\item{decision_without}{The weighted-optimal decision made without this model.}
 \item{welfare_excluded}{The excluded model's welfare under that decision.}
 \item{welfare_own_best}{The best welfare the excluded model could receive.}
 \item{exclusion_cost}{Welfare loss: welfare_own_best - welfare_excluded.}
 }
 \description{
 For each model, computes the welfare cost of excluding that model from
-deliberation entirely. When a model is excluded, the BMA-optimal decision
+deliberation entirely. When a model is excluded, the weighted-optimal decision
 is found using only the remaining models, and the excluded model's welfare
 under that decision is compared to its best possible outcome.
 }

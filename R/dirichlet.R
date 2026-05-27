@@ -3,7 +3,7 @@
 #' Computes EVCA across a distribution of model weight vectors drawn from a
 #' Dirichlet distribution. This turns EVCA from a point estimate (at fixed
 #' model weights) into a distribution, allowing assessment of how sensitive
-#' the BMA-optimal decision is to uncertainty over model weights.
+#' the weighted-optimal decision is to uncertainty over model weights.
 #'
 #' @usage compute_evca_dirichlet(model_utilities, alpha, n_draws = 5000,
 #'   seed = NULL)
@@ -23,12 +23,12 @@
 #'
 #' @return A list with the following components:
 #'   \item{evca_draws}{Numeric vector of EVCA values, one per draw (length n_draws).}
-#'   \item{optimal_actions}{Character vector of BMA-optimal decision names, one per draw.}
+#'   \item{optimal_actions}{Character vector of weighted-optimal decision names, one per draw.}
 #'   \item{alpha}{Dirichlet concentration parameters used.}
 #'   \item{n_draws}{Number of Monte Carlo draws performed.}
 #'   \item{mean_evca}{Mean EVCA across all draws.}
 #'   \item{sd_evca}{Standard deviation of EVCA across all draws.}
-#'   \item{action_frequencies}{Named numeric vector: fraction of draws in which each action is BMA-optimal.}
+#'   \item{action_frequencies}{Named numeric vector: fraction of draws in which each action is weighted-optimal.}
 #'   \item{model_utilities}{The utility matrix used (for reference and plotting).}
 #'
 #' @details
@@ -186,10 +186,10 @@ compute_evca_dirichlet <- function(model_utilities,
 
   for (i in seq_len(n_draws)) {
     p           <- p_draws[i, ]
-    bma_eu_i    <- as.vector(model_utilities %*% p)
+    wtd_eu_i    <- as.vector(model_utilities %*% p)
     perf_i      <- sum(p * per_model_max)
-    evca_draws[i]    <- perf_i - max(bma_eu_i)
-    optimal_draws[i] <- rownames(model_utilities)[which.max(bma_eu_i)]
+    evca_draws[i]    <- perf_i - max(wtd_eu_i)
+    optimal_draws[i] <- rownames(model_utilities)[which.max(wtd_eu_i)]
   }
 
   # Compute action frequencies ----
@@ -329,7 +329,7 @@ plot_dirichlet_evca <- function(dirichlet_result,
 #' Plot BMA-Optimal Action Frequencies from Dirichlet Sensitivity Analysis
 #'
 #' Creates a stacked bar chart showing what fraction of Dirichlet weight draws
-#' result in each action being BMA-optimal. Supports a single result or a named
+#' result in each action being weighted-optimal. Supports a single result or a named
 #' list of results for multi-scenario comparison.
 #'
 #' @param dirichlet_result A single list returned by [compute_evca_dirichlet()],
@@ -371,7 +371,7 @@ plot_dirichlet_evca <- function(dirichlet_result,
 #'   decision_order = c("No road", "Direct route", "Rerouted road")
 #' )
 plot_dirichlet_actions <- function(dirichlet_result,
-                                    title         = "BMA-Optimal Action across Dirichlet Weight Draws",
+                                    title         = "Weighted-Optimal Action across Dirichlet Weight Draws",
                                     decision_order = NULL) {
   # Allow single result or named list ----
   if (is.list(dirichlet_result) && "evca_draws" %in% names(dirichlet_result)) {
@@ -432,10 +432,10 @@ plot_dirichlet_actions <- function(dirichlet_result,
     ) +
     ggplot2::labs(
       title    = title,
-      subtitle = "How often each action is BMA-optimal under sampled model weights",
+      subtitle = "How often each action is weighted-optimal under sampled model weights",
       x        = "Dirichlet prior scenario",
       y        = "Fraction of draws",
-      fill     = "BMA-optimal action"
+      fill     = "weighted-optimal action"
     ) +
     ggplot2::theme_minimal(base_size = 13) +
     ggplot2::theme(legend.position = "top")

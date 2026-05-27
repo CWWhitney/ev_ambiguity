@@ -21,9 +21,9 @@
 #'   utility functions like exponential utility: function(x) -exp(-r*x).
 #'
 #' @return A list with the following components:
-#'   \item{bma_expected_utility}{Numeric vector of BMA expected utility for each decision.}
-#'   \item{optimal_decision_bma}{Integer index of optimal decision under BMA.}
-#'   \item{optimal_utility_bma}{Expected utility of optimal BMA decision.}
+#'   \item{weighted_model_utility}{Numeric vector of weighted expected utility for each decision.}
+#'   \item{optimal_decision}{Integer index of optimal decision under model averaging.}
+#'   \item{optimal_utility}{Expected utility of optimal weighted-optimal decision.}
 #'   \item{optimal_decisions_per_model}{Integer vector of optimal decision under each model.}
 #'   \item{optimal_utilities_per_model}{Numeric vector of expected utility of optimal decision under each model.}
 #'   \item{perfect_info_expected_utility}{Expected utility with perfect information about which model is true.}
@@ -101,7 +101,7 @@
 #'
 #' # Print key results
 #' print(result$evca)
-#' print(result$optimal_decision_bma)
+#' print(result$optimal_decision)
 #'
 #' # Example 2: Making a decision based on EVCA
 #' research_cost <- 1.5
@@ -110,7 +110,7 @@
 #'   cat("Decision: INVEST IN RESEARCH\n")
 #'   cat("Rationale: EVCA (", result$evca, ") > research cost (", research_cost, ")\n")
 #' } else {
-#'   cat("Decision: PROCEED with decision", result$optimal_decision_bma, "\n")
+#'   cat("Decision: PROCEED with decision", result$optimal_decision, "\n")
 #'   cat("Rationale: EVCA (", result$evca, ") < research cost (", research_cost, ")\n")
 #' }
 #'
@@ -227,12 +227,12 @@ compute_evca <- function(model_utilities, model_probs,
     stop("model_utilities must have at least one column (model)")
   }
 
-  # Compute BMA expected utility ----
-  bma_eu <- bma_expected_utility(model_utilities, model_probs)
+  # Compute weighted expected utility ----
+  wtd_eu <- weighted_model_utility(model_utilities, model_probs)
 
-  # Find optimal decision under BMA ----
-  optimal_decision_bma <- which.max(bma_eu)
-  optimal_utility_bma <- bma_eu[optimal_decision_bma]
+  # Find optimal decision under model averaging ----
+  optimal_decision <- which.max(wtd_eu)
+  optimal_utility <- wtd_eu[optimal_decision]
 
   # Compute optimal decision under each model ----
   optimal_decisions_per_model <- apply(model_utilities, 2, which.max)
@@ -250,13 +250,13 @@ compute_evca <- function(model_utilities, model_probs,
   # Calculate EVCA ----
   # EVCA is the difference between perfect information and BMA
   # Represents maximum value of resolving model ambiguity
-  evca <- perfect_info_eu - optimal_utility_bma
+  evca <- perfect_info_eu - optimal_utility
 
   # Return comprehensive results ----
   return(list(
-    bma_expected_utility = bma_eu,
-    optimal_decision_bma = optimal_decision_bma,
-    optimal_utility_bma = optimal_utility_bma,
+    weighted_model_utility = wtd_eu,
+    optimal_decision = optimal_decision,
+    optimal_utility = optimal_utility,
     optimal_decisions_per_model = optimal_decisions_per_model,
     optimal_utilities_per_model = optimal_utilities_per_model,
     perfect_info_expected_utility = perfect_info_eu,

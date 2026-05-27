@@ -27,19 +27,19 @@ distribution (default: 5000).}
 \value{
 A list with the following components:
 \item{evca_draws}{Numeric vector of EVCA values, one per draw (length n_draws).}
-\item{optimal_actions}{Character vector of BMA-optimal decision names, one per draw.}
+\item{optimal_actions}{Character vector of weighted-optimal decision names, one per draw.}
 \item{alpha}{Dirichlet concentration parameters used.}
 \item{n_draws}{Number of Monte Carlo draws performed.}
 \item{mean_evca}{Mean EVCA across all draws.}
 \item{sd_evca}{Standard deviation of EVCA across all draws.}
-\item{action_frequencies}{Named numeric vector: fraction of draws in which each action is BMA-optimal.}
+\item{action_frequencies}{Named numeric vector: fraction of draws in which each action is weighted-optimal.}
 \item{model_utilities}{The utility matrix used (for reference and plotting).}
 }
 \description{
 Computes EVCA across a distribution of model weight vectors drawn from a
 Dirichlet distribution. This turns EVCA from a point estimate (at fixed
 model weights) into a distribution, allowing assessment of how sensitive
-the BMA-optimal decision is to uncertainty over model weights.
+the weighted-optimal decision is to uncertainty over model weights.
 }
 \details{
 Standard EVCA is computed at a single fixed model weight vector (e.g., equal
