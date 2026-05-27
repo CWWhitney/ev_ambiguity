@@ -6,8 +6,7 @@ Description: Computes the Expected Value of Eliminating Causal Ambiguity (EVCA),
     structural uncertainty in decision problems with competing causal models.
     EVCA extends traditional value of information analysis to handle situations
     where multiple competing theories exist about how interventions affect outcomes.
-    Uses Bayesian model averaging to integrate across model uncertainty and
-    provides tools for research prioritization and decision-making under ambiguity.
+    EVCA provides tools for research prioritization and decision-making under ambiguity.
 Authors@R:
     person("Cory", "Whitney", email = "cory.whitney@uni-bonn.de", role = c("aut", "cre"))
 License: MIT + file LICENSE
