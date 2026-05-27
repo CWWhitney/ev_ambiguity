@@ -1,2 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^R_FUNCTION_STYLE_GUIDE\.md$
+^SUMMARY\.md$
+^cran-comments\.md$
