@@ -71,8 +71,8 @@ then normalize: p_k = X_k / sum(X). This is exact Dirichlet sampling.
 # Luang Prabang road decision
 model_utilities <- matrix(
   c(
-     5, 40, 80,
-    90, 82,  8,
+    5, 40, 80,
+    90, 82, 8,
     72, 78, 55
   ),
   nrow = 3, ncol = 3, byrow = TRUE,

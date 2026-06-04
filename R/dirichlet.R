@@ -69,8 +69,8 @@
 #' # Luang Prabang road decision
 #' model_utilities <- matrix(
 #'   c(
-#'      5, 40, 80,
-#'     90, 82,  8,
+#'     5, 40, 80,
+#'     90, 82, 8,
 #'     72, 78, 55
 #'   ),
 #'   nrow = 3, ncol = 3, byrow = TRUE,
@@ -100,9 +100,9 @@
 #'
 #' @export
 compute_evca_dirichlet <- function(model_utilities,
-                                    alpha,
-                                    n_draws = 5000,
-                                    seed = NULL) {
+                                   alpha,
+                                   n_draws = 5000,
+                                   seed = NULL) {
   # Input validation ----
 
   # Coerce data frame to matrix if needed
@@ -118,7 +118,7 @@ compute_evca_dirichlet <- function(model_utilities,
   }
 
   n_decisions <- nrow(model_utilities)
-  n_models    <- ncol(model_utilities)
+  n_models <- ncol(model_utilities)
 
   if (any(is.na(model_utilities))) {
     stop(
@@ -170,8 +170,9 @@ compute_evca_dirichlet <- function(model_utilities,
   # X_k ~ Gamma(alpha_k, rate=1); normalize so sum = 1
   raw <- matrix(
     stats::rgamma(n_draws * n_models,
-                  shape = rep(alpha, each = n_draws),
-                  rate  = 1),
+      shape = rep(alpha, each = n_draws),
+      rate  = 1
+    ),
     nrow = n_draws,
     ncol = n_models
   )
@@ -181,32 +182,32 @@ compute_evca_dirichlet <- function(model_utilities,
   per_model_max <- apply(model_utilities, 2, max)
 
   # Compute EVCA for each draw ----
-  evca_draws    <- numeric(n_draws)
+  evca_draws <- numeric(n_draws)
   optimal_draws <- character(n_draws)
 
   for (i in seq_len(n_draws)) {
-    p           <- p_draws[i, ]
-    wtd_eu_i    <- as.vector(model_utilities %*% p)
-    perf_i      <- sum(p * per_model_max)
-    evca_draws[i]    <- perf_i - max(wtd_eu_i)
+    p <- p_draws[i, ]
+    wtd_eu_i <- as.vector(model_utilities %*% p)
+    perf_i <- sum(p * per_model_max)
+    evca_draws[i] <- perf_i - max(wtd_eu_i)
     optimal_draws[i] <- rownames(model_utilities)[which.max(wtd_eu_i)]
   }
 
   # Compute action frequencies ----
-  action_tbl  <- table(optimal_draws)
+  action_tbl <- table(optimal_draws)
   action_freq <- as.numeric(action_tbl) / n_draws
   names(action_freq) <- names(action_tbl)
 
   # Return ----
   return(list(
-    evca_draws        = evca_draws,
-    optimal_actions   = optimal_draws,
-    alpha             = alpha,
-    n_draws           = n_draws,
-    mean_evca         = mean(evca_draws),
-    sd_evca           = stats::sd(evca_draws),
+    evca_draws = evca_draws,
+    optimal_actions = optimal_draws,
+    alpha = alpha,
+    n_draws = n_draws,
+    mean_evca = mean(evca_draws),
+    sd_evca = stats::sd(evca_draws),
     action_frequencies = action_freq,
-    model_utilities   = model_utilities
+    model_utilities = model_utilities
   ))
 }
 
@@ -235,8 +236,8 @@ compute_evca_dirichlet <- function(model_utilities,
 #' @examples
 #' model_utilities <- matrix(
 #'   c(
-#'      5, 40, 80,
-#'     90, 82,  8,
+#'     5, 40, 80,
+#'     90, 82, 8,
 #'     72, 78, 55
 #'   ),
 #'   nrow = 3, ncol = 3, byrow = TRUE,
@@ -256,8 +257,8 @@ compute_evca_dirichlet <- function(model_utilities,
 #' r2 <- compute_evca_dirichlet(U_norm, alpha = c(8, 8, 2), seed = 42)
 #' plot_dirichlet_evca(list("Equal (2,2,2)" = r1, "Dev-coalition (8,8,2)" = r2))
 plot_dirichlet_evca <- function(dirichlet_result,
-                                 title = "EVCA Distribution under Dirichlet Weight Uncertainty",
-                                 bins  = 40) {
+                                title = "EVCA Distribution under Dirichlet Weight Uncertainty",
+                                bins = 40) {
   # Allow single result or named list of results ----
   if (is.list(dirichlet_result) && "evca_draws" %in% names(dirichlet_result)) {
     dirichlet_result <- list("Result" = dirichlet_result)
@@ -280,15 +281,16 @@ plot_dirichlet_evca <- function(dirichlet_result,
       )
     }
     data.frame(
-      Scenario  = sname,
-      EVCA      = res$evca_draws,
+      Scenario = sname,
+      EVCA = res$evca_draws,
       mean_evca = res$mean_evca,
       stringsAsFactors = FALSE
     )
   }))
 
   plot_data$Scenario <- factor(plot_data$Scenario,
-                               levels = names(dirichlet_result))
+    levels = names(dirichlet_result)
+  )
 
   mean_data <- unique(plot_data[, c("Scenario", "mean_evca")])
 
@@ -300,7 +302,7 @@ plot_dirichlet_evca <- function(dirichlet_result,
   ) +
     ggplot2::geom_histogram(bins = bins, alpha = 0.75, colour = "white") +
     ggplot2::geom_vline(
-      data     = mean_data,
+      data = mean_data,
       ggplot2::aes(xintercept = .data$mean_evca),
       linetype = "dashed",
       linewidth = 0.7
@@ -326,7 +328,7 @@ plot_dirichlet_evca <- function(dirichlet_result,
 }
 
 
-#' Plot BMA-Optimal Action Frequencies from Dirichlet Sensitivity Analysis
+#' Plot Weighted-Optimal Action Frequencies from Dirichlet Sensitivity Analysis
 #'
 #' Creates a stacked bar chart showing what fraction of Dirichlet weight draws
 #' result in each action being weighted-optimal. Supports a single result or a named
@@ -334,7 +336,7 @@ plot_dirichlet_evca <- function(dirichlet_result,
 #'
 #' @param dirichlet_result A single list returned by [compute_evca_dirichlet()],
 #'   or a named list of such results.
-#' @param title Plot title. Default: "BMA-Optimal Action across Dirichlet Weight
+#' @param title Plot title. Default: "Weighted-Optimal Action across Dirichlet Weight
 #'   Draws".
 #' @param decision_order Optional character vector specifying the stacking order
 #'   of decisions in the bars (default: order found in action_frequencies).
@@ -351,8 +353,8 @@ plot_dirichlet_evca <- function(dirichlet_result,
 #' @examples
 #' model_utilities <- matrix(
 #'   c(
-#'      5, 40, 80,
-#'     90, 82,  8,
+#'     5, 40, 80,
+#'     90, 82, 8,
 #'     72, 78, 55
 #'   ),
 #'   nrow = 3, ncol = 3, byrow = TRUE,
@@ -371,8 +373,8 @@ plot_dirichlet_evca <- function(dirichlet_result,
 #'   decision_order = c("No road", "Direct route", "Rerouted road")
 #' )
 plot_dirichlet_actions <- function(dirichlet_result,
-                                    title         = "Weighted-Optimal Action across Dirichlet Weight Draws",
-                                    decision_order = NULL) {
+                                   title = "Weighted-Optimal Action across Dirichlet Weight Draws",
+                                   decision_order = NULL) {
   # Allow single result or named list ----
   if (is.list(dirichlet_result) && "evca_draws" %in% names(dirichlet_result)) {
     dirichlet_result <- list("Result" = dirichlet_result)
@@ -387,7 +389,7 @@ plot_dirichlet_actions <- function(dirichlet_result,
 
   # Build action-frequency data frame ----
   plot_data <- do.call(rbind, lapply(names(dirichlet_result), function(sname) {
-    res   <- dirichlet_result[[sname]]
+    res <- dirichlet_result[[sname]]
     if (!"action_frequencies" %in% names(res)) {
       stop(
         "Each element must be output from compute_evca_dirichlet(). ",
@@ -397,19 +399,20 @@ plot_dirichlet_actions <- function(dirichlet_result,
     freqs <- res$action_frequencies
     data.frame(
       Scenario = sname,
-      Action   = names(freqs),
-      Share    = as.numeric(freqs),
+      Action = names(freqs),
+      Share = as.numeric(freqs),
       stringsAsFactors = FALSE
     )
   }))
 
   plot_data$Scenario <- factor(plot_data$Scenario,
-                               levels = names(dirichlet_result))
+    levels = names(dirichlet_result)
+  )
 
   # Set action (decision) factor order ----
   all_actions <- unique(plot_data$Action)
   if (!is.null(decision_order)) {
-    matched   <- intersect(decision_order, all_actions)
+    matched <- intersect(decision_order, all_actions)
     remaining <- setdiff(all_actions, matched)
     all_actions <- c(matched, remaining)
   }
@@ -422,10 +425,10 @@ plot_dirichlet_actions <- function(dirichlet_result,
     ggplot2::geom_col(width = 0.6) +
     ggplot2::geom_text(
       ggplot2::aes(label = paste0(round(.data$Share * 100), "%")),
-      position  = ggplot2::position_stack(vjust = 0.5),
-      size      = 3.5,
-      colour    = "white",
-      fontface  = "bold"
+      position = ggplot2::position_stack(vjust = 0.5),
+      size = 3.5,
+      colour = "white",
+      fontface = "bold"
     ) +
     ggplot2::scale_y_continuous(
       labels = function(x) paste0(round(x * 100), "%")
