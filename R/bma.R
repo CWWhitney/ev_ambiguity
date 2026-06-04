@@ -1,8 +1,9 @@
-#' Bayesian Model Averaging for Expected Utilities
+#' Prior-Credence-Weighted Model Utility
 #'
-#' Computes Bayesian model average expected utilities across competing causal
+#' Computes prior-credence-weighted expected utilities across competing causal
 #' models. This function calculates the weighted average of utilities where
-#' weights are the posterior probabilities of each model being correct.
+#' weights are prior credences over competing causal structures, not
+#' data-fit posteriors.
 #'
 #' @usage weighted_model_utility(model_utilities, model_probs)
 #'
@@ -10,24 +11,28 @@
 #'   containing expected utilities for each decision under each model.
 #'   Can also be a data frame that can be coerced to matrix. Each cell \[i,j\]
 #'   represents the expected utility of decision i if model j is true.
-#' @param model_probs Numeric vector of posterior probabilities for each model.
-#'   Must have length equal to number of columns in model_utilities.
-#'   Must be non-negative and sum to 1 (within 1e-10 tolerance).
+#' @param model_probs Numeric vector of prior credences for each model,
+#'   representing the analyst's or stakeholders' degree of belief in each
+#'   competing causal structure. These are elicited credences, not
+#'   data-fit posteriors. Must have length equal to number of columns in
+#'   model_utilities. Must be non-negative and sum to 1 (within 1e-10 tolerance).
 #'
-#' @return Numeric vector of BMA expected utilities for each decision,
-#'   with length equal to nrow(model_utilities). Each element represents
-#'   the expected utility of that decision averaged across all models
-#'   weighted by model probabilities.
+#' @return Numeric vector of prior-credence-weighted expected utilities,
+#'   one per decision (length equal to nrow(model_utilities)). Each element
+#'   represents the expected utility of that decision averaged across all
+#'   causal models, weighted by their prior credences.
 #'
 #' @details
-#' prior-weighted model aggregation provides a coherent framework for making
-#' decisions under model uncertainty. For each decision d, the BMA expected
-#' utility is calculated as:
+#' Prior-credence-weighted model aggregation provides a principled framework
+#' for making decisions under causal structural uncertainty. For each decision
+#' d, the weighted expected utility is:
 #'
-#' EU_BMA(d) = sum over all models k of: P(M_k) * EU(d|M_k)
+#' EU_avg(d) = sum over all models k of: p(M_k) * EU(d|M_k)
 #'
-#' where P(M_k) is the probability that model k is correct and EU(d|M_k)
-#' is the expected utility of decision d given model k.
+#' where p(M_k) is the prior credence assigned to causal model M_k and
+#' EU(d|M_k) is the expected utility of decision d under that model.
+#' The credences p(M_k) are supplied by the analyst or elicited from
+#' stakeholders; they are not updated from data within this function.
 #'
 #' This function uses efficient matrix multiplication: model_utilities %*% model_probs
 #'
