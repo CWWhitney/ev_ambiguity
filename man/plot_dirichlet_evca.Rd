@@ -30,8 +30,8 @@ list of results for multi-scenario comparison (faceted).
 \examples{
 model_utilities <- matrix(
   c(
-     5, 40, 80,
-    90, 82,  8,
+    5, 40, 80,
+    90, 82, 8,
     72, 78, 55
   ),
   nrow = 3, ncol = 3, byrow = TRUE,

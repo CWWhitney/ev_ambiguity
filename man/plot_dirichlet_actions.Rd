@@ -2,7 +2,7 @@
 % Please edit documentation in R/dirichlet.R
 \name{plot_dirichlet_actions}
 \alias{plot_dirichlet_actions}
-\title{Plot BMA-Optimal Action Frequencies from Dirichlet Sensitivity Analysis}
+\title{Plot Weighted-Optimal Action Frequencies from Dirichlet Sensitivity Analysis}
 \usage{
 plot_dirichlet_actions(
   dirichlet_result,
@@ -14,7 +14,7 @@ plot_dirichlet_actions(
 \item{dirichlet_result}{A single list returned by \code{\link[=compute_evca_dirichlet]{compute_evca_dirichlet()}},
 or a named list of such results.}
 
-\item{title}{Plot title. Default: "BMA-Optimal Action across Dirichlet Weight
+\item{title}{Plot title. Default: "Weighted-Optimal Action across Dirichlet Weight
 Draws".}
 
 \item{decision_order}{Optional character vector specifying the stacking order
@@ -31,8 +31,8 @@ list of results for multi-scenario comparison.
 \examples{
 model_utilities <- matrix(
   c(
-     5, 40, 80,
-    90, 82,  8,
+    5, 40, 80,
+    90, 82, 8,
     72, 78, 55
   ),
   nrow = 3, ncol = 3, byrow = TRUE,
