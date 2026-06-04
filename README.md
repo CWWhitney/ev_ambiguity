@@ -1,7 +1,7 @@
 # evca: Expected Value of Eliminating Causal Ambiguity
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20418470.svg)](https://doi.org/10.5281/zenodo.20418470)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20418469.svg)](https://doi.org/10.5281/zenodo.20418469)
 
 ## Overview
 
@@ -264,7 +264,7 @@ EVCA is applicable wherever causal ambiguity exists:
 If you use this package, please cite:
 
 Whitney, C. W. (2026). *evca: Expected Value of Eliminating Causal Ambiguity*.
-R package version 0.1.1-alpha. https://doi.org/10.5281/zenodo.20418470
+R package version 0.1.1-alpha. https://doi.org/10.5281/zenodo.20418469
 
 ```bibtex
 @software{whitney2025evca,
@@ -272,8 +272,8 @@ R package version 0.1.1-alpha. https://doi.org/10.5281/zenodo.20418470
   title   = {{evca}: {Expected Value of Eliminating Causal Ambiguity}},
   year    = {2026},
   version = {0.1.1-alpha},
-  doi     = {10.5281/zenodo.20418470},
-  url     = {https://doi.org/10.5281/zenodo.20418470},
+  doi     = {10.5281/zenodo.20418469},
+  url     = {https://doi.org/10.5281/zenodo.20418469},
   note    = {R package}
 }
 ```
