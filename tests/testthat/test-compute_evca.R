@@ -13,7 +13,7 @@ test_that("compute_evca returns correct structure", {
   # Check structure
   expect_type(result, "list")
   expect_named(result, c(
-    "weighted_model_utility",
+    "action_utilities",
     "optimal_decision",
     "optimal_utility",
     "optimal_decisions_per_model",
@@ -28,7 +28,7 @@ test_that("compute_evca returns correct structure", {
   # Check dimensions
   expect_equal(result$n_decisions, 3)
   expect_equal(result$n_models, 3)
-  expect_equal(length(result$weighted_model_utility), 3)
+  expect_equal(length(result$action_utilities), 3)
   expect_equal(length(result$optimal_decisions_per_model), 3)
   expect_equal(length(result$optimal_utilities_per_model), 3)
 })
@@ -91,8 +91,8 @@ test_that("compute_evca with utility function", {
   expect_equal(result$n_models, 3)
 
   # Check that utilities were transformed (values should be smaller after sqrt)
-  expect_true(all(result$weighted_model_utility <
-    compute_evca(model_utilities, model_probs)$weighted_model_utility))
+  expect_true(all(result$action_utilities <
+    compute_evca(model_utilities, model_probs)$action_utilities))
 })
 
 test_that("compute_evca returns correct EVCA calculation", {
@@ -119,7 +119,7 @@ test_that("compute_evca returns correct EVCA calculation", {
   # Perfect info EU: 0.5*10 + 0.5*9 = 9.5
   # EVCA: 9.5 - 7.5 = 2.0
 
-  expect_equal(result$weighted_model_utility, c(7.5, 7.5))
+  expect_equal(result$action_utilities, c(7.5, 7.5))
   expect_equal(result$perfect_info_expected_utility, 9.5)
   expect_equal(result$evca, 2.0)
 })

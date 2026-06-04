@@ -325,7 +325,7 @@ test_that("compute_evca handles utility functions correctly", {
   # Squared: [100, 25; 36, 81]
   # BMA: Decision 1: 0.5*100 + 0.5*25 = 62.5
   #      Decision 2: 0.5*36 + 0.5*81 = 58.5
-  expect_equal(result$weighted_model_utility, c(62.5, 58.5), tolerance = 1e-10)
+  expect_equal(result$action_utilities, c(62.5, 58.5), tolerance = 1e-10)
   expect_equal(result$optimal_decision, 1)
 })
 
@@ -340,7 +340,7 @@ test_that("compute_evca returns correct structure and metadata", {
 
   # Check all expected components are present
   expected_components <- c(
-    "weighted_model_utility",
+    "action_utilities",
     "optimal_decision",
     "optimal_utility",
     "optimal_decisions_per_model",
