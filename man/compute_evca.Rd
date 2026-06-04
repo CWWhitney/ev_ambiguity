@@ -13,9 +13,11 @@ Can also be a data frame that can be coerced to matrix. Each cell [i,j]
 represents the expected utility of decision i if model j is the true
 causal model.}
 
-\item{model_probs}{Numeric vector of posterior probabilities for each model.
-Must have length equal to number of columns in model_utilities.
-Must be non-negative and sum to 1 (within 1e-10 tolerance).}
+\item{model_probs}{Numeric vector of prior credences (weights) for each model,
+representing the analyst's or stakeholders' degree of belief in each causal
+structure. These are not data-fit posteriors; they are elicited credences
+over competing causal mechanisms. Must have length equal to number of
+columns in model_utilities. Must be non-negative and sum to 1 (within 1e-10 tolerance).}
 
 \item{utility_function}{Function to apply to outcomes (default: identity).
 If provided, will be applied to model_utilities assuming they represent
@@ -24,7 +26,7 @@ utility functions like exponential utility: function(x) -exp(-r*x).}
 }
 \value{
 A list with the following components:
-\item{weighted_model_utility}{Numeric vector of weighted expected utility for each decision.}
+\item{action_utilities}{Numeric vector of weighted expected utility for each decision.}
 \item{optimal_decision}{Integer index of optimal decision under model averaging.}
 \item{optimal_utility}{Expected utility of optimal weighted-optimal decision.}
 \item{optimal_decisions_per_model}{Integer vector of optimal decision under each model.}
@@ -36,10 +38,10 @@ A list with the following components:
 \item{n_models}{Number of competing causal models.}
 }
 \description{
-Computes the Expected Value of Eliminating Causal Ambiguity using Bayesian
-model averaging framework. EVCA quantifies the maximum value of resolving
-structural uncertainty about which causal model is correct among competing
-alternatives.
+Computes the Expected Value of Eliminating Causal Ambiguity using prior
+credence-weighted model aggregation. EVCA quantifies the cost of acting
+under structural uncertainty about which causal model is correct, and the
+cost of excluding any one causal model from deliberation entirely.
 }
 \details{
 The Expected Value of Eliminating Causal Ambiguity (EVCA) extends traditional
@@ -50,10 +52,10 @@ EVCA is calculated as:
 EVCA = E(max utility with perfect info) - max(E(utility under ambiguity))
 = sum_k P(M_k) * max_d EU(d|M_k) - max_d sum_k P(M_k) * EU(d|M_k)
 
-The first term represents expected utility if we knew which model is true
-(we would choose the optimal decision for that model). The second term is
-the expected utility of the optimal decision under current ambiguity using
-Bayesian Model Averaging.
+The first term represents expected utility if we knew which causal model is
+true (we would choose the optimal decision for that model). The second term
+is the expected utility of the optimal decision under current ambiguity,
+using prior credence-weighted aggregation across competing causal models.
 
 Interpretation:
 \itemize{
@@ -66,12 +68,56 @@ Interpretation:
 Computational complexity is O(D × M) where D is the number of decisions
 and M is the number of models.
 }
+\section{Scope}{
+
+This function operates at the utility layer. It takes a pre-computed matrix
+of expected utilities EU(d|M_k) — one value per decision-model combination
+— and computes EVCA from that matrix. The upstream steps that produce this
+matrix are outside the function's scope:
+\enumerate{
+\item Specifying competing causal models (what are the alternative
+theories of how the intervention works?)
+\item Estimating model parameters (fitting each causal model to data)
+\item Computing expected utilities per model (simulating outcomes under
+each model for each available decision)
+\item Eliciting prior credences (how plausible is each causal model?)
+\item Normalizing utilities when models use incommensurable welfare units
+(see \code{\link{normalize_utilities}()})
+}
+Users must complete these steps before calling \code{compute_evca()}.
+A future extension of this package will provide tools for causal model
+specification, parameter estimation, and utility computation integrated
+with Stan and Bayesian network frameworks.
+}
+
+\section{Relationship to related methods}{
+
+\strong{EVPI (Expected Value of Perfect Information)} addresses parameter
+uncertainty within a single agreed causal model: how much would it be worth
+to know the exact parameter values? EVCA addresses structural uncertainty:
+the decision maker does not know which of several competing causal models
+is correct. Both are theoretical upper bounds on the value of further
+research, but they quantify different types of uncertainty and are
+appropriate in different problem contexts.
+
+\strong{Strong & Oakley (2014)} address the Expected Value of Model
+Improvement (EVMI) — the gain from reducing systematic bias (model
+discrepancy) within a single model relative to the true data-generating
+process. This concerns within-model inadequacy: the model is assumed to be
+structurally correct but imprecise. EVCA instead treats multiple complete
+causal models as competing hypotheses with no agreed truth and asks what
+it would be worth to identify which is correct. Both extend VOI to
+structural model considerations, but through distinct mechanisms:
+EVMI quantifies the cost of within-model bias; EVCA quantifies the cost
+of between-model ambiguity.
+}
+
 \section{Warning}{
 
 Model probabilities must sum to exactly 1 (within 1e-10 tolerance).
-All utility values should be on the same scale for meaningful comparison.
-If using a utility function, ensure it preserves the preference ordering
-and is appropriate for the decision context.
+All utility values should be on the same scale for meaningful comparison;
+use \code{\link{normalize_utilities}()} when welfare units differ across
+models.
 
 When comparing EVCA to research costs, ensure both are in the same units
 (e.g., dollars, utility points).
@@ -157,9 +203,6 @@ Economics, 18(3), 341-364.
 Yokota, F., & Thompson, K. M. (2004). Value of information analysis in
 environmental health risk management decisions: past, present, and future.
 Risk Analysis, 24(3), 635-650.
-
-Hoeting, J. A., Madigan, D., Raftery, A. E., & Volinsky, C. T. (1999).
-Bayesian model averaging: a tutorial. Statistical Science, 14(4), 382-401.
 }
 \keyword{decision-analysis}
 \keyword{models}
