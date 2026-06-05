@@ -1,0 +1,207 @@
+---
+title: "Glossary of Decision-Theoretic and Game-Theoretic Terms"
+author: "Cory Whitney"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Glossary of Decision-Theoretic and Game-Theoretic Terms}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+# Purpose
+
+This glossary defines the core concepts underlying the `evca` package and its decision-theoretic framework. Terms are drawn from decision theory, Bayesian statistics, value of information analysis, and game theory. Definitions are written to be consistent with the Bayesian, subjectivist position: uncertainty is always expressible as a probability distribution, even when data are sparse, and calibrated expert judgment is a legitimate and quantifiable source of evidence (Hubbard 2014; Savage 1954; de Finetti 1974).
+
+The glossary is organized thematically. Cross-references to `evca` functions are provided where relevant.
+
+---
+
+# Uncertainty, Variability, and Risk
+
+## Variability
+
+Natural dispersion in outcomes across contexts, individuals, replications, or time. Variability reflects genuine heterogeneity in the world and does not diminish as knowledge increases. Knowing more about a population does not reduce the spread of outcomes within it.
+
+*Example:* Crop yields vary across farms in the same region even under identical management. That variation is real and irreducible; it is not an artefact of ignorance.
+
+Variability is distinct from uncertainty. Conflating the two leads to underestimating what research can and cannot achieve.
+
+## Uncertainty
+
+A state of incomplete knowledge about a quantity, outcome, or model, expressible as a **probability distribution** over the unknown. Uncertainty is **epistemic** it arises from ignorance rather than from genuine randomness in the world, and it can in principle be reduced by gathering evidence.
+
+Critically, the absence of data does not make uncertainty unmeasurable. Through calibrated expert knowledge elicitation (EKE), reference-class reasoning, and structured judgment, it is possible to construct defensible probability distributions for quantities that have never been measured directly including hard-to-value goods such as ecosystem services or non-market welfare (Hubbard 2014; O'Hagan et al. 2006).
+
+*Note on Knightian uncertainty:* Knight (1921) distinguished "risk" (known probabilities) from "uncertainty" (unknowable probabilities). This distinction is rejected here, following the Bayesian position: there is no sharp line between the two. A wide, carefully constructed prior is still a prior; it still supports rational expected-utility calculations; and it can still be updated as evidence accumulates.
+
+## Risk
+
+The expected harm from a potential damaging event, defined as:
+
+$$\text{Risk} = P(\text{event}) \times E[\text{damage} \mid \text{event}]$$
+
+Risk combines two components: (1) the probability that a harmful event occurs, and (2) the expected magnitude of damage if it does. Both components can be estimated under uncertainty using probability distributions; neither requires certainty to be actionable.
+
+*Note:* $E[\text{damage} \mid \text{event}]$ the expected damage conditional on the event occurring is the **severity** or **consequence** of the event. Severity alone is not risk; it must be weighted by the event's probability.
+
+*Relation to decision theory:* Under expected-utility theory, rational agents choose actions that minimize expected harm (or maximize expected utility). Risk is therefore the decision-relevant quantity: it integrates probability and consequence into a single number that can be compared across alternatives.
+
+---
+
+# 2. Decisions and Preferences
+
+## Outcome
+
+A consequence that results from taking a particular decision in a particular state of the world. Outcomes may be single-dimensional (e.g., net monetary benefit) or multi-dimensional (e.g., yield, cost, and environmental impact simultaneously). See `compute_multi_attribute_utilities()` for multi-dimensional handling within `evca`.
+
+## Decision
+
+A choice among two or more alternatives (actions), each leading to different outcomes depending on the state of the world. A well-formed decision problem specifies: (1) the set of available actions, (2) the uncertain states of the world, (3) the outcomes that result from each action–state combination, and (4) the decision-maker's preferences over outcomes.
+
+## Preference
+
+A binary relation over outcomes or lotteries expressing how a decision-maker ranks alternatives. Preferences are **rational** (in the technical sense) if they satisfy the von Neumann–Morgenstern axioms: completeness, transitivity, continuity, and independence. Rational preferences over lotteries can always be represented by an expected utility function.
+
+## Value
+
+The worth assigned to an outcome. Generally measured on a scale with meaningful differences and ratios (as with monetary outcomes or calibrated utility scores).
+
+Value and utility are related but not identical: value is the underlying worth of an outcome; utility is a formal mathematical representation of that worth that is consistent with a decision-maker's preferences under uncertainty.
+
+## Utility
+
+A numerical function $U(\cdot)$ that represents a decision-maker's preferences over outcomes, satisfying the von Neumann–Morgenstern (vNM) axioms. When preferences are rational in the vNM sense, utility exists, is unique up to affine transformation, and supports expected-utility calculations.
+
+Utility may be **risk-neutral** (linear in outcomes), **risk-averse** (concave the decision-maker prefers a certain outcome to a gamble with the same expected value), or **risk-seeking** (convex). The curvature of the utility function encodes the decision-maker's attitude toward risk.
+
+Within `evca`, utilities are treated as pre-computed inputs. The package operates at the utility layer: `compute_evca()` takes a matrix of expected utilities (decisions × models) and computes the value of resolving structural uncertainty.
+
+## Expected Utility
+
+The probability-weighted average of utilities across uncertain outcomes:
+
+$$EU(d) = \sum_{s} P(s) \cdot U(\text{outcome}(d, s))$$
+
+where $s$ indexes states of the world. The **expected utility hypothesis** (von Neumann and Morgenstern 1944; Savage 1954) holds that rational agents choose the action that maximizes expected utility. This is the foundational decision rule in `evca`.
+
+---
+
+# Ambiguity and Model Uncertainty
+
+## Ambiguity
+
+Uncertainty over which **model** correctly describes how the world works sometimes called "model uncertainty" or "deep uncertainty." Ambiguity is distinguished from ordinary parameter uncertainty not because it is unquantifiable (it is still expressible as a probability distribution over models) but because it operates at a different level: it concerns the *structure* of causal relationships rather than the *values* of parameters within an agreed structure.
+
+High ambiguity arises when: competing theories exist with serious empirical support; mechanistic understanding is limited; or the system of interest has never been directly observed in the relevant context.
+
+## Causal Ambiguity
+
+The specific form of ambiguity addressed by the `evca` package: uncertainty over which **causal model** among several competing alternatives correctly describes how an intervention produces outcomes. Causal ambiguity means that even if all parameters within each candidate model were known exactly, the decision-maker would still be uncertain about the true causal mechanism.
+
+*Example:* A livelihood intervention might improve household welfare through (a) direct income transfer, (b) improved social capital, or (c) both simultaneously. These represent different causal structures, each implying different optimal follow-on decisions.
+
+## Structural Uncertainty
+
+Uncertainty about the **form** of the causal model: which variables are relevant, which causal pathways operate, what functional form describes the relationships. Structural uncertainty is the between-model layer of uncertainty. EVCA quantifies the value of resolving structural uncertainty.
+
+Contrast with **parameter uncertainty**: uncertainty about the numerical values of coefficients within an agreed model structure. EVPI (see below) addresses parameter uncertainty; EVCA addresses structural uncertainty.
+
+---
+
+# Value of Information
+
+## Value of Information (VOI)
+
+The maximum amount a rational decision-maker should pay to obtain new information before making a decision. VOI is always non-negative (information cannot harm a rational agent who can choose to ignore it) and is bounded above by EVPI.
+
+VOI analysis translates research prioritization from a question of *scientific interest* to a question of *decision relevance*: how much does knowing this improve the decision I face?
+
+## Expected Value of Perfect Information (EVPI)
+
+The expected gain from having **perfect** knowledge of the true state of the world (or true parameter values) before deciding, compared to deciding under current uncertainty:
+
+$$EVPI = E_s\left[\max_d U(d, s)\right] - \max_d E_s\left[U(d, s)\right]$$
+
+EVPI is the upper bound on the value of any information-gathering activity. It addresses **parameter uncertainty** within a given model structure. If EVPI is low, the current decision is robust to parameter uncertainty and further data collection is unlikely to change it.
+
+See also: Strong and Oakley (2014); Briggs et al. (2012).
+
+## Expected Value of Eliminating Causal Ambiguity (EVCA)
+
+The expected gain from knowing which **causal model** is correct before deciding, compared to deciding under model ambiguity using Bayesian model averaging:
+
+$$EVCA = \sum_{k=1}^{K} p(M_k) \cdot \max_d EU(d \mid M_k) - \max_d \sum_{k=1}^{K} p(M_k) \cdot EU(d \mid M_k)$$
+
+The first term is the expected utility achievable if the true model were revealed (choose the optimal action for each model, weighted by model probability). The second term is the expected utility of the best decision under current ambiguity (model averaging). EVCA is the difference: the welfare cost of structural uncertainty.
+
+If EVCA exceeds the cost of research that would identify the correct model, invest in that research. If EVCA is low, the optimal decision is robust across models and can be taken immediately.
+
+Computed by `compute_evca()`.
+
+## Exclusion Cost
+
+The welfare loss from omitting a model entirely from deliberation treating its probability as zero when it should be positive. Exclusion costs quantify the risk of model neglect: how much worse off is the decision-maker who ignores a plausible competing model?
+
+Computed by `compute_exclusion_costs()`.
+
+---
+
+# Bayesian Reasoning and Elicitation
+
+## Prior Probability
+
+A probability distribution expressing the decision-maker's degree of belief in a hypothesis, model, or parameter value **before** observing new evidence. Priors may be derived from previous studies, mechanistic theory, or calibrated expert judgment. In `evca`, model probabilities $p(M_k)$ are priors over competing causal structures.
+
+The Bayesian framework requires only that priors be coherent (internally consistent) and updatable via Bayes' theorem. They do not need to be "objective" or data-derived to be legitimate. When no basis exists to prefer one model over another, equal weights are the honest default and EVCA remains fully interpretable under equal weights.
+
+## Elicitation
+
+The structured process of extracting probability distributions or utility functions from experts or stakeholders when direct data are unavailable. Elicitation methods include probability wheel assessments, betting-odds approaches, SHELF (Sheffield Elicitation Framework), and calibration training.
+
+Calibration training teaching participants to distinguish confidence from accuracy substantially improves the quality of elicited distributions (Hubbard 2014; Oakley and O'Hagan 2019). Elicitation is the primary method for populating model probabilities in `evca` when empirical model comparison data are not available.
+
+## Bayesian Model Averaging (BMA)
+
+A statistical method for combining predictions from multiple models fitted to the same data, weighting each by its posterior model probability. BMA treats models as alternative parameterizations or specifications of a shared underlying data-generating process. The weighted average is itself the answer BMA produces a single merged prediction or estimate.
+
+BMA is appropriate when models are *commensurable*: they occupy the same sample space, are fitted to the same observations, and represent plausible variants of the same causal structure rather than fundamentally different theories. It addresses parameter and model-specification uncertainty within an agreed domain.
+
+BMA is **not** the aggregation method used in `evca`. The competing causal models in EVCA are ontologically distinct they represent different theories of how an intervention works, not alternative fits to the same data. They cannot be merged into a single model.
+
+## Credence-Weighted Aggregation
+
+The aggregation method used in `evca`: utilities are averaged across competing causal models, weighted by the analyst's prior credences $p(M_k)$. The result is the best decision available when the correct causal model is unknown. EVCA is the gap between this baseline and what would be achievable if the correct model were identified.
+
+When EVCA ≈ 0, the models agree on which decision is best and the baseline is sufficient proceed. When EVCA is large, the models disagree and the baseline is a poor substitute for knowing the truth; that is the signal to invest in resolving the ambiguity.
+
+Implemented in `compute_evca()` via the `weighted_model_utility()` helper.
+
+
+---
+
+# References
+
+de Finetti, B. (1974). *Theory of Probability* (Vols. 1–2). Wiley.
+
+Hubbard, D. W. (2014). *How to Measure Anything: Finding the Value of Intangibles in Business* (3rd ed.). Wiley.
+
+Knight, F. H. (1921). *Risk, Uncertainty and Profit*. Hart, Schaffner & Marx.
+
+O'Hagan, A., Buck, C. E., Daneshkhah, A., Eiser, J. R., Garthwaite, P. H., Jenkinson, D. J., Oakley, J. E., and Rakow, T. (2006). *Uncertain Judgements: Eliciting Experts' Probabilities*. Wiley.
+
+Oakley, J. E. and O'Hagan, A. (2019). SHELF: The Sheffield Elicitation Framework (version 4). University of Sheffield. <https://shelf.sites.sheffield.ac.uk/>
+
+Savage, L. J. (1954). *The Foundations of Statistics*. Wiley.
+
+Strong, M. and Oakley, J. E. (2014). When is a model good enough? Deriving the expected value of model improvement via specifying internal model discrepancies. *SIAM/ASA Journal on Uncertainty Quantification*, 2(1), 106–125.
+
+von Neumann, J. and Morgenstern, O. (1944). *Theory of Games and Economic Behavior*. Princeton University Press.
