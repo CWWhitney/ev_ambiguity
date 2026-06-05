@@ -104,9 +104,6 @@ print(wtd_eu_df)
 
 }
 \references{
-Hoeting, J. A., Madigan, D., Raftery, A. E., & Volinsky, C. T. (1999).
-Bayesian model averaging: a tutorial. Statistical Science, 14(4), 382-401.
-
 Claxton, K. (1999). The irrelevance of inference: a decision-making approach
 to the stochastic evaluation of health care technologies. Journal of Health
 Economics, 18(3), 341-364.
