@@ -311,7 +311,6 @@ Key takeaways:
 
 For more details on the theoretical foundations and applications, see:
 
-- Hoeting, J. A., Madigan, D., Raftery, A. E., & Volinsky, C. T. (1999). Bayesian Model Averaging: Statistical Methods and Applications. _Statistical Science_, 14(4), 382–417. https://doi.org/10.1214/ss/1009212519
 - Claxton, K. (1999). The Value of Information: An Overview of Methods and Applications. _Health Economics_, 8(2), 191–202. https://doi.org/10.1002/(SICI)1099-1050(199903)8:2<191::AID-HEC420>3.0.CO;2-I
 - Yokota, F., & Thompson, K. M. (2004). Value of Information Analysis in Health Risk Management Decisions: Past, Present, and Future. _Risk Analysis_, 24(3), 635–650. https://doi.org/10.1111/j.0272-4332.2004.00463.x
 - Brock, W. A., Durlauf, S. N., & Moffitt, R. (2003). Generalized Instrumental Variables and Causal Ambiguity. In S. N. Durlauf & L. E. Blume (Eds.), _The New Palgrave Dictionary of Economics_ (pp. 1–7). Palgrave Macmillan. https://doi.org/10.1057/978-1-349-95121-5_2157-1
