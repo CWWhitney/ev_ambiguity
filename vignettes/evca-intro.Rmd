@@ -26,7 +26,7 @@ library(evca)
 
 ## The Problem of Causal Ambiguity
 
-Many decision problems face **causal ambiguity** — uncertainty about which causal model among several competing alternatives correctly describes how interventions affect outcomes. This is different from parameter uncertainty (uncertainty about the magnitude of effects within a known model structure).
+Many decision problems face **causal ambiguity**, uncertainty about which causal model among several competing alternatives correctly describes how interventions affect outcomes. This is different from parameter uncertainty (uncertainty about the magnitude of effects within a known model structure).
 
 For example:
 
@@ -144,7 +144,7 @@ The EVCA of `r round(result$evca, 3)` tells us the maximum we should pay (in uti
 plot_evca(result, title = "EVCA Analysis: Model Ambiguity Value")
 ```
 
-The gap between the bars represents EVCA — the expected value of eliminating causal ambiguity.
+The gap between the bars represents EVCA, the expected value of eliminating causal ambiguity.
 
 ## Utility Heatmap
 

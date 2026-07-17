@@ -41,7 +41,7 @@ is found using only the remaining models, and the excluded model's welfare
 under that decision is compared to its best possible outcome.
 }
 \details{
-Exclusion cost quantifies the stakes of model exclusion — distinct from
+Exclusion cost quantifies the stakes of model exclusion, distinct from
 EVCA, which quantifies the cost of model uncertainty. Where EVCA asks
 "what would perfect structural knowledge be worth?", exclusion analysis asks
 "what does it cost a particular stakeholder group when their model is not

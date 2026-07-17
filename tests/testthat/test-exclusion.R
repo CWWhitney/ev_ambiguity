@@ -48,7 +48,7 @@ test_that("compute_exclusion_costs Traditional_Hmong exclusion is catastrophic",
   result <- compute_exclusion_costs(mat, normalize = TRUE)
   trad_row <- result[result$excluded_model == "Traditional_Hmong", ]
   expect_equal(nrow(trad_row), 1)
-  # Without Traditional_Hmong, Direct route is chosen — catastrophic for them
+  # Without Traditional_Hmong, Direct route is chosen, catastrophic for them
   expect_gt(trad_row$exclusion_cost, 0.8)
 })
 

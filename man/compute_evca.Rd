@@ -71,8 +71,8 @@ and M is the number of models.
 \section{Scope}{
 
 This function operates at the utility layer. It takes a pre-computed matrix
-of expected utilities EU(d|M_k) — one value per decision-model combination
-— and computes EVCA from that matrix. The upstream steps that produce this
+of expected utilities EU(d|M_k), one value per decision-model combination
+and computes EVCA from that matrix. The upstream steps that produce this
 matrix are outside the function's scope:
 \enumerate{
 \item Specifying competing causal models (what are the alternative
@@ -101,7 +101,7 @@ research, but they quantify different types of uncertainty and are
 appropriate in different problem contexts.
 
 \strong{Strong & Oakley (2014)} address the Expected Value of Model
-Improvement (EVMI) — the gain from reducing systematic bias (model
+Improvement (EVMI), the gain from reducing systematic bias (model
 discrepancy) within a single model relative to the true data-generating
 process. This concerns within-model inadequacy: the model is assumed to be
 structurally correct but imprecise. EVCA instead treats multiple complete
