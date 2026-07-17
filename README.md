@@ -19,10 +19,7 @@ EVCA provides a quantitative answer by computing the maximum value of resolving 
 
 ```r
 # Install from GitHub
-devtools::install_github("corywhitney/evca")
-
-# Or install locally
-devtools::install_local("path/to/evca")
+devtools::install_github("CWWhitney/ev_ambiguity")
 ```
 
 ## Quick Start
