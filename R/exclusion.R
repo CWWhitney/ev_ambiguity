@@ -32,7 +32,7 @@
 #'   \item{exclusion_cost}{Welfare loss: welfare_own_best - welfare_excluded.}
 #'
 #' @details
-#' Exclusion cost quantifies the stakes of model exclusion — distinct from
+#' Exclusion cost quantifies the stakes of model exclusion, distinct from
 #' EVCA, which quantifies the cost of model uncertainty. Where EVCA asks
 #' "what would perfect structural knowledge be worth?", exclusion analysis asks
 #' "what does it cost a particular stakeholder group when their model is not
