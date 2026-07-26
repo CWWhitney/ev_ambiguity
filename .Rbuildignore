@@ -1,5 +1,12 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.git$
+^\.gitignore$
+^\.DS_Store$
+(^|/)\.DS_Store$
+^\.Rhistory$
+(^|/)\.Rhistory$
+^\.\.[R]check$
 ^R_FUNCTION_STYLE_GUIDE\.md$
 ^SUMMARY\.md$
 ^cran-comments\.md$
