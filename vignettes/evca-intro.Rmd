@@ -75,6 +75,52 @@ $$EVCA = \underbrace{\sum_{k=1}^K p(M_k) \cdot \max_d EU(d|M_k)}_{\text{With per
 
 The first term represents expected utility if we knew which model is true (we would choose the optimal decision for that model). The second term is the expected utility of the optimal decision under current ambiguity.
 
+## Exclusion Cost
+
+A related but distinct question is what a single model's stakeholder loses
+when that model is dropped from deliberation entirely, rather than merely
+outweighed within it. For each model $M_k$, let $d^{*}_{-k}$ be the
+optimal decision computed from the remaining models alone, with their
+probabilities renormalized to sum to 1. The exclusion cost is
+
+$$EC_k = \max_d EU(d \mid M_k) - EU(d^{*}_{-k} \mid M_k)$$
+
+`compute_exclusion_costs()` computes $EC_k$ for every model in a single
+call; see `?compute_exclusion_costs` and the worked example below.
+
+### A two-model bound
+
+When there are exactly two competing models, EVCA can never exceed
+whichever model's own exclusion cost is smaller, once that cost is
+discounted by the model's probability:
+
+$$EVCA \leq \min\{p_1 EC_1,\; p_2 EC_2\} \qquad (K = 2)$$
+
+**Proof.** By definition, $d^*$ maximizes the probability-weighted
+aggregate utility, so for any decision $d$,
+$$\sum_j p_j\, EU(d^* \mid M_j) \geq \sum_j p_j\, EU(d \mid M_j).$$
+Apply this to $d = d^{*}_{-k}$, the decision chosen when model $k$ is
+excluded. With only two models, excluding $k$ leaves a single remaining
+model $j \neq k$, so $d^{*}_{-k}$ is exactly that model's own maximizer:
+$EU(d^{*}_{-k} \mid M_j) = \max_d EU(d \mid M_j)$. Hence
+$$\sum_j p_j\, EU(d^* \mid M_j) \geq p_k\, EU(d^{*}_{-k} \mid M_k) +
+p_j \max_d EU(d \mid M_j).$$
+Subtracting both sides from the perfect-information benchmark
+$p_k \max_d EU(d \mid M_k) + p_j \max_d EU(d \mid M_j)$ turns the
+left-hand side into EVCA and the right-hand side into
+$p_k\bigl(\max_d EU(d \mid M_k) - EU(d^{*}_{-k} \mid M_k)\bigr) = p_k EC_k$.
+So $EVCA \leq p_k EC_k$; since this holds for both $k = 1$ and $k = 2$, it
+holds for the minimum of the two. $\blacksquare$
+
+This bound is specific to $K = 2$: with three or more models, excluding
+one still leaves more than one behind, and $d^{*}_{-k}$ then maximizes the
+weighted sum over those remaining models rather than each one's own
+utility individually, so $d^{*}_{-k}$ need not attain every remaining
+model's own maximum, and the step above can fail. A three-model
+counterexample where the bound is violated is worked out in Whitney
+(2025), the companion short communication on the Expected Value of
+Causal Ambiguity.
+
 # Basic Example
 
 ## Simple Three-Decision, Four-Model Problem
@@ -311,6 +357,5 @@ Key takeaways:
 
 For more details on the theoretical foundations and applications, see:
 
-- Claxton, K. (1999). The Value of Information: An Overview of Methods and Applications. _Health Economics_, 8(2), 191–202. https://doi.org/10.1002/(SICI)1099-1050(199903)8:2<191::AID-HEC420>3.0.CO;2-I
-- Yokota, F., & Thompson, K. M. (2004). Value of Information Analysis in Health Risk Management Decisions: Past, Present, and Future. _Risk Analysis_, 24(3), 635–650. https://doi.org/10.1111/j.0272-4332.2004.00463.x
-- Brock, W. A., Durlauf, S. N., & Moffitt, R. (2003). Generalized Instrumental Variables and Causal Ambiguity. In S. N. Durlauf & L. E. Blume (Eds.), _The New Palgrave Dictionary of Economics_ (pp. 1–7). Palgrave Macmillan. https://doi.org/10.1057/978-1-349-95121-5_2157-1
+- Claxton, K. (1999). Bayesian approaches to the value of information: implications for the regulation of new pharmaceuticals. _Health Economics_, 8(2), 191–202. https://pubmed.ncbi.nlm.nih.gov/10348422/
+- Yokota, F., & Thompson, K. M. (2004). Value of Information Analysis in Environmental Health Risk Management Decisions: Past, Present, and Future. _Risk Analysis_, 24(3), 635–650. https://doi.org/10.1111/j.0272-4332.2004.00464.x
