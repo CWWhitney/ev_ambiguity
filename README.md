@@ -291,4 +291,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Support
 
-For issues and feature requests, please use the [GitHub issue tracker](https://github.com/corywhitney/evca/issues).
+For issues and feature requests, please use the [GitHub issue tracker](https://github.com/CWWhitney/ev_ambiguity/issues).
