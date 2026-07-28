@@ -662,3 +662,98 @@ compute_multi_attribute_utilities <- function(model_outcomes, outcome_weights) {
   # Return utility matrix ----
   return(utilities)
 }
+
+
+#' Ba Vi National Park Forest-Access Example
+#'
+#' Returns the worked example from Whitney (2026): forest-access policy in
+#' Ba Vi National Park, Vietnam, with two structurally incommensurable
+#' stakeholder models (Conservation and FoodSecurity). Payoffs are mean
+#' expert-elicited effect sizes in each model's native units before
+#' rescaling.
+#'
+#' @usage example_bavi(weights = c(Conservation = 0.5, FoodSecurity = 0.5))
+#'
+#' @param weights Named numeric vector of normative model weights. Must sum
+#'   to 1. Default: equal weights.
+#'
+#' @return A list with:
+#'   \item{U_raw}{Raw payoff matrix (actions x models) in native units.}
+#'   \item{U}{Min-max normalized matrix from \code{normalize_utilities()}.}
+#'   \item{weights}{Model weights used.}
+#'   \item{action_names}{Character vector of policy action names.}
+#'   \item{model_names}{Character vector of stakeholder model names.}
+#'   \item{evca_result}{Output from \code{compute_evca(U, weights)}.}
+#'   \item{exclusion_costs}{Output from \code{compute_exclusion_costs(U, weights, normalize = FALSE)}.}
+#'
+#' @details
+#' At equal weights the weighted-optimal action is \code{regulated_harvest}
+#' with EVCA approximately 0.34 on the normalized 0--1 scale. See the
+#' INFORMS Decision Analysis short communication for interpretation.
+#'
+#' @references
+#' Whitney, C. W. (2026). The Expected Value of Causal Ambiguity:
+#' Deciding Under Structurally Incommensurable Causal Models.
+#' Decision Analysis (INFORMS), short communication.
+#'
+#' @keywords datagen utilities examples
+#'
+#' @examples
+#' bavi <- example_bavi()
+#' bavi$U_raw
+#' bavi$evca_result$evca
+#' rownames(bavi$U)[bavi$evca_result$optimal_decision]
+#'
+#' @export
+example_bavi <- function(weights = c(Conservation = 0.5, FoodSecurity = 0.5)) {
+  if (!is.numeric(weights)) {
+    stop("weights must be a numeric vector")
+  }
+  if (length(weights) != 2) {
+    stop("example_bavi requires exactly 2 model weights")
+  }
+  if (any(weights < 0)) {
+    stop("weights must be non-negative")
+  }
+  if (abs(sum(weights) - 1) > 1e-10) {
+    stop(
+      "weights must sum to 1 (within 1e-10 tolerance). ",
+      "Current sum: ", round(sum(weights), 10)
+    )
+  }
+
+  action_names <- c(
+    "control_access", "regulated_harvest", "forest_access",
+    "limited_access", "seedlings"
+  )
+  model_names <- c("Conservation", "FoodSecurity")
+
+  U_raw <- matrix(
+    c(
+      0.383,  0.297,  0.232,  0.170,  0.149,
+      -0.067, 0.146,  0.182,  0.214,  0.240
+    ),
+    nrow = 5, ncol = 2, byrow = TRUE,
+    dimnames = list(action_names, model_names)
+  )
+
+  U <- normalize_utilities(U_raw, warn_if_normalized = FALSE)
+  names(weights) <- model_names
+
+  evca_result <- compute_evca(U, weights)
+  exclusion_costs <- compute_exclusion_costs(
+    U,
+    model_probs = weights,
+    normalize = FALSE
+  )
+
+  list(
+    U_raw = U_raw,
+    U = U,
+    weights = weights,
+    action_names = action_names,
+    model_names = model_names,
+    evca_result = evca_result,
+    exclusion_costs = exclusion_costs
+  )
+}
