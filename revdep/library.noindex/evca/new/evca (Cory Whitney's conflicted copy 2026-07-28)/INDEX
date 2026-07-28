@@ -1,0 +1,24 @@
+compute_evca            Expected Value of Eliminating Causal Ambiguity
+                        (EVCA)
+compute_evca_dirichlet
+                        EVCA Sensitivity Analysis via Dirichlet Model
+                        Weights
+compute_exclusion_costs
+                        Compute Exclusion Costs for Each Causal Model
+example_bavi            Ba Vi National Park Forest-Access Example
+example_evca            Example Analysis for Expected Value of
+                        Eliminating Causal Ambiguity
+example_evca_multidim   Example with Multi-Dimensional Outcomes
+normalize_utilities     Normalize a Utility Matrix for Cross-Model
+                        Comparison
+plot_dirichlet_actions
+                        Plot Weighted-Optimal Action Frequencies from
+                        Dirichlet Sensitivity Analysis
+plot_dirichlet_evca     Plot EVCA Distribution from Dirichlet
+                        Sensitivity Analysis
+plot_evca               Plot Expected Value of Eliminating Causal
+                        Ambiguity (EVCA) Results
+plot_exclusion_costs    Plot Exclusion Costs by Model
+plot_sensitivity        Plot EVCA Sensitivity to Model Probabilities
+plot_utilities_heatmap
+                        Plot Model Utilities Heatmap

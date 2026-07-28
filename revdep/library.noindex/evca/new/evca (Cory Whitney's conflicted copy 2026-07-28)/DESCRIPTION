@@ -1,0 +1,35 @@
+Package: evca
+Title: Expected Value of Eliminating Causal Ambiguity
+Version: 0.4.0
+Description: Computes the Expected Value of Eliminating Causal Ambiguity (EVCA),
+    a decision-theoretic measure that quantifies the cost of acting under
+    structural uncertainty about which causal model is correct. EVCA extends
+    traditional value of information analysis (EVPI) from parameter uncertainty
+    within an agreed model to between-model ambiguity: the situation where
+    competing causal structures exist and no single one is accepted as correct.
+    The package operates at the utility layer: it takes pre-computed expected
+    utilities for each decision under each competing model and returns EVCA,
+    exclusion costs (the welfare cost of omitting a model from deliberation),
+    and Dirichlet sensitivity analysis over model weights. Upstream steps
+    (causal model specification, parameter estimation, utility elicitation)
+    are outside the current scope.
+Authors@R: 
+    person("Cory", "Whitney", email = "cory.whitney@uni-bonn.de", role = c("aut", "cre"))
+Author: Cory Whitney [aut, cre]
+Maintainer: Cory Whitney <cory.whitney@uni-bonn.de>
+License: MIT + file LICENSE
+URL: https://github.com/CWWhitney/ev_ambiguity
+BugReports: https://github.com/CWWhitney/ev_ambiguity/issues
+Depends: R (>= 4.0.0)
+Imports: ggplot2, viridis
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown, dplyr, tidyr
+Roxygen: list(markdown = TRUE)
+Encoding: UTF-8
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
+RemoteType: local
+RemoteUrl:
+        /Users/corywhitney/Library/CloudStorage/Dropbox/Contributions/26_ev_ambiguity/ev_ambiguity
+NeedsCompilation: no
+Packaged: 2026-07-28 07:59:11 UTC; corywhitney
+Built: R 4.6.1; ; 2026-07-28 07:59:12 UTC; unix
