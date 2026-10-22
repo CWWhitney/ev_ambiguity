@@ -1,30 +1,39 @@
 # evca: Expected Value of Eliminating Causal Ambiguity
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20418469.svg)](https://doi.org/10.5281/zenodo.20418469)
 
 ## Overview
 
-`evca` provides tools for computing the **Expected Value of Eliminating Causal Ambiguity (EVCA)**, a decision-theoretic framework that quantifies the value of resolving structural uncertainty when multiple competing causal models exist.
+`evca` provides tools for computing the **Expected Value of Eliminating
+Causal Ambiguity (EVCA)**, a decision-theoretic framework that
+quantifies the value of resolving structural uncertainty when multiple
+competing causal models exist.
 
-Traditional value of information (VOI) analysis addresses parameter uncertainty within a fixed causal model. EVCA extends VOI to handle **causal ambiguity**—situations where you're uncertain about which causal model is correct among several competing alternatives.
+Traditional value of information (VOI) analysis addresses parameter
+uncertainty within a fixed causal model. EVCA extends VOI to handle
+**causal ambiguity**—situations where you're uncertain about which
+causal model is correct among several competing alternatives.
 
 ### Key Question
 
-**Should you act now under uncertainty, or invest in research to identify the correct causal model?**
+**Should you act now under uncertainty, or invest in research to
+identify the correct causal model?**
 
-EVCA provides a quantitative answer by computing the maximum value of resolving model uncertainty.
+EVCA provides a quantitative answer by computing the maximum value of
+resolving model uncertainty.
 
 ## Installation
 
-```r
+``` r
 # Install from GitHub
 devtools::install_github("CWWhitney/ev_ambiguity")
 ```
 
 ## Quick Start
 
-```r
+``` r
 library(evca)
 
 # Define utility matrix: rows = decisions, columns = models
@@ -50,17 +59,19 @@ print(result$optimal_decision_bma)  # Optimal decision under uncertainty
 
 ### Causal Ambiguity
 
-**Causal ambiguity** occurs when multiple competing theories exist about how an intervention affects outcomes:
+**Causal ambiguity** occurs when multiple competing theories exist about
+how an intervention affects outcomes:
 
 - Policy might work through direct effects, spillovers, or both
 - Treatment might operate via mechanism A, B, or a combination
-- Agricultural practice might improve yields through soil health, pest control, or water retention
+- Agricultural practice might improve yields through soil health, pest
+  control, or water retention
 
 ### Bayesian Model Averaging (BMA)
 
 Under ambiguity, we use BMA to compute expected utility:
 
-```
+```         
 EU_BMA(decision) = Σ P(model) × EU(decision|model)
 ```
 
@@ -68,7 +79,7 @@ EU_BMA(decision) = Σ P(model) × EU(decision|model)
 
 EVCA quantifies the value of perfect structural information:
 
-```
+```         
 EVCA = E[max utility with perfect info] - max[E[utility under ambiguity]]
      = Σ P(model) × max_d EU(d|model) - max_d Σ P(model) × EU(d|model)
 ```
@@ -76,25 +87,31 @@ EVCA = E[max utility with perfect info] - max[E[utility under ambiguity]]
 ### Interpretation
 
 - **High EVCA**: Worth investing in research to identify correct model
-- **Low EVCA**: Optimal decision is robust across models; proceed without additional research
+- **Low EVCA**: Optimal decision is robust across models; proceed
+  without additional research
 
 ## Features
 
 ### Core functions
 
-- `compute_evca()`: Calculate EVCA given model utilities and probabilities
+- `compute_evca()`: Calculate EVCA given model utilities and
+  probabilities
 - `bma_expected_utility()`: Compute Bayesian model averaging
 
 ### Exclusion analysis
 
-- `compute_exclusion_costs()`: Compute welfare costs when each model is excluded from deliberation
+- `compute_exclusion_costs()`: Compute welfare costs when each model is
+  excluded from deliberation
 - `plot_exclusion_costs()`: Visualize exclusion costs by model
 
 ### Sensitivity analysis
 
-- `compute_evca_dirichlet()`: EVCA across a Dirichlet distribution of model weights
-- `plot_dirichlet_evca()`: Plot EVCA distribution from Dirichlet analysis
-- `plot_dirichlet_actions()`: Plot BMA-optimal action frequencies from Dirichlet analysis
+- `compute_evca_dirichlet()`: EVCA across a Dirichlet distribution of
+  model weights
+- `plot_dirichlet_evca()`: Plot EVCA distribution from Dirichlet
+  analysis
+- `plot_dirichlet_actions()`: Plot BMA-optimal action frequencies from
+  Dirichlet analysis
 - `plot_sensitivity()`: EVCA sensitivity to a single model's probability
 
 ### Visualization
@@ -105,14 +122,16 @@ EVCA = E[max utility with perfect info] - max[E[utility under ambiguity]]
 ### Examples and utilities
 
 - `example_evca()`: Generate synthetic example datasets
-- `example_evca_multidim()`: Generate examples with multiple outcome dimensions
-- `compute_multi_attribute_utilities()`: Aggregate multi-dimensional outcomes into utilities
+- `example_evca_multidim()`: Generate examples with multiple outcome
+  dimensions
+- `compute_multi_attribute_utilities()`: Aggregate multi-dimensional
+  outcomes into utilities
 
 ### Multi-Dimensional Outcomes
 
 Handle decisions with multiple outcomes using multi-attribute utility:
 
-```r
+``` r
 # Generate example with 2 outcome dimensions
 result <- example_evca_multidim(
   n_decisions = 3,
@@ -126,7 +145,7 @@ result <- example_evca_multidim(
 
 ### 1. Generate or Define Your Data
 
-```r
+``` r
 # Use example generator
 example_data <- example_evca(n_decisions = 4, n_models = 3)
 
@@ -137,7 +156,7 @@ model_probs <- c(...)
 
 ### 2. Compute EVCA
 
-```r
+``` r
 result <- compute_evca(model_utilities, model_probs)
 
 cat("EVCA:", result$evca, "\n")
@@ -146,7 +165,7 @@ cat("Optimal decision:", result$optimal_decision_bma, "\n")
 
 ### 3. Visualize Results
 
-```r
+``` r
 # Basic plot
 plot_evca(result)
 
@@ -160,7 +179,7 @@ plot_sensitivity(model_utilities, model_probs, vary_model = 1)
 
 ### 4. Make Decision
 
-```r
+``` r
 research_cost <- 2.0
 
 if (result$evca > research_cost) {
@@ -175,16 +194,15 @@ if (result$evca > research_cost) {
 
 ### Setup
 
-Given:
-- K competing causal models: M₁, M₂, ..., Mₖ
-- Model probabilities: p(M₁), p(M₂), ..., p(Mₖ)
-- D decision alternatives: d₁, d₂, ..., dᴰ
-- Expected utility EU(dᵢ|Mⱼ) for decision i under model j
+Given: - K competing causal models: M₁, M₂, ..., Mₖ - Model
+probabilities: p(M₁), p(M₂), ..., p(Mₖ) - D decision alternatives: d₁,
+d₂, ..., dᴰ - Expected utility EU(dᵢ\|Mⱼ) for decision i under model j
 
 ### Under Ambiguity (BMA)
 
 The expected utility for each decision:
-```
+
+```         
 EU_BMA(d) = Σₖ p(Mₖ) × EU(d|Mₖ)
 ```
 
@@ -193,18 +211,21 @@ Optimal decision: `d* = argmax_d EU_BMA(d)`
 ### With Perfect Information
 
 If we knew which model is true, expected utility would be:
-```
+
+```         
 EU_perfect = Σₖ p(Mₖ) × max_d EU(d|Mₖ)
 ```
 
 ### EVCA
 
 The difference:
-```
+
+```         
 EVCA = EU_perfect - EU_BMA(d*)
 ```
 
-This represents the maximum we should pay to definitively identify the correct causal model.
+This represents the maximum we should pay to definitively identify the
+correct causal model.
 
 ## Advanced Features
 
@@ -212,7 +233,7 @@ This represents the maximum we should pay to definitively identify the correct c
 
 Incorporate risk aversion via utility functions:
 
-```r
+``` r
 # Risk-neutral (default)
 result_neutral <- compute_evca(outcomes, model_probs)
 
@@ -228,7 +249,7 @@ result_averse <- compute_evca(
 
 For decisions affecting multiple outcomes:
 
-```r
+``` r
 # Create outcome array: decisions × models × outcomes
 model_outcomes <- array(...)
 
@@ -250,20 +271,23 @@ result <- compute_evca(model_utilities, model_probs)
 EVCA is applicable wherever causal ambiguity exists:
 
 - **Policy evaluation**: Different theories about how policy works
-- **Medical decisions**: Multiple biological mechanisms for treatment effects
+- **Medical decisions**: Multiple biological mechanisms for treatment
+  effects
 - **Agriculture**: Competing pathways for yield improvements
 - **Environmental policy**: Alternative models of ecosystem response
 - **Technology adoption**: Different diffusion mechanisms
-- **Organizational interventions**: Multiple theories of behavioral change
+- **Organizational interventions**: Multiple theories of behavioral
+  change
 
 ## Citation
 
 If you use this package, please cite:
 
-Whitney, C. W. (2026). *evca: Expected Value of Eliminating Causal Ambiguity*.
-R package version 0.1.1-alpha. https://doi.org/10.5281/zenodo.20418469
+Whitney, C. W. (2026). *evca: Expected Value of Eliminating Causal
+Ambiguity*. R package version 0.1.1-alpha.
+<https://doi.org/10.5281/zenodo.20418469>
 
-```bibtex
+``` bibtex
 @software{whitney2025evca,
   author  = {Whitney, Cory W.},
   title   = {{evca}: {Expected Value of Eliminating Causal Ambiguity}},
@@ -291,4 +315,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Support
 
-For issues and feature requests, please use the [GitHub issue tracker](https://github.com/CWWhitney/ev_ambiguity/issues).
+For issues and feature requests, please use the [GitHub issue
+tracker](https://github.com/CWWhitney/ev_ambiguity/issues).
