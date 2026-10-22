@@ -21,7 +21,7 @@ test_that("compute_evca_dirichlet returns correct structure", {
 
   expect_type(result, "list")
   expect_named(result, c(
-    "evca_draws", "optimal_actions", "alpha", "n_draws",
+    "evca_draws", "optimal_actions", "alpha", "weight_interpretation", "n_draws",
     "mean_evca", "sd_evca", "action_frequencies", "model_utilities"
   ))
 })

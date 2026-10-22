@@ -5,7 +5,7 @@
 \title{Compute Exclusion Costs for Each Causal Model}
 \usage{
 compute_exclusion_costs(model_utilities, model_probs = NULL,
-  normalize = TRUE)
+  normalize = TRUE, model_weights = NULL, weight_interpretation = NULL)
 }
 \arguments{
 \item{model_utilities}{Matrix where rows are decisions and columns are models,
@@ -13,10 +13,8 @@ containing expected utilities for each decision under each model.
 Can also be a data frame that can be coerced to matrix. Each cell \verb{[i,j]}
 represents the expected utility of decision i under model j.}
 
-\item{model_probs}{Numeric vector of model probabilities. If provided,
-the probabilities for remaining models are renormalized proportionally
-when one model is excluded. If NULL (default), equal weights are assigned
-to the remaining models, reflecting maximum uncertainty about them.}
+\item{model_probs}{Optional epistemic probabilities over models. If supplied,
+weights for the remaining models are renormalized after exclusion.}
 
 \item{normalize}{Logical. If TRUE (default), applies min-max normalization
 to each model column before computing exclusion costs. Required for
@@ -25,6 +23,12 @@ meaningful cross-model comparison when welfare units are incommensurable
 model's welfare range to [0, 1], where 0 is the worst outcome and 1 is
 the best for that model. This is itself a political assumption (equal stakes
 for each model) and should be reported explicitly.}
+
+\item{model_weights}{Optional evaluative weights representing declared
+standing assigned to stakeholder accounts. If neither vector is supplied,
+equal evaluative weights are used among the remaining models.}
+
+\item{weight_interpretation}{Optional label inferred from the vector supplied.}
 }
 \value{
 A data frame with one row per excluded model, containing:
@@ -41,11 +45,10 @@ is found using only the remaining models, and the excluded model's welfare
 under that decision is compared to its best possible outcome.
 }
 \details{
-Exclusion cost quantifies the stakes of model exclusion, distinct from
-EVCA, which quantifies the cost of model uncertainty. Where EVCA asks
-"what would perfect structural knowledge be worth?", exclusion analysis asks
-"what does it cost a particular stakeholder group when their model is not
-at the table?"
+Exclusion cost is distinct from the aggregate shortfall: it measures one
+model's own welfare loss when the decision is selected without that model.
+It is not simply the loss from being outvoted in the full aggregation. The
+result depends on the rule used to reweight the models that remain.
 
 Provincial decisions routinely proceed under a single dominant framework
 (e.g., an economic NPV model). The exclusion analysis makes the cost of

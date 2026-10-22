@@ -6,7 +6,7 @@
 #' the weighted-optimal decision is to uncertainty over model weights.
 #'
 #' @usage compute_evca_dirichlet(model_utilities, alpha, n_draws = 5000,
-#'   seed = NULL)
+#'   seed = NULL, weight_interpretation = c("evaluative", "epistemic"))
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models,
 #'   containing expected utilities for each decision under each model.
@@ -14,9 +14,13 @@
 #'   When welfare units are incommensurable across models, apply
 #'   min-max normalization before calling this function.
 #' @param alpha Numeric vector of Dirichlet concentration parameters, one per
-#'   model. Must be strictly positive (> 0). Larger alpha_k concentrates prior
-#'   weight on model k; equal values (e.g., `rep(2, K)`) give symmetric
-#'   uncertainty across models.
+#'   model. Must be strictly positive (> 0). Larger alpha_k places more mass on
+#'   higher weights for model k. Treat the resulting distribution as an
+#'   epistemic prior or as a declared evaluative sensitivity set, as specified
+#'   by `weight_interpretation`.
+#' @param weight_interpretation Whether draws represent epistemic uncertainty
+#'   about model probabilities or evaluative sensitivity over standing weights.
+#'   Defaults to `"evaluative"`.
 #' @param n_draws Integer. Number of Monte Carlo draws from the Dirichlet
 #'   distribution (default: 5000).
 #' @param seed Integer or NULL. Random seed for reproducibility (default: NULL).
@@ -32,30 +36,28 @@
 #'   \item{model_utilities}{The utility matrix used (for reference and plotting).}
 #'
 #' @details
-#' Standard EVCA is computed at a single fixed model weight vector (e.g., equal
-#' weights). But the same structural uncertainty that motivates EVCA also applies
-#' to the weights themselves: analysts who disagree about which causal model is
-#' correct will also disagree about prior credences.
+#' This function explores results over a declared distribution of weight
+#' vectors. For evaluative weights, this is sensitivity analysis over possible
+#' standing rules, not a probability distribution over which stakeholder is
+#' correct. For epistemic weights, it represents prior uncertainty about model
+#' probabilities; the function does not update them from data.
 #'
-#' The Dirichlet distribution provides a coherent prior over the probability
-#' simplex. The concentration vector alpha encodes prior beliefs about model
-#' credibility:
+#' The Dirichlet distribution supplies a convenient distribution over the
+#' weight simplex. The concentration vector alpha encodes the sensitivity
+#' scenarios or prior beliefs selected by the analyst:
 #'
 #' \itemize{
-#'   \item Equal alpha (e.g., rep(2, K)): symmetric uncertainty, no model
-#'     preferred a priori.
-#'   \item High alpha_k relative to others: model k is believed more plausible.
-#'   \item Low alpha_k: model k is systematically discounted (e.g., indigenous
-#'     knowledge models in standard planning processes).
+#'   \item Equal alpha: symmetric sensitivity around equal weights.
+#'   \item High alpha_k relative to others: more weight is assigned to account k.
+#'   \item Low alpha_k: account k receives less weight in the scenarios explored.
 #' }
 #'
-#' A high-EVCA distribution signals that the decision is sensitive to model
-#' weight uncertainty. A widening EVCA distribution when alpha_k is small for
-#' one model signals that marginalising that model increases decision fragility:
-#' if the discounted model turns out to be correct, the welfare loss is large.
+#' A wide EVCA distribution or changing optimal actions signals sensitivity to
+#' the selected weight distribution. This is not evidence that one model is
+#' true or that a particular weighting rule is legitimate.
 #'
 #' Draws use the standard method: X_k ~ Gamma(alpha_k, 1) independently,
-#' then normalize: p_k = X_k / sum(X). This is exact Dirichlet sampling.
+#' then normalize: w_k = X_k / sum(X). This is exact Dirichlet sampling.
 #'
 #' @references
 #' Hoeting, J. A., Madigan, D., Raftery, A. E., & Volinsky, C. T. (1999).
@@ -84,17 +86,17 @@
 #' norm_col <- function(x) (x - min(x)) / (max(x) - min(x))
 #' U_norm <- apply(model_utilities, 2, norm_col)
 #'
-#' # Equal uncertainty prior
+#' # Equal-weight sensitivity distribution
 #' result_eq <- compute_evca_dirichlet(U_norm, alpha = c(2, 2, 2), seed = 42)
 #' cat("Mean EVCA:", result_eq$mean_evca, "\n")
 #' print(result_eq$action_frequencies)
 #'
-#' # Development-coalition prior (marginalises Traditional_Hmong)
+#' # Development-coalition sensitivity scenario (lower Traditional_Hmong weight)
 #' result_dc <- compute_evca_dirichlet(U_norm, alpha = c(8, 8, 2), seed = 42)
-#' cat("Mean EVCA (biased prior):", result_dc$mean_evca, "\n")
+#' cat("Mean EVCA (development-coalition scenario):", result_dc$mean_evca, "\n")
 #' print(result_dc$action_frequencies)
 #'
-#' # Community-weighted prior (upweights Traditional_Hmong)
+#' # Community-weighted sensitivity scenario (upweights Traditional_Hmong)
 #' result_cw <- compute_evca_dirichlet(U_norm, alpha = c(2, 2, 8), seed = 42)
 #' cat("Mean EVCA (community-weighted):", result_cw$mean_evca, "\n")
 #'
@@ -102,7 +104,9 @@
 compute_evca_dirichlet <- function(model_utilities,
                                    alpha,
                                    n_draws = 5000,
-                                   seed = NULL) {
+                                   seed = NULL,
+                                   weight_interpretation = c("evaluative", "epistemic")) {
+  weight_interpretation <- match.arg(weight_interpretation)
   # Input validation ----
 
   # Coerce data frame to matrix if needed
@@ -203,6 +207,7 @@ compute_evca_dirichlet <- function(model_utilities,
     evca_draws = evca_draws,
     optimal_actions = optimal_draws,
     alpha = alpha,
+    weight_interpretation = weight_interpretation,
     n_draws = n_draws,
     mean_evca = mean(evca_draws),
     sd_evca = stats::sd(evca_draws),
@@ -436,7 +441,7 @@ plot_dirichlet_actions <- function(dirichlet_result,
     ggplot2::labs(
       title    = title,
       subtitle = "How often each action is weighted-optimal under sampled model weights",
-      x        = "Dirichlet prior scenario",
+      x        = "Declared weight scenario",
       y        = "Fraction of draws",
       fill     = "weighted-optimal action"
     ) +

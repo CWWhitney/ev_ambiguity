@@ -6,16 +6,18 @@
 #' under that decision is compared to its best possible outcome.
 #'
 #' @usage compute_exclusion_costs(model_utilities, model_probs = NULL,
-#'   normalize = TRUE)
+#'   normalize = TRUE, model_weights = NULL, weight_interpretation = NULL)
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models,
 #'   containing expected utilities for each decision under each model.
 #'   Can also be a data frame that can be coerced to matrix. Each cell `[i,j]`
 #'   represents the expected utility of decision i under model j.
-#' @param model_probs Numeric vector of model probabilities. If provided,
-#'   the probabilities for remaining models are renormalized proportionally
-#'   when one model is excluded. If NULL (default), equal weights are assigned
-#'   to the remaining models, reflecting maximum uncertainty about them.
+#' @param model_probs Optional epistemic probabilities over models. If supplied,
+#'   weights for the remaining models are renormalized after exclusion.
+#' @param model_weights Optional evaluative weights representing declared
+#'   standing assigned to stakeholder accounts. If neither vector is supplied,
+#'   equal evaluative weights are used among the remaining models.
+#' @param weight_interpretation Optional label inferred from the vector supplied.
 #' @param normalize Logical. If TRUE (default), applies min-max normalization
 #'   to each model column before computing exclusion costs. Required for
 #'   meaningful cross-model comparison when welfare units are incommensurable
@@ -32,11 +34,10 @@
 #'   \item{exclusion_cost}{Welfare loss: welfare_own_best - welfare_excluded.}
 #'
 #' @details
-#' Exclusion cost quantifies the stakes of model exclusion, distinct from
-#' EVCA, which quantifies the cost of model uncertainty. Where EVCA asks
-#' "what would perfect structural knowledge be worth?", exclusion analysis asks
-#' "what does it cost a particular stakeholder group when their model is not
-#' at the table?"
+#' Exclusion cost is distinct from the aggregate shortfall: it measures one
+#' model's own welfare loss when the decision is selected without that model.
+#' It is not simply the loss from being outvoted in the full aggregation. The
+#' result depends on the rule used to reweight the models that remain.
 #'
 #' Provincial decisions routinely proceed under a single dominant framework
 #' (e.g., an economic NPV model). The exclusion analysis makes the cost of
@@ -96,7 +97,26 @@
 #' @export
 compute_exclusion_costs <- function(model_utilities,
                                     model_probs = NULL,
-                                    normalize = TRUE) {
+                                    normalize = TRUE,
+                                    model_weights = NULL,
+                                    weight_interpretation = NULL) {
+  supplied_probs <- !is.null(model_probs)
+  supplied_weights <- !is.null(model_weights)
+  if (supplied_probs && supplied_weights) {
+    stop("Supply either model_probs (epistemic) or model_weights (evaluative), not both.")
+  }
+  if (is.null(weight_interpretation)) {
+    weight_interpretation <- if (supplied_weights || (!supplied_probs && !supplied_weights)) "evaluative" else "epistemic"
+  }
+  weight_interpretation <- match.arg(weight_interpretation, c("epistemic", "evaluative"))
+  if (supplied_probs && weight_interpretation != "epistemic") {
+    stop("model_probs must use the epistemic interpretation; use model_weights for evaluative standing.")
+  }
+  if (supplied_weights && weight_interpretation != "evaluative") {
+    stop("model_weights must use the evaluative interpretation; use model_probs for epistemic probabilities.")
+  }
+  if (supplied_weights) model_probs <- model_weights
+
   # Input validation ----
 
   # Coerce data frame to matrix if needed
@@ -221,6 +241,7 @@ compute_exclusion_costs <- function(model_utilities,
 
   result_df <- do.call(rbind, results)
   rownames(result_df) <- NULL
+  attr(result_df, "weight_interpretation") <- weight_interpretation
   return(result_df)
 }
 

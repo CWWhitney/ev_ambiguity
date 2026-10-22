@@ -1,22 +1,28 @@
 #' Expected Value of Eliminating Causal Ambiguity (EVCA)
 #'
-#' Computes the Expected Value of Eliminating Causal Ambiguity using prior
-#' credence-weighted model aggregation. EVCA quantifies the cost of acting
-#' under structural uncertainty about which causal model is correct, and the
-#' cost of excluding any one causal model from deliberation entirely.
+#' Computes a weighted aggregation shortfall across competing causal models.
+#' The same arithmetic has two distinct interpretations: expected value of
+#' perfect information when weights are epistemic probabilities, or a
+#' conditional aggregation diagnostic when weights represent evaluative
+#' standing assigned to stakeholder accounts.
 #'
-#' @usage compute_evca(model_utilities, model_probs, utility_function = identity)
+#' @usage compute_evca(model_utilities, model_probs = NULL,
+#'   utility_function = identity, model_weights = NULL,
+#'   weight_interpretation = NULL)
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models,
 #'   containing expected utilities for each decision under each model.
 #'   Can also be a data frame that can be coerced to matrix. Each cell \[i,j\]
-#'   represents the expected utility of decision i if model j is the true
-#'   causal model.
-#' @param model_probs Numeric vector of prior credences (weights) for each model,
-#'   representing the analyst's or stakeholders' degree of belief in each causal
-#'   structure. These are not data-fit posteriors; they are elicited credences
-#'   over competing causal mechanisms. Must have length equal to number of
-#'   columns in model_utilities. Must be non-negative and sum to 1 (within 1e-10 tolerance).
+#'   represents the expected utility of decision i under model j.
+#' @param model_probs Optional numeric vector of epistemic probabilities over
+#'   model columns. Use this argument only when weights express belief about
+#'   which model may govern. Must be non-negative and sum to 1.
+#' @param model_weights Optional numeric vector of evaluative weights over
+#'   model columns, expressing declared standing assigned to stakeholder
+#'   accounts. Must be non-negative and sum to 1. Supply either this or
+#'   `model_probs`, not both.
+#' @param weight_interpretation Optional label, `"epistemic"` or `"evaluative"`.
+#'   Inferred from the argument supplied; included explicitly in results.
 #' @param utility_function Function to apply to outcomes (default: identity).
 #'   If provided, will be applied to model_utilities assuming they represent
 #'   outcomes rather than utilities. Common examples include risk-averse
@@ -28,31 +34,40 @@
 #'   \item{optimal_utility}{Expected utility of optimal weighted-optimal decision.}
 #'   \item{optimal_decisions_per_model}{Integer vector of optimal decision under each model.}
 #'   \item{optimal_utilities_per_model}{Numeric vector of expected utility of optimal decision under each model.}
-#'   \item{perfect_info_expected_utility}{Expected utility with perfect information about which model is true.}
-#'   \item{evca}{Expected Value of Eliminating Causal Ambiguity.}
-#'   \item{model_probs}{Original model probabilities (for reference).}
+#'   \item{perfect_info_expected_utility}{Disaggregation benchmark; an information benchmark only under epistemic weights.}
+#'   \item{evca}{Weighted aggregation shortfall under the supplied weights and utility scale.}
+#'   \item{model_probs}{Supplied epistemic probabilities, or NULL for evaluative weights.}
+#'   \item{model_weights}{Weights used in the computation.}
+#'   \item{weight_interpretation}{Whether weights are epistemic or evaluative.}
+#'   \item{model_contributions}{Additive per-model contributions to EVCA; these sum to EVCA.}
 #'   \item{n_decisions}{Number of decision alternatives.}
 #'   \item{n_models}{Number of competing causal models.}
 #'
 #' @details
-#' The Expected Value of Eliminating Causal Ambiguity (EVCA) extends traditional
-#' value of information analysis to handle structural uncertainty. It quantifies
-#' the value of definitively identifying the correct causal model.
+#' The package addresses structural uncertainty, a recognized value-of-information
+#' setting. Its calculation is the familiar gap between the weighted sum of
+#' model-specific optima and the best weighted aggregate action. Under epistemic
+#' probabilities this is EVPI for the model index. Under evaluative weights it
+#' measures the shortfall imposed by the selected aggregation rule, not the
+#' expected benefit of learning a true model.
 #'
-#' EVCA is calculated as:
-#' EVCA = E(max utility with perfect info) - max(E(utility under ambiguity))
-#'       = sum_k P(M_k) * max_d EU(d|M_k) - max_d sum_k P(M_k) * EU(d|M_k)
+#' For weights w_k, the weighted aggregation shortfall is:
+#' EVCA = sum_k w_k * max_d EU(d|M_k) - max_d sum_k w_k * EU(d|M_k)
+#' With epistemic probabilities this is EVPI for the model index. With
+#' evaluative weights, the first term is a disaggregation benchmark.
 #'
-#' The first term represents expected utility if we knew which causal model is
-#' true (we would choose the optimal decision for that model). The second term
-#' is the expected utility of the optimal decision under current ambiguity,
-#' using prior credence-weighted aggregation across competing causal models.
+#' The first term is the disaggregation benchmark; the second is the best
+#' utility under one shared action chosen by weighted aggregation. Read the
+#' first term as an information benchmark only when the weights are epistemic
+#' probabilities. Under evaluative weights, it is a normative benchmark in
+#' which each account is scored at its own best action.
 #'
 #' Interpretation:
-#' - EVCA = 0: No value to resolving ambiguity (same decision optimal under all models)
-#' - EVCA > 0: Value to identifying correct model (different models favor different decisions)
-#' - High EVCA: Research to identify correct model likely worthwhile
-#' - Low EVCA: Decision is robust across models; proceed without additional research
+#' - EVCA = 0: The best shared action attains the disaggregation benchmark.
+#' - Under epistemic probabilities, EVCA is the value of perfect information
+#'   about the model index.
+#' - Under evaluative weights, EVCA is the shortfall under the declared
+#'   aggregation rule; it is not by itself a reason to commission research.
 #'
 #' Computational complexity is O(D × M) where D is the number of decisions
 #' and M is the number of models.
@@ -68,7 +83,8 @@
 #'   \item Estimating model parameters (fitting each causal model to data)
 #'   \item Computing expected utilities per model (simulating outcomes under
 #'     each model for each available decision)
-#'   \item Eliciting prior credences (how plausible is each causal model?)
+#'   \item Supplying epistemic probabilities or evaluative standing weights,
+#'     depending on the interpretation selected.
 #'   \item Normalizing utilities when models use incommensurable welfare units
 #'     (see \code{\link{normalize_utilities}()})
 #' }
@@ -78,13 +94,15 @@
 #' with Stan and Bayesian network frameworks.
 #'
 #' @section Relationship to related methods:
-#' \strong{EVPI (Expected Value of Perfect Information)} addresses parameter
-#' uncertainty within a single agreed causal model: how much would it be worth
-#' to know the exact parameter values? EVCA addresses structural uncertainty:
-#' the decision maker does not know which of several competing causal models
-#' is correct. Both are theoretical upper bounds on the value of further
-#' research, but they quantify different types of uncertainty and are
-#' appropriate in different problem contexts.
+#' \strong{Structural-uncertainty VOI.} Decision analysis already represents
+#' structural uncertainty and can calculate the value of information when
+#' models and outcomes have a defined common representation. This function does
+#' not replace EVPI or Bayesian model averaging. Once a common utility bridge
+#' and epistemic model probabilities are supplied, its formula is EVPI for a
+#' model index. With evaluative stakeholder weights, the same formula instead
+#' reports an aggregation shortfall. Non-overlapping variables alone do not
+#' make the arithmetic undefined; the unresolved judgment is how to construct
+#' and justify a common-scale bridge.
 #'
 #' \strong{Strong & Oakley (2014)} address the Expected Value of Model
 #' Improvement (EVMI), the gain from reducing systematic bias (model
@@ -135,7 +153,7 @@
 #' model_probs <- c(0.3, 0.25, 0.25, 0.2)
 #'
 #' # Compute EVCA with risk-neutral utility (identity function)
-#' result <- compute_evca(model_utilities, model_probs)
+#' result <- compute_evca(model_utilities, model_weights = model_probs)
 #'
 #' # Print key results
 #' print(result$evca)
@@ -189,8 +207,31 @@
 #'
 #' @export
 #'
-compute_evca <- function(model_utilities, model_probs,
-                         utility_function = identity) {
+compute_evca <- function(model_utilities, model_probs = NULL,
+                         utility_function = identity,
+                         model_weights = NULL,
+                         weight_interpretation = NULL) {
+  supplied_probs <- !is.null(model_probs)
+  supplied_weights <- !is.null(model_weights)
+  if (supplied_probs && supplied_weights) {
+    stop("Supply either model_probs (epistemic) or model_weights (evaluative), not both.")
+  }
+  if (!supplied_probs && !supplied_weights) {
+    stop("Supply model_probs for epistemic probabilities or model_weights for evaluative standing.")
+  }
+  if (is.null(weight_interpretation)) {
+    weight_interpretation <- if (supplied_weights) "evaluative" else "epistemic"
+  }
+  weight_interpretation <- match.arg(weight_interpretation, c("epistemic", "evaluative"))
+  if (supplied_probs && weight_interpretation != "epistemic") {
+    stop("model_probs must use the epistemic interpretation; use model_weights for evaluative standing.")
+  }
+  if (supplied_weights && weight_interpretation != "evaluative") {
+    stop("model_weights must use the evaluative interpretation; use model_probs for epistemic probabilities.")
+  }
+  if (supplied_weights) model_probs <- model_weights
+  model_weights <- model_probs
+
   # Input validation ----
 
   # Convert to matrix if needed
@@ -280,15 +321,17 @@ compute_evca <- function(model_utilities, model_probs,
     optimal_utilities_per_model[i] <- model_utilities[optimal_decisions_per_model[i], i]
   }
 
-  # Compute expected utility with perfect information ----
-  # If we knew which model is true, we would choose the optimal decision for that model
-  # Expected utility is weighted average of these optimal utilities
-  perfect_info_eu <- sum(model_probs * optimal_utilities_per_model)
+  # Disaggregation benchmark: each account is evaluated at its own best action.
+  # This is an information benchmark only for epistemic model probabilities.
+  disaggregation_eu <- sum(model_weights * optimal_utilities_per_model)
 
-  # Calculate EVCA ----
-  # EVCA is the difference between perfect information and weighted model aggregation
-  # Represents the maximum value of resolving causal structural ambiguity
-  evca <- perfect_info_eu - optimal_utility
+  # Additive contribution of each model to the aggregate shortfall.
+  aggregate_by_model <- model_utilities[optimal_decision, ]
+  model_contributions <- model_weights *
+    (optimal_utilities_per_model - aggregate_by_model)
+  names(model_contributions) <- colnames(model_utilities)
+
+  evca <- disaggregation_eu - optimal_utility
 
   # Return comprehensive results ----
   return(list(
@@ -297,9 +340,12 @@ compute_evca <- function(model_utilities, model_probs,
     optimal_utility = optimal_utility,
     optimal_decisions_per_model = optimal_decisions_per_model,
     optimal_utilities_per_model = optimal_utilities_per_model,
-    perfect_info_expected_utility = perfect_info_eu,
+    perfect_info_expected_utility = disaggregation_eu,
     evca = evca,
-    model_probs = model_probs,
+    model_probs = if (weight_interpretation == "epistemic") model_weights else NULL,
+    model_weights = model_weights,
+    weight_interpretation = weight_interpretation,
+    model_contributions = model_contributions,
     n_decisions = n_decisions,
     n_models = n_models
   ))

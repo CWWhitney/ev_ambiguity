@@ -1,18 +1,16 @@
 Package: evca
 Title: Expected Value of Eliminating Causal Ambiguity
 Version: 0.4.0
-Description: Computes the Expected Value of Eliminating Causal Ambiguity (EVCA),
-    a decision-theoretic measure that quantifies the cost of acting under
-    structural uncertainty about which causal model is correct. EVCA extends
-    traditional value of information analysis (EVPI) from parameter uncertainty
-    within an agreed model to between-model ambiguity: the situation where
-    competing causal structures exist and no single one is accepted as correct.
-    The package operates at the utility layer: it takes pre-computed expected
-    utilities for each decision under each competing model and returns EVCA,
-    exclusion costs (the welfare cost of omitting a model from deliberation),
-    and Dirichlet sensitivity analysis over model weights. Upstream steps
-    (causal model specification, parameter estimation, utility elicitation)
-    are outside the current scope.
+Description: Provides decision-analytic diagnostics for structural
+    uncertainty and contested causal models. The package computes the
+    shortfall between a weighted aggregate decision and a disaggregation
+    benchmark, plus leave-one-model-out exclusion costs. With epistemic model
+    probabilities, the shortfall has the expected value of perfect information
+    interpretation for a model index. With evaluative model weights, it is an
+    aggregation diagnostic conditional on the chosen weights and common-scale
+    bridge, not a value of research. The package operates on pre-computed
+    expected utilities; model construction, utility elicitation, and defensible
+    cross-model scaling remain the analyst's responsibility.
 Authors@R:
     person("Cory", "Whitney", email = "cory.whitney@uni-bonn.de", role = c("aut", "cre"))
 Author: Cory Whitney [aut, cre]

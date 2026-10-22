@@ -21,6 +21,9 @@ test_that("compute_evca returns correct structure", {
     "perfect_info_expected_utility",
     "evca",
     "model_probs",
+    "model_weights",
+    "weight_interpretation",
+    "model_contributions",
     "n_decisions",
     "n_models"
   ))

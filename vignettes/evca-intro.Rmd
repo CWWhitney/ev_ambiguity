@@ -1,361 +1,115 @@
 ---
-title: "Introduction to Expected Value of Eliminating Causal Ambiguity (EVCA)"
+title: "Decision diagnostics for contested causal models"
 author: "Cory Whitney"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to EVCA}
+  %\VignetteIndexEntry{Decision diagnostics for contested causal models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  warning = FALSE,
-  message = FALSE,
-  fig.width = 7,
-  fig.height = 5,
-  fig.align = "center"
-)
-
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(evca)
 ```
 
-# Introduction
+# What the package computes
 
-## The Problem of Causal Ambiguity
+The package accepts expected utilities for each decision under each model. It
+does not construct the causal models or determine whether their outputs can be
+compared. When model columns use different welfare units, the analyst must
+declare a common-scale bridge first.
 
-Many decision problems face **causal ambiguity**, uncertainty about which causal model among several competing alternatives correctly describes how interventions affect outcomes. This is different from parameter uncertainty (uncertainty about the magnitude of effects within a known model structure).
+The weighted gap has two interpretations. If weights are epistemic
+probabilities over a model index, it is the expected value of perfect
+information for that index. If weights assign evaluative standing to
+stakeholder accounts, it is an aggregation shortfall under a declared rule;
+it is not the value of research to discover a true model.
 
-For example:
+# A worked example
 
-- A policy intervention might work through direct effects, indirect spillovers, or both
-- A treatment might operate via mechanism A, mechanism B, or a combination
-- An agricultural practice might improve yields through soil health, pest control, or water retention
+The utility matrix below illustrates three actions and three stakeholder
+accounts. These values are constructed for illustration.
 
-Traditional value of information (VOI) analysis addresses parameter uncertainty but not structural uncertainty about which causal model is correct.
-
-## Expected Value of Eliminating Causal Ambiguity (EVCA)
-
-**EVCA** extends VOI analysis to handle structural uncertainty. It quantifies the value of knowing which causal model is correct, helping you decide whether to:
-- **Act now** under current uncertainty using prior-weighted model aggregation
-- **Research first** to identify the correct causal model before deciding
-
-### Key Insight
-
-If EVCA is high relative to research costs, invest in resolving model uncertainty. If EVCA is low, the optimal decision is robust across models—proceed without additional research.
-
-# Mathematical Framework
-
-## Setup
-
-Consider:
-
-- **K competing causal models**: M₁, M₂, ..., Mₖ
-- **Model probabilities**: p(M₁), p(M₂), ..., p(Mₖ) that sum to 1
-- **D decision alternatives**: d₁, d₂, ..., dᴰ
-- **Expected utility** EU(dᵢ|Mⱼ) for decision dᵢ under model Mⱼ
-
-## prior-weighted model aggregation
-
-Under causal ambiguity, we use prior-weighted model aggregation to compute expected utility:
-
-$$\overline{EU}(d) = \sum_{k=1}^K p(M_k) \cdot EU(d|M_k)$$
-
-The optimal decision under model averaging is:
-
-$$d^* = \arg\max_d \overline{EU}(d)$$
-
-## EVCA Calculation
-
-EVCA compares decision-making with and without perfect structural information:
-
-$$EVCA = \underbrace{\sum_{k=1}^K p(M_k) \cdot \max_d EU(d|M_k)}_{\text{With perfect information}} - \underbrace{\max_d \sum_{k=1}^K p(M_k) \cdot EU(d|M_k)}_{\text{Weighted average (under ambiguity)}}$$
-
-The first term represents expected utility if we knew which model is true (we would choose the optimal decision for that model). The second term is the expected utility of the optimal decision under current ambiguity.
-
-## Exclusion Cost
-
-A related but distinct question is what a single model's stakeholder loses
-when that model is dropped from deliberation entirely, rather than merely
-outweighed within it. For each model $M_k$, let $d^{*}_{-k}$ be the
-optimal decision computed from the remaining models alone, with their
-probabilities renormalized to sum to 1. The exclusion cost is
-
-$$EC_k = \max_d EU(d \mid M_k) - EU(d^{*}_{-k} \mid M_k)$$
-
-`compute_exclusion_costs()` computes $EC_k$ for every model in a single
-call; see `?compute_exclusion_costs` and the worked example below.
-
-### A two-model bound
-
-When there are exactly two competing models, EVCA can never exceed
-whichever model's own exclusion cost is smaller, once that cost is
-discounted by the model's probability:
-
-$$EVCA \leq \min\{p_1 EC_1,\; p_2 EC_2\} \qquad (K = 2)$$
-
-**Proof.** By definition, $d^*$ maximizes the probability-weighted
-aggregate utility, so for any decision $d$,
-$$\sum_j p_j\, EU(d^* \mid M_j) \geq \sum_j p_j\, EU(d \mid M_j).$$
-Apply this to $d = d^{*}_{-k}$, the decision chosen when model $k$ is
-excluded. With only two models, excluding $k$ leaves a single remaining
-model $j \neq k$, so $d^{*}_{-k}$ is exactly that model's own maximizer:
-$EU(d^{*}_{-k} \mid M_j) = \max_d EU(d \mid M_j)$. Hence
-$$\sum_j p_j\, EU(d^* \mid M_j) \geq p_k\, EU(d^{*}_{-k} \mid M_k) +
-p_j \max_d EU(d \mid M_j).$$
-Subtracting both sides from the perfect-information benchmark
-$p_k \max_d EU(d \mid M_k) + p_j \max_d EU(d \mid M_j)$ turns the
-left-hand side into EVCA and the right-hand side into
-$p_k\bigl(\max_d EU(d \mid M_k) - EU(d^{*}_{-k} \mid M_k)\bigr) = p_k EC_k$.
-So $EVCA \leq p_k EC_k$; since this holds for both $k = 1$ and $k = 2$, it
-holds for the minimum of the two. $\blacksquare$
-
-This bound is specific to $K = 2$: with three or more models, excluding
-one still leaves more than one behind, and $d^{*}_{-k}$ then maximizes the
-weighted sum over those remaining models rather than each one's own
-utility individually, so $d^{*}_{-k}$ need not attain every remaining
-model's own maximum, and the step above can fail. A three-model
-counterexample where the bound is violated is worked out in Whitney
-(2025), the companion short communication on the Expected Value of
-Causal Ambiguity.
-
-# Basic Example
-
-## Simple Three-Decision, Four-Model Problem
-
-```{r basic_example}
-# Define utility matrix: rows = decisions, columns = models
-model_utilities <- matrix(
-  c(
-    8.5, 6.0, 9.0, 7.5,  # Decision 1 utilities under each model
-    7.0, 8.5, 5.5, 8.0,  # Decision 2 utilities under each model
-    9.0, 7.5, 6.5, 9.5   # Decision 3 utilities under each model
-  ),
-  nrow = 3, ncol = 4, byrow = TRUE,
+```{r setup-example}
+U_raw <- matrix(
+  c(5, 40, 80,
+    90, 82, 8,
+    72, 78, 55),
+  nrow = 3, byrow = TRUE,
   dimnames = list(
-    paste("Decision", 1:3),
-    paste("Model", 1:4)
+    c("No road", "Direct route", "Rerouted road"),
+    c("Officials", "ProDev_Hmong", "Traditional_Hmong")
   )
 )
-
-# Display utility matrix
-print(model_utilities)
-
-# Define model probabilities (from data or expert judgment)
-model_probs <- c(0.35, 0.30, 0.20, 0.15)
-names(model_probs) <- colnames(model_utilities)
-
-print(model_probs)
+U <- normalize_utilities(U_raw)
 ```
 
-## Compute EVCA
+Column-wise min-max scaling maps each model's realized range to `[0, 1]`. It
+assigns equal stakes to those ranges and is therefore a normative choice. A
+different action set or external anchor can change the scale and result.
 
-```{r compute_evca}
-# Compute EVCA
-result <- compute_evca(model_utilities, model_probs)
-
-# Display key results
-cat("Optimal decision under model averaging:", rownames(model_utilities)[result$optimal_decision], "\n")
-cat("Expected utility under model averaging:", round(result$optimal_utility, 3), "\n")
-cat("Expected utility with perfect info:", round(result$perfect_info_expected_utility, 3), "\n")
-cat("EVCA:", round(result$evca, 3), "\n")
+```{r evaluative}
+w <- c(1/3, 1/3, 1/3)  # illustrative standing weights, not probabilities
+result <- compute_evca(U, model_weights = w)
+result$evca
+result$model_contributions
 ```
 
-## Interpretation
+For weights `w[k]`, the calculation is
 
-```{r interpretation}
-# What would we choose under each model?
-for (i in 1:length(model_probs)) {
-  optimal_under_model <- result$optimal_decisions_per_model[i]
-  cat(sprintf(
-    "If %s is true (p=%.2f): Choose %s (utility=%.2f)\n",
-    names(model_probs)[i],
-    model_probs[i],
-    rownames(model_utilities)[optimal_under_model],
-    result$optimal_utilities_per_model[i]
-  ))
-}
+$$
+EVCA = \sum_k w_k \max_d U(d, k) - \max_d \sum_k w_k U(d, k).
+$$
+
+The first term is the **disaggregation benchmark**: each account is evaluated
+at its best action. The second is the best welfare under one shared action.
+`model_contributions` decomposes the gap across accounts and sums to EVCA.
+
+# Exclusion costs
+
+Exclusion cost is separate from EVCA. It measures the loss a model incurs when
+the action is chosen after that model is removed. The package reweights the
+remaining models, chooses an action, and evaluates that action under the
+excluded model's utility column.
+
+```{r exclusion}
+compute_exclusion_costs(U, model_weights = w, normalize = FALSE)
 ```
 
-The EVCA of `r round(result$evca, 3)` tells us the maximum we should pay (in utility units) to definitively identify the correct causal model. If research to resolve model ambiguity costs less than this, it's worthwhile.
+The result depends on the reweighting rule and common-scale bridge. Exclusion
+cost is not simply the loss from being outvoted in the full aggregation.
 
-# Visualization
+# Sensitivity to weights
 
-## Basic EVCA Plot
+The Dirichlet function explores a distribution over weight vectors. In an
+evaluative analysis, choose this distribution as a set of sensitivity
+scenarios; it is not evidence about which account is more credible.
 
-```{r plot_basic, fig.width=7, fig.height=5}
-# Visualize EVCA components
-plot_evca(result, title = "EVCA Analysis: Model Ambiguity Value")
-```
-
-The gap between the bars represents EVCA, the expected value of eliminating causal ambiguity.
-
-## Utility Heatmap
-
-```{r plot_heatmap, fig.width=8, fig.height=5}
-# Visualize utility matrix
-evca::plot_utilities_heatmap(
-  model_utilities,
-  model_probs = model_probs,
-  optimal_decision = result$optimal_decision,
-  title = "Decision-Model Utility Landscape"
+```{r sensitivity}
+sens <- compute_evca_dirichlet(
+  U, alpha = c(2, 2, 2), n_draws = 1000, seed = 42,
+  weight_interpretation = "evaluative"
 )
+sens$mean_evca
+sens$action_frequencies
 ```
 
-The yellow border highlights the optimal decision under model averaging. Notice how different decisions perform best under different models—this is why EVCA is positive.
+# Epistemic interpretation
 
-## Sensitivity Analysis
+For an epistemic analysis, pass probabilities explicitly. With comparable
+utilities, the weighted gap is EVPI for the model index. The package accepts
+these probabilities but does not estimate or update them from data.
 
-```{r plot_sensitivity, fig.width=7, fig.height=5}
-# How sensitive is EVCA to our belief about Model 1?
-plot_sensitivity(
-  model_utilities,
-  model_probs,
-  vary_model = 1,
-  title = "Sensitivity: How EVCA Changes with P(Model 1)"
-)
+```{r epistemic}
+result_epistemic <- compute_evca(U, model_probs = c(0.5, 0.3, 0.2))
+compute_evpi_gap(U, c(0.5, 0.3, 0.2))
 ```
 
-This shows how EVCA varies as we become more or less certain about Model 1. The red triangle shows our current probability estimate.
+# Reporting
 
-# Multi-Dimensional Outcomes
-
-Often decisions affect multiple outcomes simultaneously (e.g., cost and effectiveness, yield and sustainability). EVCA handles this through multi-attribute utility functions.
-
-## Example with Two Outcome Dimensions
-
-```{r multidim_example}
-# Generate example with 2 outcome dimensions
-result_multi <- example_evca_multidim(
-  n_decisions = 3,
-  n_models = 4,
-  n_outcomes = 2,
-  outcome_weights = c(0.6, 0.4),  # 60% weight on outcome 1, 40% on outcome 2
-  seed = 456
-)
-
-# View outcome array structure
-cat("Outcome array dimensions:", dim(result_multi$model_outcomes), "\n")
-cat("Dimensions: decisions x models x outcomes\n\n")
-
-# Show outcomes for Decision 1 under all models
-cat("Outcomes for", result_multi$decision_names[1], ":\n")
-print(result_multi$model_outcomes[1, , ])
-```
-
-## Multi-Attribute Utility
-
-```{r multiattribute}
-# The multi-attribute utilities (weighted combination)
-cat("Multi-attribute utilities:\n")
-print(round(result_multi$model_utilities, 3))
-
-# EVCA result
-cat("\nEVCA:", round(result_multi$evca_result$evca, 3), "\n")
-cat("Optimal decision:",
-    result_multi$decision_names[result_multi$evca_result$optimal_decision], "\n")
-```
-
-The outcome weights (0.6, 0.4) determine the trade-off between the two outcome dimensions. Sensitivity analysis could explore how EVCA changes with different weight specifications.
-
-# Using EVCA in Practice
-
-## Workflow
-
-1. **Identify competing causal models**: What are the alternative theories of how your intervention works?
-
-2. **Estimate model probabilities**: Use prior research, pilot data, or expert elicitation
-
-3. **Compute expected utilities**: For each decision under each model, estimate the expected utility
-
-4. **Calculate EVCA**: Use `compute_evca()` to quantify the value of resolving ambiguity
-
-5. **Make decision**:
-   - If EVCA < research cost: Choose optimal decision under model averaging
-   - If EVCA > research cost: Invest in research to identify correct model
-
-## Example Decision Process
-
-```{r decision_process}
-# Generate example
-ex <- example_evca(n_decisions = 4, n_models = 3, seed = 789)
-
-# Suppose research to identify the correct model costs 2.0 utility units
-research_cost <- 2.0
-
-cat("EVCA:", round(ex$evca_result$evca, 3), "\n")
-cat("Research cost:", research_cost, "\n\n")
-
-if (ex$evca_result$evca > research_cost) {
-  cat("Decision: CONDUCT RESEARCH\n")
-  cat("Rationale: Value of resolving ambiguity (", round(ex$evca_result$evca, 3),
-      ") exceeds research cost (", research_cost, ")\n")
-} else {
-  cat("Decision: PROCEED WITH DECISION", ex$decision_names[ex$evca_result$optimal_decision], "\n")
-  cat("Rationale: Value of resolving ambiguity (", round(ex$evca_result$evca, 3),
-      ") is less than research cost (", research_cost, ")\n")
-  cat("Optimal decision under model averaging:", ex$decision_names[ex$evca_result$optimal_decision], "\n")
-}
-```
-
-# Advanced Topics
-
-## Risk Aversion
-
-By default, EVCA assumes risk-neutral utility. You can incorporate risk preferences:
-
-```{r risk_aversion}
-# Assume outcomes (not utilities) in model_utilities
-outcomes <- matrix(
-  c(100, 80, 120, 90,
-    70, 110, 60, 95,
-    115, 95, 75, 105),
-  nrow = 3, ncol = 4, byrow = TRUE
-)
-
-# Risk-neutral (identity utility)
-result_neutral <- compute_evca(outcomes, model_probs)
-
-# Risk-averse (exponential utility with risk aversion coefficient 0.02)
-result_averse <- compute_evca(
-  outcomes,
-  model_probs,
-  utility_function = function(x) -exp(-0.02 * x)
-)
-
-cat("EVCA (risk-neutral):", round(result_neutral$evca, 3), "\n")
-cat("EVCA (risk-averse):", round(result_averse$evca, 3), "\n")
-```
-
-Risk aversion typically increases EVCA because uncertainty is more costly when you're risk-averse.
-
-## Relationship to EVPI
-
-EVCA addresses structural uncertainty (which model?), while EVPI addresses parameter uncertainty (what are the exact parameter values?). In problems with both types of uncertainty:
-
-$$\text{Total VOI} \approx \text{EVPI}_{parameters} + \text{EVCA}_{structure}$$
-
-In practice, you might first compute EVCA to see if resolving structural uncertainty is valuable, then compute EVPI for parameters within the most probable model.
-
-# Conclusion
-
-EVCA provides a rigorous framework for:
-- **Quantifying** the value of resolving model uncertainty
-- **Prioritizing** research investments
-- **Making robust decisions** under causal ambiguity
-- **Combining** information from multiple competing theories
-
-Key takeaways:
-- High EVCA → Research to identify correct model is valuable
-- Low EVCA → Optimal decision is robust; proceed with model averaging
-- EVCA integrates prior-weighted model aggregation with decision theory
-- Framework extends to multi-dimensional outcomes and risk preferences
-
-# Further Reading
-
-For more details on the theoretical foundations and applications, see:
-
-- Claxton, K. (1999). Bayesian approaches to the value of information: implications for the regulation of new pharmaceuticals. _Health Economics_, 8(2), 191–202. https://pubmed.ncbi.nlm.nih.gov/10348422/
-- Yokota, F., & Thompson, K. M. (2004). Value of Information Analysis in Environmental Health Risk Management Decisions: Past, Present, and Future. _Risk Analysis_, 24(3), 635–650. https://doi.org/10.1111/j.0272-4332.2004.00464.x
+Report who selected the weights, what they represent, how the common scale was
+constructed, how results change under alternatives, and the exclusion costs
+for each account. A transparent number does not by itself make the aggregation
+legitimate.

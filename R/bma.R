@@ -1,38 +1,31 @@
-#' Prior-Credence-Weighted Model Utility
+#' Weighted Model Utility
 #'
-#' Computes prior-credence-weighted expected utilities across competing causal
-#' models. This function calculates the weighted average of utilities where
-#' weights are prior credences over competing causal structures, not
-#' data-fit posteriors.
+#' Computes a weighted sum of utilities across model columns. The function is
+#' arithmetic only: the caller must determine whether weights represent
+#' epistemic probabilities or evaluative standing, and report that meaning.
 #'
 #' @usage weighted_model_utility(model_utilities, model_probs)
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models,
 #'   containing expected utilities for each decision under each model.
 #'   Can also be a data frame that can be coerced to matrix. Each cell \[i,j\]
-#'   represents the expected utility of decision i if model j is true.
-#' @param model_probs Numeric vector of prior credences for each model,
-#'   representing the analyst's or stakeholders' degree of belief in each
-#'   competing causal structure. These are elicited credences, not
-#'   data-fit posteriors. Must have length equal to number of columns in
-#'   model_utilities. Must be non-negative and sum to 1 (within 1e-10 tolerance).
+#'   represents the expected utility of decision i under model j.
+#' @param model_probs Numeric vector of non-negative weights for model columns,
+#'   summing to 1. The helper does not distinguish epistemic probabilities from
+#'   evaluative standing weights; interpretation is set by the calling method.
 #'
-#' @return Numeric vector of prior-credence-weighted expected utilities,
-#'   one per decision (length equal to nrow(model_utilities)). Each element
-#'   represents the expected utility of that decision averaged across all
-#'   causal models, weighted by their prior credences.
+#' @return Numeric vector of weighted utilities, one per decision (length
+#'   equal to nrow(model_utilities)). The weights retain the interpretation
+#'   chosen by the caller; this helper does not infer it.
 #'
 #' @details
-#' Prior-credence-weighted model aggregation provides a principled framework
-#' for making decisions under causal structural uncertainty. For each decision
-#' d, the weighted expected utility is:
+#' For each decision d, this helper computes a weighted sum of model utilities:
 #'
-#' EU_avg(d) = sum over all models k of: p(M_k) * EU(d|M_k)
+#' EU_avg(d) = sum over all models k of: w_k * EU(d|M_k)
 #'
-#' where p(M_k) is the prior credence assigned to causal model M_k and
-#' EU(d|M_k) is the expected utility of decision d under that model.
-#' The credences p(M_k) are supplied by the analyst or elicited from
-#' stakeholders; they are not updated from data within this function.
+#' where w_k is the supplied weight for model k and EU(d|M_k) is the
+#' expected utility of decision d under that model. This helper does not
+#' update weights from data.
 #'
 #' This function uses efficient matrix multiplication: model_utilities %*% model_probs
 #'
@@ -46,7 +39,7 @@
 #' Model probabilities are validated in a specific order:
 #' 1. Non-negative values
 #' 2. Sum to 1
-#' Ensure probabilities meet the first constraint before checking the second.
+#' Ensure weights meet the first constraint before checking the second.
 #'
 #' @references
 #' Claxton, K. (1999). The irrelevance of inference: a decision-making approach
@@ -64,13 +57,13 @@
 #'   ), # Decision 2: utility 6 under M1, 9 under M2
 #'   nrow = 2, ncol = 2, byrow = TRUE
 #' )
-#' model_probs <- c(0.5, 0.5) # Equal probability for both models
+#' model_probs <- c(0.5, 0.5) # Equal weights; caller determines interpretation
 #'
 #' wtd_eu <- weighted_model_utility(model_utilities, model_probs)
 #' print(wtd_eu) # Should be c(7.5, 7.5)
 #'
 #' # Example 2: Unequal model probabilities
-#' model_probs_unequal <- c(0.7, 0.3)
+#' model_probs_unequal <- c(0.7, 0.3) # Unequal weights; caller determines interpretation
 #' wtd_eu_unequal <- weighted_model_utility(model_utilities, model_probs_unequal)
 #' print(wtd_eu_unequal) # Decision 1: 0.7*10 + 0.3*5 = 8.5
 #' # Decision 2: 0.7*6 + 0.3*9 = 6.9

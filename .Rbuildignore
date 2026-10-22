@@ -12,3 +12,7 @@
 ^cran-comments\.md$
 ^AGENTS.md
 ^FEEDBACK\.md$
+^\.cursor$
+^revdep$
+^evca\.Rcheck$
+^evca_.*\.tar\.gz$
