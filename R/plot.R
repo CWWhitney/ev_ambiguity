@@ -97,7 +97,10 @@ plot_evca <- function(evca_result,
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models,
 #'   containing expected utilities for each decision under each model.
-#' @param model_probs Vector of model probabilities (optional, shown if provided).
+#' @param model_weights Vector of model weights (optional, shown if provided).
+#'   These may be epistemic probabilities or evaluative standing weights; the
+#'   caller determines the interpretation.
+#' @param model_probs Deprecated; use `model_weights`.
 #' @param optimal_decision Index of optimal decision under model averaging (optional, highlighted if provided).
 #' @param title Plot title (default: "Decision-Model Utility Matrix").
 #'
@@ -114,14 +117,19 @@ plot_evca <- function(evca_result,
 #' # Create heatmap
 #' p <- plot_utilities_heatmap(
 #'   result$model_utilities,
-#'   model_probs = result$model_probs,
+#'   model_weights = result$model_probs,
 #'   optimal_decision = result$evca_result$optimal_decision
 #' )
 #' print(p)
 plot_utilities_heatmap <- function(model_utilities,
-                                   model_probs = NULL,
+                                   model_weights = NULL,
                                    optimal_decision = NULL,
-                                   title = "Decision-Model Utility Matrix") {
+                                   title = "Decision-Model Utility Matrix",
+                                   model_probs = NULL) {
+  if (!is.null(model_probs)) {
+    warning("`model_probs` is deprecated; use `model_weights`.", call. = FALSE)
+    if (is.null(model_weights)) model_weights <- model_probs
+  }
   # Convert to matrix if needed
   if (!is.matrix(model_utilities)) {
     model_utilities <- as.matrix(model_utilities)
@@ -142,13 +150,13 @@ plot_utilities_heatmap <- function(model_utilities,
 
   # Create subtitle with model probabilities if provided
   subtitle <- NULL
-  if (!is.null(model_probs)) {
+  if (!is.null(model_weights)) {
     prob_text <- paste(
       colnames(model_utilities),
-      sprintf("(p=%.2f)", model_probs),
+      sprintf("(w=%.2f)", model_weights),
       collapse = ", "
     )
-    subtitle <- paste("Model probabilities:", prob_text)
+    subtitle <- paste("Model weights:", prob_text)
   }
 
   # Create base heatmap
@@ -209,7 +217,9 @@ plot_utilities_heatmap <- function(model_utilities,
 #' probabilities vary.
 #'
 #' @param model_utilities Matrix where rows are decisions and columns are models.
-#' @param model_probs Vector of model probabilities (baseline).
+#' @param model_weights Vector of model weights (baseline); epistemic
+#'   probabilities or evaluative standing weights, as the caller determines.
+#' @param model_probs Deprecated; use `model_weights`.
 #' @param vary_model Index or name of model to vary (default: 1).
 #' @param prob_seq Sequence of probabilities to test (default: seq(0, 1, 0.05)).
 #' @param title Plot title (default: auto-generated).
@@ -231,10 +241,15 @@ plot_utilities_heatmap <- function(model_utilities,
 #' )
 #' print(p)
 plot_sensitivity <- function(model_utilities,
-                             model_probs,
+                             model_weights,
                              vary_model = 1,
                              prob_seq = seq(0, 1, by = 0.05),
-                             title = NULL) {
+                             title = NULL,
+                             model_probs = NULL) {
+  if (!is.null(model_probs)) {
+    warning("`model_probs` is deprecated; use `model_weights`.", call. = FALSE)
+    if (missing(model_weights)) model_weights <- model_probs
+  }
   # Convert to matrix if needed
   if (!is.matrix(model_utilities)) {
     model_utilities <- as.matrix(model_utilities)
@@ -251,7 +266,7 @@ plot_sensitivity <- function(model_utilities,
 
   # Create title if not provided
   if (is.null(title)) {
-    title <- sprintf("EVCA Sensitivity: Varying P(%s)", model_name)
+    title <- sprintf("EVCA Sensitivity: Varying weight of %s", model_name)
   }
 
   # Compute EVCA for each probability value
@@ -261,7 +276,7 @@ plot_sensitivity <- function(model_utilities,
     p <- prob_seq[i]
 
     # Adjust probabilities
-    new_probs <- model_probs
+    new_probs <- model_weights
     new_probs[model_idx] <- p
 
     # Handle edge cases
@@ -286,7 +301,7 @@ plot_sensitivity <- function(model_utilities,
   )
 
   # Baseline probability
-  baseline_prob <- model_probs[model_idx]
+  baseline_prob <- model_weights[model_idx]
   baseline_evca <- evca_values[which.min(abs(prob_seq - baseline_prob))]
 
   # Create plot
@@ -305,10 +320,10 @@ plot_sensitivity <- function(model_utilities,
     ggplot2::labs(
       title = title,
       subtitle = sprintf(
-        "Baseline: P(%s) = %.3f, EVCA = %.4f",
+        "Baseline: weight(%s) = %.3f, EVCA = %.4f",
         model_name, baseline_prob, baseline_evca
       ),
-      x = sprintf("Probability of %s", model_name),
+      x = sprintf("Weight of %s", model_name),
       y = "EVCA"
     ) +
     ggplot2::theme_minimal() +
