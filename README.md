@@ -11,6 +11,14 @@ weights mean.
   same arithmetic is an aggregation diagnostic. It is not the value of research
   to identify a true model.
 
+**Scope.** The package is a calculation kernel. It aggregates account-level payoffs
+that have already been estimated and placed on a chosen common scale. It has no
+representation of states of the world or of causal hypotheses within an account,
+so it does not compute the split of the shortfall into an evidence-reducible term
+and an evidence-irreducible one (see the manuscript). The field
+`perfect_info_expected_utility` is the account-specific best-action benchmark;
+it is an information benchmark only under epistemic weights.
+
 The package does not construct causal models, elicit utilities, or justify a
 common scale across incommensurable welfare measures. Those choices must be
 reported with any result.
