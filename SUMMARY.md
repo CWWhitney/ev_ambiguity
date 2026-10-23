@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `evca` R package has been successfully streamlined to focus on the core modeling framework for Expected Value of Eliminating Causal Ambiguity (EVCA), removing domain-specific content and creating a general-purpose decision-theoretic tool.
+The `evca` R package has been successfully streamlined to focus on the core modeling framework for Expected Value of Causal Ambiguity (EVCA), removing domain-specific content and creating a general-purpose decision-theoretic tool.
 
 ## What Was Done
 
@@ -15,7 +15,7 @@ The `evca` R package has been successfully streamlined to focus on the core mode
 
 #### Package Metadata (DESCRIPTION)
 - **Before**: Focused on "Gender-Nutrition Decisions" with specific development context
-- **After**: General "Expected Value of Eliminating Causal Ambiguity" applicable to any modeling context
+- **After**: General "Expected Value of Causal Ambiguity" applicable to any modeling context
 - Version bumped to 0.3.0 to reflect major changes
 - Removed unused dependencies (RColorBrewer)
 - Updated email and description to be domain-agnostic

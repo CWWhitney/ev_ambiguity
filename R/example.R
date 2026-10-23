@@ -36,7 +36,7 @@
 #'
 #' The generated data creates realistic model ambiguity where:
 #' - Different models favor different decisions
-#' - EVCA will typically be positive (value to resolving ambiguity)
+#' - EVCA will typically be positive (a shortfall from one shared action)
 #' - Results are reproducible when using the same seed
 #'
 #' This function is useful for:

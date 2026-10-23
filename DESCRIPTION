@@ -1,5 +1,5 @@
 Package: evca
-Title: Expected Value of Eliminating Causal Ambiguity
+Title: Expected Value of Causal Ambiguity
 Version: 0.4.0
 Description: Provides decision-analytic diagnostics for structural
     uncertainty and contested causal models. The package computes the

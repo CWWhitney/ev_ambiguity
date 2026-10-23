@@ -109,11 +109,11 @@
 #' discrepancy) within a single model relative to the true data-generating
 #' process. This concerns within-model inadequacy: the model is assumed to be
 #' structurally correct but imprecise. EVCA instead treats multiple complete
-#' causal models as competing hypotheses with no agreed truth and asks what
-#' it would be worth to identify which is correct. Both extend VOI to
-#' structural model considerations, but through distinct mechanisms:
-#' EVMI quantifies the cost of within-model bias; EVCA quantifies the cost
-#' of between-model ambiguity.
+#' causal models as competing accounts. With epistemic probabilities its
+#' formula is EVPI over a model index; with evaluative weights it reports
+#' the welfare shortfall from imposing one shared action, which is not by
+#' itself a value of research. The two address different questions: EVMI
+#' concerns within-model bias, EVCA concerns aggregation across models.
 #'
 #' @section Warning:
 #' Model probabilities must sum to exactly 1 (within 1e-10 tolerance).

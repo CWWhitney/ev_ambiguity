@@ -2,7 +2,7 @@
 % Please edit documentation in R/evca.R
 \name{compute_evca}
 \alias{compute_evca}
-\title{Expected Value of Eliminating Causal Ambiguity (EVCA)}
+\title{Expected Value of Causal Ambiguity (EVCA)}
 \usage{
 compute_evca(model_utilities, model_probs = NULL,
   utility_function = identity, model_weights = NULL,
@@ -125,11 +125,11 @@ Improvement (EVMI), the gain from reducing systematic bias (model
 discrepancy) within a single model relative to the true data-generating
 process. This concerns within-model inadequacy: the model is assumed to be
 structurally correct but imprecise. EVCA instead treats multiple complete
-causal models as competing hypotheses with no agreed truth and asks what
-it would be worth to identify which is correct. Both extend VOI to
-structural model considerations, but through distinct mechanisms:
-EVMI quantifies the cost of within-model bias; EVCA quantifies the cost
-of between-model ambiguity.
+causal models as competing accounts. With epistemic probabilities its
+formula is EVPI over a model index; with evaluative weights it reports
+the welfare shortfall from imposing one shared action, which is not by
+itself a value of research. The two address different questions: EVMI
+concerns within-model bias, EVCA concerns aggregation across models.
 }
 
 \section{Warning}{
