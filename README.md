@@ -12,16 +12,32 @@ weights mean.
   to identify a true model.
 
 **Scope.** The package is a calculation kernel. It aggregates account-level payoffs
-that have already been estimated and placed on a chosen common scale. It has no
-representation of states of the world or of causal hypotheses within an account,
-so it does not compute the split of the shortfall into an evidence-reducible term
-and an evidence-irreducible one (see the manuscript). The field
+that have already been estimated and placed on a chosen common scale.
+`compute_evca()` works on expected payoffs. `evca_decompose()` takes payoffs
+over simulated states of the world (a states x decisions x models array) and
+splits the gap between the ideal and the shared-action value into an aggregate
+EVPI (reducible by evidence about the state) and the expected EVCA that remains
+once the state is known. It does not construct the causal models or the scenario
+model that generate the states. The field
 `perfect_info_expected_utility` is the account-specific best-action benchmark;
 it is an information benchmark only under epistemic weights.
 
 The package does not construct causal models, elicit utilities, or justify a
 common scale across incommensurable welfare measures. Those choices must be
 reported with any result.
+
+## Decomposition over states
+
+```r
+# draws: states x decisions x models, on a common scale
+evca_decompose(draws, model_weights = rep(1/3, 3),
+               scale_min = scale_min, scale_range = scale_range)
+```
+
+The split holds under one probability measure over states, all models defined
+over the same states, and a common scale, weights and action set held fixed
+across states. Normalization constants are supplied once, not re-estimated per
+state.
 
 ## Installation
 
