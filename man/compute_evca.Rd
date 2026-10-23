@@ -2,7 +2,7 @@
 % Please edit documentation in R/evca.R
 \name{compute_evca}
 \alias{compute_evca}
-\title{Expected Value of Causal Ambiguity (EVCA)}
+\title{Expected Value of Eliminating Causal Ambiguity (EVCA)}
 \usage{
 compute_evca(model_utilities, model_probs = NULL,
   utility_function = identity, model_weights = NULL,

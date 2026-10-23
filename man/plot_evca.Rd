@@ -2,11 +2,11 @@
 % Please edit documentation in R/plot.R
 \name{plot_evca}
 \alias{plot_evca}
-\title{Plot Expected Value of Causal Ambiguity (EVCA) Results}
+\title{Plot Expected Value of Eliminating Causal Ambiguity (EVCA) Results}
 \usage{
 plot_evca(
   evca_result,
-  title = "Expected Value of Causal Ambiguity",
+  title = "Expected Value of Eliminating Causal Ambiguity",
   subtitle = NULL,
   colors = c("#4E79A7", "#F28E2B")
 )

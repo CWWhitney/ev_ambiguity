@@ -6,20 +6,25 @@
 \usage{
 plot_utilities_heatmap(
   model_utilities,
-  model_probs = NULL,
+  model_weights = NULL,
   optimal_decision = NULL,
-  title = "Decision-Model Utility Matrix"
+  title = "Decision-Model Utility Matrix",
+  model_probs = NULL
 )
 }
 \arguments{
 \item{model_utilities}{Matrix where rows are decisions and columns are models,
 containing expected utilities for each decision under each model.}
 
-\item{model_probs}{Vector of model probabilities (optional, shown if provided).}
+\item{model_weights}{Vector of model weights (optional, shown if provided).
+These may be epistemic probabilities or evaluative standing weights; the
+caller determines the interpretation.}
 
 \item{optimal_decision}{Index of optimal decision under model averaging (optional, highlighted if provided).}
 
 \item{title}{Plot title (default: "Decision-Model Utility Matrix").}
+
+\item{model_probs}{Deprecated; use \code{model_weights}.}
 }
 \value{
 A ggplot object.
@@ -34,7 +39,7 @@ result <- example_evca()
 # Create heatmap
 p <- plot_utilities_heatmap(
   result$model_utilities,
-  model_probs = result$model_probs,
+  model_weights = result$model_probs,
   optimal_decision = result$evca_result$optimal_decision
 )
 print(p)

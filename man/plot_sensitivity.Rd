@@ -6,22 +6,26 @@
 \usage{
 plot_sensitivity(
   model_utilities,
-  model_probs,
+  model_weights,
   vary_model = 1,
   prob_seq = seq(0, 1, by = 0.05),
-  title = NULL
+  title = NULL,
+  model_probs = NULL
 )
 }
 \arguments{
 \item{model_utilities}{Matrix where rows are decisions and columns are models.}
 
-\item{model_probs}{Vector of model probabilities (baseline).}
+\item{model_weights}{Vector of model weights (baseline); epistemic
+probabilities or evaluative standing weights, as the caller determines.}
 
 \item{vary_model}{Index or name of model to vary (default: 1).}
 
 \item{prob_seq}{Sequence of probabilities to test (default: seq(0, 1, 0.05)).}
 
 \item{title}{Plot title (default: auto-generated).}
+
+\item{model_probs}{Deprecated; use \code{model_weights}.}
 }
 \value{
 A ggplot object.
