@@ -32,6 +32,13 @@
 #' This places all models on a common \[0, 1\] scale where 0 = worst outcome
 #' the model anticipates for any action, and 1 = best.
 #'
+#' @section Two actions:
+#' With two decisions, every model gets a 0 and a 1, so each becomes a
+#' full-range preference. Which models disagree is unchanged, but the size of
+#' [compute_evca()] depends on this. Example: equal weights, three of four
+#' models prefer action 1, one prefers action 2, giving EVCA = 0.25 whatever
+#' the native ranges. Report EVCA under another scaling too.
+#'
 #' @section Political assumption:
 #' Min-max normalization assigns equal stakes to the welfare range of each
 #' model. A model whose stakeholders face catastrophic outcomes is treated as
