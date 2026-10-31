@@ -2,7 +2,7 @@
 % Please edit documentation in R/example.R
 \name{example_evca}
 \alias{example_evca}
-\title{Example Analysis for Expected Value of Eliminating Causal Ambiguity}
+\title{Example Analysis for Expected Value of Causal Ambiguity}
 \usage{
 example_evca(n_decisions = 3, n_models = 4, seed = 123,
   utility_range = c(0, 10))

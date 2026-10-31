@@ -1,4 +1,4 @@
-#' Plot Expected Value of Eliminating Causal Ambiguity (EVCA) Results
+#' Plot Expected Value of Causal Ambiguity (EVCA) Results
 #'
 #' Create visualizations of EVCA analysis results from `compute_evca()`.
 #'
@@ -27,7 +27,7 @@
 #' )
 #' print(p)
 plot_evca <- function(evca_result,
-                      title = "Expected Value of Eliminating Causal Ambiguity",
+                      title = "Expected Value of Causal Ambiguity",
                       subtitle = NULL,
                       colors = c("#4E79A7", "#F28E2B")) {
   # Validate input
