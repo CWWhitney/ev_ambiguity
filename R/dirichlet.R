@@ -315,7 +315,7 @@ plot_dirichlet_evca <- function(dirichlet_result,
     ggplot2::labs(
       title    = title,
       subtitle = "Dashed line = mean EVCA | Higher EVCA = decision more sensitive to model choice",
-      x        = "EVCA (normalised welfare units)",
+      x        = "EVCA (normalized welfare units)",
       y        = "Count",
       fill     = "Scenario"
     ) +
