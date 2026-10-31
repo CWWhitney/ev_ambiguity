@@ -250,12 +250,12 @@ compute_exclusion_costs <- function(model_utilities,
 #'
 #' Creates a grouped bar chart comparing each excluded model's welfare when
 #' that model is absent from deliberation versus its best possible welfare
-#' (had the decision been made in its favour). The gap between the bars is
+#' (had the decision been made in its favor). The gap between the bars is
 #' the exclusion cost.
 #'
 #' @param exclusion_df Data frame returned by [compute_exclusion_costs()].
 #' @param title Plot title. Default: "Exclusion Costs by Model".
-#' @param colors Length-2 character vector of bar colours. The first colour
+#' @param colors Length-2 character vector of bar colors. The first color
 #'   applies to the "when excluded" scenario; the second to the "own best"
 #'   scenario. Default: `c("#c0392b", "#2980b9")`.
 #'
@@ -284,7 +284,7 @@ compute_exclusion_costs <- function(model_utilities,
 #' excl <- compute_exclusion_costs(model_utilities)
 #' plot_exclusion_costs(excl)
 #'
-#' # Customise colours and title
+#' # Customize colors and title
 #' plot_exclusion_costs(excl,
 #'   title  = "Cost of Excluding Each Stakeholder Model",
 #'   colors = c("#e74c3c", "#3498db")
@@ -348,7 +348,7 @@ plot_exclusion_costs <- function(exclusion_df,
       title    = title,
       subtitle = "Exclusion cost = gap between bars",
       x        = "Model excluded from deliberation",
-      y        = "Welfare [0\u20131, normalised within each model]",
+      y        = "Welfare [0\u20131, normalized within each model]",
       fill     = NULL
     ) +
     ggplot2::theme_minimal(base_size = 13) +

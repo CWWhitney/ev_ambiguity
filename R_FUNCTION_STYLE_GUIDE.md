@@ -89,12 +89,12 @@ function_name <- function(param1, param2 = default_value) {
 
 **Title**: One line, capitalized, no period
 ```r
-#' Expected Value of Eliminating Causal Ambiguity (EVCA)
+#' Expected Value of Causal Ambiguity (EVCA)
 ```
 
 **Description**: 1-3 sentences explaining purpose
 ```r
-#' Calculates the Expected Value of Eliminating Causal Ambiguity using
+#' Calculates the Expected Value of Causal Ambiguity using
 #' Bayesian model averaging framework. This function quantifies the value
 #' of resolving structural uncertainty about which causal model is correct.
 ```
@@ -140,7 +140,7 @@ Describe what the function returns:
 **Complex return (list):**
 ```r
 #' @return A list with the following components:
-#'   \item{evca}{Expected Value of Eliminating Causal Ambiguity.}
+#'   \item{evca}{Expected Value of Causal Ambiguity.}
 #'   \item{optimal_decision_bma}{Integer index of optimal decision under BMA.}
 #'   \item{optimal_utility_bma}{Expected utility of optimal BMA decision.}
 #'   \item{model_probs}{Original model probabilities (for reference).}
@@ -409,9 +409,9 @@ Include:
 ## Complete Example Following All Guidelines
 
 ```r
-#' Expected Value of Eliminating Causal Ambiguity (EVCA)
+#' Expected Value of Causal Ambiguity (EVCA)
 #'
-#' Computes the Expected Value of Eliminating Causal Ambiguity using
+#' Computes the Expected Value of Causal Ambiguity using
 #' Bayesian model averaging. EVCA quantifies the maximum value of
 #' resolving structural uncertainty about which causal model is correct.
 #'
@@ -427,7 +427,7 @@ Include:
 #'   outcomes rather than utilities.
 #'
 #' @return A list with the following components:
-#'   \item{evca}{Expected Value of Eliminating Causal Ambiguity.}
+#'   \item{evca}{Expected Value of Causal Ambiguity.}
 #'   \item{optimal_decision_bma}{Integer index of optimal decision under BMA.}
 #'   \item{optimal_utility_bma}{Expected utility of optimal BMA decision.}
 #'   \item{perfect_info_expected_utility}{Expected utility with perfect information.}

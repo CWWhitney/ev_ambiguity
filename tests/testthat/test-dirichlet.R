@@ -56,7 +56,7 @@ test_that("compute_evca_dirichlet different seeds give different results", {
   expect_false(identical(r1$evca_draws, r2$evca_draws))
 })
 
-test_that("compute_evca_dirichlet equal prior favours Rerouted road", {
+test_that("compute_evca_dirichlet equal prior favors Rerouted road", {
   result <- compute_evca_dirichlet(U_norm, alpha = c(2, 2, 2),
                                     n_draws = 2000, seed = 42)
   freq <- result$action_frequencies

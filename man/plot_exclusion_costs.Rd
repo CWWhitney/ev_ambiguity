@@ -15,7 +15,7 @@ plot_exclusion_costs(
 
 \item{title}{Plot title. Default: "Exclusion Costs by Model".}
 
-\item{colors}{Length-2 character vector of bar colours. The first colour
+\item{colors}{Length-2 character vector of bar colors. The first color
 applies to the "when excluded" scenario; the second to the "own best"
 scenario. Default: \code{c("#c0392b", "#2980b9")}.}
 }
@@ -25,7 +25,7 @@ A ggplot object that can be further customized or printed.
 \description{
 Creates a grouped bar chart comparing each excluded model's welfare when
 that model is absent from deliberation versus its best possible welfare
-(had the decision been made in its favour). The gap between the bars is
+(had the decision been made in its favor). The gap between the bars is
 the exclusion cost.
 }
 \examples{
@@ -44,7 +44,7 @@ model_utilities <- matrix(
 excl <- compute_exclusion_costs(model_utilities)
 plot_exclusion_costs(excl)
 
-# Customise colours and title
+# Customize colors and title
 plot_exclusion_costs(excl,
   title  = "Cost of Excluding Each Stakeholder Model",
   colors = c("#e74c3c", "#3498db")

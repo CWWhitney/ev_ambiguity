@@ -257,7 +257,7 @@ test_that("plot_utilities_heatmap creates valid ggplot object", {
   # Create heatmap
   p <- plot_utilities_heatmap(
     example_result$model_utilities,
-    model_probs = example_result$model_probs,
+    model_weights = example_result$model_probs,
     optimal_decision = example_result$evca_result$optimal_decision
   )
 
