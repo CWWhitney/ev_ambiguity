@@ -1,4 +1,4 @@
-#' Example Analysis for Expected Value of Eliminating Causal Ambiguity
+#' Example Analysis for Expected Value of Causal Ambiguity
 #'
 #' Generates example data for decision problems with competing causal models
 #' and runs a demonstration EVCA analysis. This function creates realistic

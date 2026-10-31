@@ -2,7 +2,7 @@
 % Please edit documentation in R/evca.R
 \name{compute_evca}
 \alias{compute_evca}
-\title{Expected Value of Eliminating Causal Ambiguity (EVCA)}
+\title{Expected Value of Causal Ambiguity (EVCA)}
 \usage{
 compute_evca(model_utilities, model_probs = NULL,
   utility_function = identity, model_weights = NULL,
@@ -158,17 +158,19 @@ model_utilities <- matrix(
   )
 )
 
-# Model probabilities from expert elicitation or data
+# Probabilities that each model governs (epistemic). Use model_weights
+# for declared standing (evaluative).
 model_probs <- c(0.3, 0.25, 0.25, 0.2)
 
 # Compute EVCA with risk-neutral utility (identity function)
-result <- compute_evca(model_utilities, model_weights = model_probs)
+result <- compute_evca(model_utilities, model_probs = model_probs)
 
 # Print key results
 print(result$evca)
 print(result$optimal_decision)
 
 # Example 2: Making a decision based on EVCA
+# Comparing EVCA with research cost needs epistemic probabilities.
 research_cost <- 1.5
 
 if (result$evca > research_cost) {
