@@ -39,32 +39,3 @@ compute_evpi_gap <- function(model_utilities, model_probs) {
   result <- compute_evca(model_utilities, model_probs)
   result$evca
 }
-
-
-#' Check Whether EVCA Equals the EVPI Gap
-#'
-#' Returns TRUE when the EVCA value from [compute_evca()] equals the EVPI
-#' gap from [compute_evpi_gap()] within tolerance. They are algebraically
-#' identical on any common-scale utility matrix; this helper is useful in
-#' tests and vignettes when documenting the EVPI boundary case.
-#'
-#' @usage evca_equals_evpi(model_utilities, model_probs, tolerance = 1e-10)
-#'
-#' @param model_utilities Utility matrix (decisions x models/states).
-#' @param model_probs Probability vector over columns.
-#' @param tolerance Numeric tolerance for equality (default: 1e-10).
-#'
-#' @return Logical scalar.
-#'
-#' @keywords decision-analysis value-of-information internal
-#'
-#' @examples
-#' U <- normalize_utilities(matrix(c(10, 5, 6, 9), nrow = 2, byrow = TRUE))
-#' evca_equals_evpi(U, c(0.5, 0.5))
-#'
-#' @export
-evca_equals_evpi <- function(model_utilities, model_probs, tolerance = 1e-10) {
-  evca <- compute_evca(model_utilities, model_probs)$evca
-  evpi <- compute_evpi_gap(model_utilities, model_probs)
-  isTRUE(abs(evca - evpi) <= tolerance)
-}

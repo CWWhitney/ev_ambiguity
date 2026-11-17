@@ -130,6 +130,17 @@ and `plot_dirichlet_actions()`.
 - `plot_evca()`, `plot_utilities_heatmap()`, and `plot_exclusion_costs()` show
   the supplied utilities and computed diagnostics.
 
+## Why not just frame better?
+
+A common response to non-overlapping causal models and value variables is that
+the framing failed. The vignette
+[`irreducible-ambiguity`](vignettes/irreducible-ambiguity.Rmd) argues that
+careful framing removes linguistic and evidential disagreement but need not
+remove ontological-evaluative disagreement. It gives a reframing test, bridge
+sensitivity, a scale-free acceptability check, a joint-venture example, and a
+literature map with a Crossref-checkable bibliography
+(`vignettes/references.bib`; run `python3 data-raw/verify_bib.py`).
+
 ## Scope
 
 Structural uncertainty and VOI are established decision-analysis topics.
