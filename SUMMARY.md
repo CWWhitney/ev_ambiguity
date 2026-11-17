@@ -1,158 +1,73 @@
-# Package Streamlining Summary
+# evca: package summary
 
-## Overview
+Package `evca`, version 0.5.0. Purpose: decision diagnostics for contested
+causal models. The package takes a decision-by-model matrix of expected
+utilities that is already on a chosen common scale. It does not build the
+causal models, elicit utilities or justify the scale.
 
-The `evca` R package has been successfully streamlined to focus on the core modeling framework for Expected Value of Causal Ambiguity (EVCA), removing domain-specific content and creating a general-purpose decision-theoretic tool.
+## Core quantity
 
-## What Was Done
-
-### 1. Created Succinct Overview (Notes.txt)
-- Created `Notes.txt` in the project root with a clear, concise explanation of VOI for ambiguity
-- Covers: core concept, key framework, mathematical formulation, practical application, and advantages
-- Suitable as a quick reference for understanding the approach
-
-### 2. Streamlined R Package
-
-#### Package Metadata (DESCRIPTION)
-- **Before**: Focused on "Gender-Nutrition Decisions" with specific development context
-- **After**: General "Expected Value of Causal Ambiguity" applicable to any modeling context
-- Version bumped to 0.3.0 to reflect major changes
-- Removed unused dependencies (RColorBrewer)
-- Updated email and description to be domain-agnostic
-
-#### Core Functions (Maintained)
-- `compute_evca()` - Main EVCA computation with BMA
-- `bma_expected_utility()` - Bayesian model averaging helper
-- Both functions remain unchanged in their core logic
-
-#### Example Functions (Simplified)
-**Before**: `example_development()` with context-specific parameters
-- Had contexts: "gender_nutrition", "empowerment_pathways", "nutrition_sensitive"
-- Complex context-specific naming and outcome generation
-
-**After**: Two clean functions
-- `example_evca()` - Simple example generator with basic utilities
-- `example_evca_multidim()` - Multi-dimensional outcomes example
-- Generic naming (Decision 1, Model 1, Outcome 1, etc.)
-- Works for any modeling application
-
-#### Plotting Functions (Generalized & Enhanced)
-**Before**: `plot_development()` with gender-nutrition specific visualizations
-
-**After**: Three focused plotting functions
-- `plot_evca()` - Basic EVCA bar chart
-- `plot_utilities_heatmap()` - Decision-model utility matrix visualization
-- `plot_sensitivity()` - Sensitivity analysis for model probabilities
-- All use generic labels and work for any application
-
-**Removed**: `plot_development.R` (domain-specific)
-
-#### Vignette (Completely Rewritten)
-**Before**: "EVCA for Gender-Nutrition Decisions" with extensive development context
-
-**After**: "Introduction to EVCA" - General framework
-- Explains causal ambiguity concept
-- Mathematical framework clearly presented
-- Simple examples anyone can follow
-- Shows basic workflow, visualization, multi-dimensional outcomes
-- Demonstrates decision-making process
-- No domain-specific content
-
-#### Documentation (Updated)
-- All function documentation now uses general terminology
-- Examples use generic decision/model names
-- No references to specific domains unless as brief examples
-- README.md created with comprehensive package overview
-
-### 3. Code Quality Improvements
-
-#### Fixed Issues
-- Corrected validation order (check negative probabilities before sum)
-- Fixed matrix construction in tests (added `byrow=TRUE` where needed)
-- Fixed deprecated ggplot2 parameters (`size` → `linewidth`)
-- Resolved global variable binding warnings
-- Fixed LICENSE file format for R packages
-
-#### Test Results
-- **100 tests passing** (72 in test-all-functions.R, 28 in test-compute_evca.R)
-- **0 errors, 0 warnings, 0 notes** in R CMD check
-- All code follows R package best practices
-
-### 4. Package Structure
-
-```
-ev_ambiguity/
-├── DESCRIPTION          # Updated to be general
-├── LICENSE              # Fixed format
-├── NAMESPACE            # Auto-generated, clean
-├── README.md            # Comprehensive guide (NEW)
-├── R/
-│   ├── bma.R           # Bayesian model averaging (maintained)
-│   ├── evca.R          # Core EVCA function (maintained)
-│   ├── example.R       # Simplified examples
-│   ├── plot.R          # Generalized plotting functions
-│   └── [plot_development.R removed]
-├── man/                 # Auto-generated documentation
-├── tests/
-│   └── testthat/       # 100 passing tests
-└── vignettes/
-    └── evca-intro.Rmd  # Completely rewritten
+```text
+EVCA = sum_k w[k] * max_d U[d, k] - max_d sum_k w[k] * U[d, k]
 ```
 
-## Key Benefits
+The first term is each model scored at its own best action. The second is the
+best single shared action under the weights. How to read the gap depends on
+the weights:
 
-### For Users
-1. **Clear Focus**: Package purpose is immediately clear - EVCA for any modeling context
-2. **Easy to Understand**: No domain knowledge required to use the package
-3. **Flexible**: Works for policy, medicine, agriculture, environment, technology, etc.
-4. **Well-Documented**: README, vignettes, and examples make it accessible
+- **Epistemic probabilities** (`model_probs`): the gap is the expected value of
+  perfect information (EVPI) for the model index.
+- **Evaluative weights** (`model_weights`): the gap is an aggregation
+  shortfall under declared standing. It is not the value of research.
 
-### For Development
-1. **Clean Codebase**: Removed unnecessary context-specific code
-2. **Better Tests**: All tests pass with no warnings
-3. **Maintainable**: Generic code is easier to maintain and extend
-4. **Professional**: Passes all R CMD checks cleanly
+## Functions
 
-## What Remains
+| Group | Functions |
+|---|---|
+| Core | `compute_evca()`, `compute_evca_dirichlet()`, `evca_decompose()` |
+| Scale and agreement | `normalize_utilities()`, `check_action_agreement()` |
+| Who loses | `compute_exclusion_costs()` |
+| Helpers | `weighted_model_utility()`, `compute_multi_attribute_utilities()`, `compute_evpi_gap()` |
+| Examples | `example_evca()`, `example_evca_multidim()`, `example_bavi()` |
+| Plots | `plot_evca()`, `plot_utilities_heatmap()`, `plot_sensitivity()`, `plot_exclusion_costs()`, `plot_dirichlet_evca()`, `plot_dirichlet_actions()` |
 
-### Manuscript Folder
-The `manuscript/` folder still contains the original gender-nutrition focused paper (paper.Rmd). This could be:
-- Kept as an example application
-- Rewritten to be more general
-- Moved to a separate examples or case-studies folder
-- Left as-is if it's for a specific publication
+Notes:
 
-### Package is Ready For
-- CRAN submission (passes all checks)
-- GitHub release
-- Use in any domain requiring EVCA analysis
-- Teaching and training on VOI under model uncertainty
+- `check_action_agreement()` uses only each model's own ranking. If all models
+  share a best action, EVCA is zero under any positive weights and any monotone
+  rescaling. If they do not, it is positive under all of them.
+- `compute_evpi_gap()` returns the same number as `compute_evca()`. It names
+  the EVPI reading that applies under epistemic probabilities.
+- `compute_exclusion_costs()` reports losses on the scale of the matrix it is
+  given. Pass the raw matrix with `normalize = FALSE` to see each model's own
+  units.
 
-## Usage Example
+## Vignettes
 
-```r
-library(evca)
+- `evca-intro`: the framework and basic workflow.
+- `irreducible-ambiguity`: the argument that careful framing need not remove
+  disagreement between accounts, with a reframing test, bridge sensitivity, an
+  acceptability check that needs no common scale, and a joint-venture example.
+- `glossary`: terms.
 
-# Define your utilities
-model_utilities <- matrix(c(8.5, 6.0, 9.0, 7.5,
-                           7.0, 8.5, 5.5, 8.0,
-                           9.0, 7.5, 6.5, 9.5),
-                         nrow = 3, ncol = 4, byrow = TRUE)
+`vignettes/references.bib` was checked against Crossref (see its header).
 
-# Define model probabilities
-model_probs <- c(0.35, 0.30, 0.20, 0.15)
+## Tests
 
-# Compute EVCA
-result <- compute_evca(model_utilities, model_probs)
+78 tests in `tests/testthat`, all passing on 2026-11-17. Files cover agreement,
+all-functions, compute_evca, decompose, dirichlet, exclusion, normalize and
+weight interpretation. R CMD check was not run for this summary.
 
-# Make decision
-if (result$evca > research_cost) {
-  message("Research to identify correct model is worthwhile")
-} else {
-  message("Proceed with decision ", result$optimal_decision_bma)
-}
-```
+## Known limits
 
-## Conclusion
-
-The package has been successfully streamlined from a domain-specific tool (gender-nutrition) to a general-purpose decision-theoretic framework. The core modeling approach remains intact while removing thematic constraints, making it applicable to any field dealing with causal ambiguity and model uncertainty.
+- A common-scale bridge is a substantive choice. Min-max normalization gives
+  each model's action range equal stakes and can change when actions are added
+  or removed. The size of EVCA depends on the bridge. Only the zero test does
+  not.
+- No function varies the normalization. The `irreducible-ambiguity` vignette
+  compares four scalings by hand. `compute_evca_dirichlet()` varies weights,
+  not scalings.
+- The value of reframing (original EVCA minus the smallest EVCA across
+  independent framings) is described in the vignette and is not a function.
+- The package is not a substitute for EVPI, Bayesian model averaging or
+  robust decision methods.
