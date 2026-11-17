@@ -1,0 +1,336 @@
+---
+title: "Irreducible ambiguity after decision quality"
+author: "Cory Whitney"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Irreducible ambiguity after decision quality}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(evca)
+```
+
+# The claim
+
+Decision analysis in the tradition of Howard and Keeney aims to give the
+parties one decision model: shared variables, a shared causal structure and one
+value function [@howard1968; @keeney1976; @keeney1992; @howard2015]. The
+decision quality chain (frame, alternatives, information, values, logic,
+commitment) is the discipline for getting there.
+
+Some decision professionals hold that when stakeholders' causal models and
+value variables do not overlap, the framing has failed: with better framing and
+pre-framing the ontologies merge. This vignette argues for a narrower claim.
+
+> Careful framing removes **linguistic** and **evidential** disagreement. It
+> need not remove **ontological-evaluative** disagreement: accounts that carry
+> different causal structures and different things of value, and that no
+> further framing or data would merge. Groups still have to act together in
+> that case.
+
+`evca` prices this situation. It does not resolve it. Everything below uses
+constructed numbers; no result is an empirical finding.
+
+# Three kinds of ambiguity
+
+| Kind | Typical symptom | What reduces it |
+|---|---|---|
+| Linguistic / framing | Same word, different variable | Clarity test, better framing [@howard2015] |
+| Evidential | Disputed effect size or state | Data, elicitation, value of information |
+| Ontological-evaluative | Different causal structure and different valued outcomes | Not research. Option design, rules, side payments, governance |
+
+The weights in `evca` mark the same split [@strong2012; @bojke2009]. With
+**epistemic** probabilities over models the shortfall is the expected value of
+perfect information about the model index, so evidence can reduce it. With
+**evaluative** weights it is an aggregation shortfall. It is the price of
+choosing one action for accounts that rank actions differently, and research does
+not remove it.
+
+# A running example
+
+Three accounts rate three road options. The numbers are illustrative.
+
+```{r example}
+U_raw <- matrix(
+  c( 5, 40, 80,
+    90, 82,  8,
+    72, 78, 55),
+  nrow = 3, byrow = TRUE,
+  dimnames = list(
+    c("No road", "Direct route", "Rerouted road"),
+    c("Officials", "ProDev_Hmong", "Traditional_Hmong")
+  )
+)
+w <- rep(1/3, 3)  # declared standing, not probabilities
+U <- normalize_utilities(U_raw)
+compute_evca(U, model_weights = w)$evca
+```
+
+Before any scale choice, ask whether the accounts agree on the best action at
+all. This uses only each account's own ranking.
+
+```{r agreement}
+check_action_agreement(U_raw)$agree
+```
+
+If the accounts agreed, EVCA would be zero for every weighting and rescaling.
+They do not, so it is positive for every positive weighting and rescaling. This
+conclusion does not depend on the contested common scale.
+
+# The reframing test
+
+The objection is that a positive EVCA only shows poor framing. This can be
+tested. Have independent facilitators reframe the problem and compute EVCA for
+each framing. If EVCA falls to zero under some defensible framing, the
+disagreement was framing. If it stays materially above zero across framings,
+the residual is ontological-evaluative.
+
+Below, framing 2 adds a co-managed option, a typical product of better
+alternative generation. Framing 3 adds a clarity-test revision: officials and
+the pro-development account were using "development" for different variables,
+and the revision moves one column.
+
+```{r reframing}
+framings <- list(
+  "F1 original" = U_raw,
+  "F2 + co-managed option" = rbind(
+    U_raw, "Co-managed road" = c(60, 70, 70)
+  ),
+  "F3 + clarified 'development'" = {
+    m <- rbind(U_raw, "Co-managed road" = c(60, 70, 70))
+    m[, "ProDev_Hmong"] <- c(20, 85, 80, 78)
+    m
+  }
+)
+
+reframe_table <- do.call(rbind, lapply(names(framings), function(f) {
+  Uf <- normalize_utilities(framings[[f]])
+  r <- compute_evca(Uf, model_weights = w)
+  data.frame(framing = f, evca = round(r$evca, 3),
+             shared_action = rownames(Uf)[r$optimal_decision],
+             accounts_agree = check_action_agreement(framings[[f]])$agree)
+}))
+reframe_table
+```
+
+Adding an option leaves EVCA unchanged here and the clarity revision lowers it
+only slightly, so most of it is residual. The framing-reducible part is the drop
+from F1 to the best framing and the residual is what remains. This
+suggests a reportable quantity, a **value of reframing**: the original EVCA
+minus the smallest EVCA across independent defensible framings. The residual
+needs governance rather than research. The package does not implement this as a
+function. The test is only as strong as the independence of the facilitators
+and the defensibility of the framings.
+
+# The scale is part of the dispute
+
+EVCA is a scalar and needs a bridge that puts accounts on one scale. In the
+incommensurable case that bridge is exactly what is contested
+[@macaskill2016; @chang1997]. Report the result under several bridges and flag
+when the recommended action flips.
+
+```{r bridges}
+bridge_minmax <- function(M) normalize_utilities(M)
+bridge_z <- function(M) apply(M, 2, function(x) (x - mean(x)) / sd(x))
+bridge_rank <- function(M) apply(M, 2, function(x) (rank(x) - 1) / (length(x) - 1))
+bridge_raw <- function(M) M / 100  # treats the 0-100 ratings as comparable
+
+bridges <- list(`min-max` = bridge_minmax, `z-score` = bridge_z,
+                `rank` = bridge_rank, `raw` = bridge_raw)
+
+bridge_table <- do.call(rbind, lapply(names(bridges), function(b) {
+  Ub <- bridges[[b]](framings[[2]])
+  r <- compute_evca(Ub, model_weights = w)
+  data.frame(bridge = b, evca = round(r$evca, 3),
+             shared_action = rownames(Ub)[r$optimal_decision])
+}))
+bridge_table
+```
+
+EVCA values on different bridges are not comparable with each other, only the
+direction and the shared action are. A shared action that changes with the
+bridge is a finding in itself.
+
+# A version that needs no common scale
+
+If cardinal comparability is the thing in dispute, drop it. Each account states
+what it can accept, for example "within 25 points of my best". The question
+then is whether a jointly acceptable action exists. This follows the logic of
+overlapping consensus and incompletely theorized agreement, in which parties
+accept the same action for different reasons [@rawls1987; @sunstein1995].
+
+```{r acceptable}
+acceptable <- function(M, tol) {
+  best <- apply(M, 2, max)
+  ok <- sweep(M, 2, best - tol, ">=")
+  rownames(M)[rowSums(ok) == ncol(M)]
+}
+acceptable(framings[[2]], tol = 25)
+acceptable(framings[[2]], tol = 10)
+```
+
+Tolerances are each account's own. An empty set at tolerances the accounts
+regard as legitimate is a genuine conflict. A non-empty set gives an action
+everyone can live with, without claiming that their utilities are comparable.
+The tolerance is a declared acceptability threshold and is not elicited by
+`evca`.
+
+# Option design: the "reverse game theory" move
+
+Mechanism design chooses the game to get a desired outcome. The analogue here
+is to choose the option set and the contract to shrink the shortfall. Exclusion
+costs show who bears the loss.
+
+```{r exclusion}
+Uf <- normalize_utilities(framings[[2]])
+compute_exclusion_costs(Uf, model_weights = w, normalize = FALSE)
+```
+
+Searching over candidate packages is straightforward: compute EVCA for each
+candidate option set and keep the one with the smallest shortfall that every
+account can accept. Two cautions apply. Standard mechanism design assumes a
+common outcome space, which is the thing missing here. Closer formal homes are
+games with unawareness, where players do not represent the same game
+[@heifetz2006], and bargaining solutions that measure distance from each
+party's ideal point [@kalai1975]. EVCA is a diagnostic of that distance and
+not a solution concept. Accounts that inflate their stakes to enlarge their
+share of the shortfall are a further strategic concern that EVCA does not
+address.
+
+# Joint ventures
+
+Joint venture partners typically hold different causal theories (market,
+regulation, technology, community response) and different objectives (return,
+learning, control, reputation, social licence) [@kogut1988; @parkhe1993].
+Three features of `evca` map onto this.
+
+* **Exclusion cost** is a partner's loss if the decision is made without its
+  account, a walk-away measure.
+* **Dirichlet sensitivity** shows how robust the shared action is to disputes
+  over standing, such as equity share or governance rights.
+* **Transferability** decides how much of the shortfall can be bought out
+  [@coase1960; @grossman1986].
+
+```{r jv}
+jv <- matrix(
+  c(10, 12,
+    18,  2,
+     8, 11),
+  nrow = 3, byrow = TRUE,
+  dimnames = list(c("Expand", "License out", "Joint plant"),
+                  c("Partner_A", "Partner_B"))
+)
+w_jv <- c(0.5, 0.5)
+disagreement <- c(Partner_A = 6, Partner_B = 5)  # payoff if the JV dissolves
+
+# Non-transferable payoffs: only the action matters.
+nt <- compute_evca(normalize_utilities(jv), model_weights = w_jv)
+list(evca_non_transferable = nt$evca,
+     shared_action = rownames(jv)[nt$optimal_decision])
+
+# Transferable (cash) payoffs: pick the largest total, then check whether a
+# side payment leaves both partners above their disagreement payoff.
+total <- rowSums(jv)
+best <- which.max(total)
+surplus_over_exit <- total[best] - sum(disagreement)
+list(action = rownames(jv)[best], total = unname(total[best]),
+     surplus_over_exit = unname(surplus_over_exit))
+```
+
+With transferable payoffs, a positive surplus over the exit payoffs means a
+transfer can leave both partners better off than dissolving, so most of the
+shortfall can be bargained away. With non-transferable outcomes such as control
+rights, reputation or community effects, it cannot, and EVCA remains the cost
+of acting together.
+
+Partners with different priors may also use contingent contracts, such as
+earn-outs and staged commitments, which let each side expect to gain on its own
+beliefs. This works because agreeing to disagree needs a common prior
+[@aumann1976].
+
+# Two layers of weights
+
+Keep two kinds of weights apart. Within an account, uncertainty about states is
+ordinary Bayesian and is reduced by evidence. Across accounts, weights are
+evaluative standing. `evca_decompose()` separates the two parts of the gap.
+
+```{r decompose}
+set.seed(1)
+mu <- U_raw
+draws <- array(NA_real_, c(500, 3, 3))
+for (i in 1:500) draws[i, , ] <- mu + rnorm(9, sd = 6)
+evca_decompose(draws, model_weights = w,
+               scale_min = apply(mu, 2, min),
+               scale_range = apply(mu, 2, function(x) diff(range(x))))
+```
+
+`evpi_agg` is ordinary EVPI about the state and can be reduced by evidence.
+`evca_post` is the shortfall that remains when the state is known. Applying
+Bayesian model averaging across accounts [@hoeting1999] would silently turn
+standing into belief; it is legitimate only within the first layer. All
+accounts must be expressed over the same states. Where some accounts contain
+states others cannot represent, the union of states with "not applicable"
+cells is a workaround, not a solution.
+
+# Position in the literature
+
+* **Structural uncertainty.** Model uncertainty and averaging
+  [@draper1995; @madigan1994; @hoeting1999] assume the model set contains
+  something useful and that weights are beliefs. When no model is true and none
+  is in the set (the M-open case, [@bernardo1994]), stacking and generalized
+  Bayes [@yao2018; @bissiri2016] and robust decisions under approximate models
+  [@watson2016] apply. Health economics has the nearest value-of-information
+  work on structural uncertainty [@bojke2009; @strong2012]. `evca` adds a
+  separate reading of the weights for accounts that are not rival guesses about
+  one world.
+* **Ambiguity and robustness.** Maxmin, smooth ambiguity, robust control and
+  scenario-based methods [@ellsberg1961; @gilboa1989; @klibanoff2005;
+  @hansen2001; @lempert2003] model one agent with non-unique beliefs. The case
+  here has several agents with non-unique worlds and values.
+* **Group beliefs and tastes.** Pooling and aggregation results
+  [@harsanyi1955; @genest1986; @nau2002] come with a warning. Agreement on an
+  action cannot generally be combined with Bayesian aggregation when beliefs
+  differ [@seidenfeld1989; @mongin1995; @gilboa2004]. A shared choice can hide
+  disagreement about why, and EVCA exposes the cost of that hiding.
+* **Incommensurability and agreement across it.** Overlapping consensus,
+  incompletely theorized agreement, boundary objects and trading zones all
+  describe action without shared reasons
+  [@rawls1987; @sunstein1995; @star1989; @galison1997], and post-normal science
+  and opening-up appraisal argue for plural framings
+  [@funtowicz1993; @stirling2010].
+* **Decision analysis.** Practitioners have long aimed at a requisite model,
+  sufficient to act on rather than complete [@phillips1984]. The claim here is
+  that requisite for a group may mean requisite plural.
+
+# Objections and limits
+
+* **"Good framing makes EVCA zero."** The reframing test is the answer. A
+  positive finding across independent framings is evidence for the residual. A
+  zero under a defensible framing is evidence against it. Both outcomes are
+  informative.
+* **"Equal weights are neutral."** They are a choice. Who sets the weights
+  matters at least as much as their values, and Dirichlet sensitivity explores
+  alternatives but does not legitimize any of them.
+* **"The scalar needs a common scale."** Yes. Use the bridge sensitivity and the
+  acceptability analysis above, and report which conclusions survive.
+* **Outside the package.** `evca` does not build the causal models, elicit the
+  utilities or justify a bridge. It takes finished account-level payoffs and
+  reports what choosing one action costs each account.
+
+# Reporting checklist
+
+1. What each account is, and who selected the accounts.
+2. Who chose the weights, what they represent, and results under alternatives.
+3. The bridge, and the actions that flip under other bridges.
+4. EVCA across independent framings, and the residual.
+5. Exclusion costs per account.
+6. Whether payoffs are transferable.
+7. The acceptability analysis, if no scale is agreed.
+
+# References
