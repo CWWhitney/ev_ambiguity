@@ -30,9 +30,16 @@ pre-framing the ontologies merge. This vignette argues for a narrower claim.
 
 > Careful framing removes **linguistic** and **evidential** disagreement. It
 > need not remove **ontological-evaluative** disagreement: accounts that carry
-> different causal structures and different things of value, and that no
-> further framing or data would merge. Groups still have to act together in
-> that case.
+> different causal structures and different things of value. No observation
+> settles that disagreement, because the accounts do not share the variable
+> that an observation would measure. Each account can still be tested on its
+> own terms, and parts of one account can be criticised from another. Groups
+> still have to act together in that case.
+
+The distinction is between two senses of "ambiguity". In standard decision
+analysis, ambiguity and uncertainty are epistemic: a missing probability or an
+unclear statement that more probing could resolve. The ontological-evaluative
+kind is not that. More probing sharpens each account but does not merge them.
 
 `evca` prices this situation. It does not resolve it. Everything below uses
 constructed numbers; no result is an empirical finding.
@@ -43,7 +50,7 @@ constructed numbers; no result is an empirical finding.
 |---|---|---|
 | Linguistic / framing | Same word, different variable | Clarity test, better framing [@howard2015] |
 | Evidential | Disputed effect size or state | Data, elicitation, value of information |
-| Ontological-evaluative | Different causal structure and different valued outcomes | Not research. Option design, rules, side payments, governance |
+| Ontological-evaluative | Different causal structure and different valued outcomes | Not more data on a shared variable. Option design, rules, side payments, governance |
 
 The weights in `evca` mark the same split [@strong2012; @bojke2009]. With
 **epistemic** probabilities over models the shortfall is the expected value of
@@ -89,7 +96,7 @@ The objection is that a positive EVCA only shows poor framing. This can be
 tested. Have independent facilitators reframe the problem and compute EVCA for
 each framing. If EVCA falls to zero under some defensible framing, the
 disagreement was framing. If it stays materially above zero across framings,
-the residual is ontological-evaluative.
+the residual is consistent with ontological-evaluative disagreement. It does not prove it, because other framings may exist that no one has tried.
 
 Below, framing 2 adds a co-managed option, a typical product of better
 alternative generation. Framing 3 adds a clarity-test revision: officials and
